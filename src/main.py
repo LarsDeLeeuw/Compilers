@@ -1,20 +1,27 @@
-import unittest
+import sys
+from antlr4 import *
+from GrammarLexer import GrammarLexer
+from GrammarParser import GrammarParser
+from BuildASTVisitor import BuildASTVisitor
+from VisualASTVisitor import VisualASTVisitor
 
-class TestStringMethods(unittest.TestCase):
+def main(argv):
+    input_stream = FileStream(argv[1])
+    lexer = GrammarLexer(input_stream)
+    stream = CommonTokenStream(lexer)
+    parser = GrammarParser(stream)
+    cst = parser.prog()
+    builder = BuildASTVisitor()
+    builder.visit(cst)
+    AST = builder.getAST()
+    ASTVisualDOT = VisualASTVisitor()
+    print(AST.root)
+    AST.accept(ASTVisualDOT)
+    outputdotfile = open("output.dot", 'w')
+    outputdotfile.write("digraph {" + ASTVisualDOT.labelbuffer + ASTVisualDOT.edgebuffer + "}")
 
-    def test_upper(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
-
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
+    print(ASTVisualDOT.labelbuffer)
+    print(ASTVisualDOT.edgebuffer)
 
 if __name__ == '__main__':
-    unittest.main()
+    main(sys.argv)

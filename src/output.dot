@@ -1,0 +1,20 @@
+digraph {n0 [label="File"];
+n1 [label="Statement"];
+n2 [label="="];
+n3 [label="<class 'Nodes.PrimitiveIntNode'>"];
+n4 [label="i"];
+n5 [label="2"];
+n6 [label="Statement"];
+n7 [label="<class 'Nodes.MultiplicationNode'>"];
+n8 [label="5"];
+n9 [label="9"];
+n0 -> n1
+n1 -> n2
+n2 -> n3
+n2 -> n4
+n2 -> n5
+n0 -> n6
+n6 -> n7
+n7 -> n8
+n7 -> n9
+}
