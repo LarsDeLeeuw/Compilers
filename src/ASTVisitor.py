@@ -44,6 +44,12 @@ class ASTVisitor:
             return self.visitIdNode(node)
         elif node_type is LiteralNode:
             return self.visitLiteralNode(node)
+        elif node_type is IntegerNode:
+            return self.visitLiteralNode(node)
+        elif node_type is CharNode:
+            return self.visitLiteralNode(node)   
+        elif node_type is FloatNode:
+            return self.visitLiteralNode(node)
         elif node_type is PrimitiveNode:
             return self.visitPrimitiveNode(node)
         else:

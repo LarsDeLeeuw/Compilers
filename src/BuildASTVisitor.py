@@ -50,7 +50,9 @@ class BuildASTVisitor(GrammarVisitor):
 
         lit_node = self.visit(ctx.expr())
         lit_node.setParent(node)
-        node.LiteralNode = lit_node
+        node.ExpressionNode = lit_node
+
+        self.memory[node.ID] = ctx.expr()
 
         return node
 
@@ -85,8 +87,10 @@ class BuildASTVisitor(GrammarVisitor):
             GrammarLexer.GEQ : GreaterOrEqualNode(),
             GrammarLexer.LEQ : LessOrEqualNode(),
             GrammarLexer.AND : AndNode(),
-            GrammarLexer.OR : OrNode()
+            GrammarLexer.OR : OrNode(),
+            GrammarLexer.MOD : ModulusNode()
         }
+
         node = BinaryExpressionNode()
         
         node_lhs = self.visit(ctx.left)
@@ -106,12 +110,23 @@ class BuildASTVisitor(GrammarVisitor):
 
     # Visit a parse tree produced by GrammarParser#unaryExpr.
     def visitUnaryExpr(self, ctx:GrammarParser.UnaryExprContext):
-        return self.visitChildren(ctx)
+        if (ctx.op.type == GrammarLexer.ADD):
+            return self.visit(ctx.expr())
+        else:
+            node = NegateNode()
+            node_expr = self.visit(ctx.expr())
+            node_expr.setParent(node)
+            if ctx.op.type == GrammarLexer.NOT:
+                node.boolean = True
+            else:
+                node.boolean = False
+            return node
+        
 
 
     # Visit a parse tree produced by GrammarParser#parensExpr.
     def visitParensExpr(self, ctx:GrammarParser.ParensExprContext):
-        return self.visitChildren(ctx)
+        return self.visit(ctx.expr())
 
 
     # Visit a parse tree produced by GrammarParser#litExpr.
@@ -120,7 +135,11 @@ class BuildASTVisitor(GrammarVisitor):
 
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
-        return self.visitChildren(ctx)
+        if ctx.ID().getText() in self.memory:
+            return self.visit(self.memory[ctx.ID().getText()])
+        
+        print("Use of undeclared identifier")
+        return None
 
 
     # Visit a parse tree produced by GrammarParser#charLit.

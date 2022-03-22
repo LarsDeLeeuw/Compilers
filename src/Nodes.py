@@ -68,10 +68,14 @@ class AndNode (BinaryExpressionNode):
 class OrNode (BinaryExpressionNode):
     pass
 
+class ModulusNode (BinaryExpressionNode):
+    pass
+
 class NegateNode (ExpressionNode):
     
     def __init__(self):
         super().__init__()
+        self.boolean = None
         self.InnerNode = None
 
 
@@ -109,7 +113,7 @@ class IdNode(ExpressionNode):
         super().__init__()
         self.PrimitiveNode = None
         self.ID = None
-        self.LiteralNode = None
+        self.ExpressionNode = None
 
 
 

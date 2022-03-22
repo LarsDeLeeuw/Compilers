@@ -4,6 +4,7 @@ from GrammarLexer import GrammarLexer
 from GrammarParser import GrammarParser
 from BuildASTVisitor import BuildASTVisitor
 from VisualASTVisitor import VisualASTVisitor
+from ConstFoldingASTVisitor import ConstFoldingASTVisitor
 
 def main(argv):
     input_stream = FileStream(argv[1])
@@ -15,13 +16,14 @@ def main(argv):
     builder.visit(cst)
     AST = builder.getAST()
     ASTVisualDOT = VisualASTVisitor()
-    print(AST.root)
+    ASTConstFolding = ConstFoldingASTVisitor()
+    AST.accept(ASTConstFolding)
     AST.accept(ASTVisualDOT)
     outputdotfile = open("output.dot", 'w')
     outputdotfile.write("digraph {" + ASTVisualDOT.labelbuffer + ASTVisualDOT.edgebuffer + "}")
 
-    print(ASTVisualDOT.labelbuffer)
-    print(ASTVisualDOT.edgebuffer)
+    # print(ASTVisualDOT.labelbuffer)
+    # print(ASTVisualDOT.edgebuffer)
 
 if __name__ == '__main__':
     main(sys.argv)

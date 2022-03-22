@@ -19,5 +19,4 @@ class AST:
     
     def accept(self, visitor):
         node = self.root
-        print(type(node))
         visitor.visit(node)

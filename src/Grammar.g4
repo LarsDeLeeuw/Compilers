@@ -16,7 +16,7 @@ expr
     | left=expr op=('=='|'>=') right=expr   # binExpr
     | left=expr op=('<='|'!=') right=expr   # binExpr
     | left=expr op=('||'|'&&') right=expr   # binExpr
-    | value=ID                              # idExpr
+    | ID                                    # idExpr
     | value=lit                             # litExpr
     ;
 
@@ -43,6 +43,7 @@ NEQ : '!=';
 NOT : '!' ;
 AND : '&&';
 OR  : '||';
+MOD : '%' ;
 
 KEY_CHAR : 'char' ;
 KEY_INT : 'int' ;

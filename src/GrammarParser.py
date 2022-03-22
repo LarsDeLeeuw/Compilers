@@ -11,7 +11,7 @@ else:
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\33")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\34")
         buf.write("K\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\3\2\6\2\16\n")
         buf.write("\2\r\2\16\2\17\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3")
         buf.write("\3\3\3\3\3\3\3\3\5\3 \n\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4")
@@ -19,16 +19,16 @@ def serializedATN():
         buf.write("\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\7\4?\n\4\f\4\16\4")
         buf.write("B\13\4\3\5\3\5\3\6\3\6\3\6\5\6I\n\6\3\6\2\3\6\7\2\4\6")
         buf.write("\b\n\2\n\4\2\t\n\21\21\3\2\7\b\3\2\t\n\3\2\13\f\3\2\r")
-        buf.write("\16\3\2\17\20\3\2\22\23\3\2\27\31\2S\2\r\3\2\2\2\4\37")
+        buf.write("\16\3\2\17\20\3\2\22\23\3\2\30\32\2S\2\r\3\2\2\2\4\37")
         buf.write("\3\2\2\2\6*\3\2\2\2\bC\3\2\2\2\nH\3\2\2\2\f\16\5\4\3\2")
         buf.write("\r\f\3\2\2\2\16\17\3\2\2\2\17\r\3\2\2\2\17\20\3\2\2\2")
         buf.write("\20\3\3\2\2\2\21\22\5\6\4\2\22\23\7\3\2\2\23 \3\2\2\2")
-        buf.write("\24\25\5\n\6\2\25\26\7\32\2\2\26\27\7\4\2\2\27\30\5\6")
-        buf.write("\4\2\30\31\7\3\2\2\31 \3\2\2\2\32\33\7\32\2\2\33\34\7")
+        buf.write("\24\25\5\n\6\2\25\26\7\33\2\2\26\27\7\4\2\2\27\30\5\6")
+        buf.write("\4\2\30\31\7\3\2\2\31 \3\2\2\2\32\33\7\33\2\2\33\34\7")
         buf.write("\4\2\2\34\35\5\6\4\2\35\36\7\3\2\2\36 \3\2\2\2\37\21\3")
         buf.write("\2\2\2\37\24\3\2\2\2\37\32\3\2\2\2 \5\3\2\2\2!\"\b\4\1")
         buf.write("\2\"#\7\5\2\2#$\5\6\4\2$%\7\6\2\2%+\3\2\2\2&\'\t\2\2\2")
-        buf.write("\'+\5\6\4\13(+\7\32\2\2)+\5\b\5\2*!\3\2\2\2*&\3\2\2\2")
+        buf.write("\'+\5\6\4\13(+\7\33\2\2)+\5\b\5\2*!\3\2\2\2*&\3\2\2\2")
         buf.write("*(\3\2\2\2*)\3\2\2\2+@\3\2\2\2,-\f\n\2\2-.\t\3\2\2.?\5")
         buf.write("\6\4\13/\60\f\t\2\2\60\61\t\4\2\2\61?\5\6\4\n\62\63\f")
         buf.write("\b\2\2\63\64\t\5\2\2\64?\5\6\4\t\65\66\f\7\2\2\66\67\t")
@@ -36,7 +36,7 @@ def serializedATN():
         buf.write("\2\2<=\t\b\2\2=?\5\6\4\6>,\3\2\2\2>/\3\2\2\2>\62\3\2\2")
         buf.write("\2>\65\3\2\2\2>8\3\2\2\2>;\3\2\2\2?B\3\2\2\2@>\3\2\2\2")
         buf.write("@A\3\2\2\2A\7\3\2\2\2B@\3\2\2\2CD\t\t\2\2D\t\3\2\2\2E")
-        buf.write("I\7\24\2\2FI\7\26\2\2GI\7\25\2\2HE\3\2\2\2HF\3\2\2\2H")
+        buf.write("I\7\25\2\2FI\7\27\2\2GI\7\26\2\2HE\3\2\2\2HF\3\2\2\2H")
         buf.write("G\3\2\2\2I\13\3\2\2\2\b\17\37*>@H")
         return buf.getvalue()
 
@@ -53,13 +53,14 @@ class GrammarParser ( Parser ):
 
     literalNames = [ "<INVALID>", "';'", "'='", "'('", "')'", "'*'", "'/'", 
                      "'+'", "'-'", "'>'", "'<'", "'=='", "'>='", "'<='", 
-                     "'!='", "'!'", "'&&'", "'||'", "'char'", "'int'", "'float'" ]
+                     "'!='", "'!'", "'&&'", "'||'", "'%'", "'char'", "'int'", 
+                     "'float'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "MUL", "DIV", "ADD", "SUB", "GRT", "LST", 
-                      "EQ", "GEQ", "LEQ", "NEQ", "NOT", "AND", "OR", "KEY_CHAR", 
-                      "KEY_INT", "KEY_FLOAT", "CHAR", "INT", "FLOAT", "ID", 
-                      "WS" ]
+                      "EQ", "GEQ", "LEQ", "NEQ", "NOT", "AND", "OR", "MOD", 
+                      "KEY_CHAR", "KEY_INT", "KEY_FLOAT", "CHAR", "INT", 
+                      "FLOAT", "ID", "WS" ]
 
     RULE_prog = 0
     RULE_stat = 1
@@ -87,14 +88,15 @@ class GrammarParser ( Parser ):
     NOT=15
     AND=16
     OR=17
-    KEY_CHAR=18
-    KEY_INT=19
-    KEY_FLOAT=20
-    CHAR=21
-    INT=22
-    FLOAT=23
-    ID=24
-    WS=25
+    MOD=18
+    KEY_CHAR=19
+    KEY_INT=20
+    KEY_FLOAT=21
+    CHAR=22
+    INT=23
+    FLOAT=24
+    ID=25
+    WS=26
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -482,7 +484,6 @@ class GrammarParser ( Parser ):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a GrammarParser.ExprContext
             super().__init__(parser)
-            self.value = None # Token
             self.copyFrom(ctx)
 
         def ID(self):
@@ -549,7 +550,7 @@ class GrammarParser ( Parser ):
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 38
-                localctx.value = self.match(GrammarParser.ID)
+                self.match(GrammarParser.ID)
                 pass
             elif token in [GrammarParser.CHAR, GrammarParser.INT, GrammarParser.FLOAT]:
                 localctx = GrammarParser.LitExprContext(self, localctx)
