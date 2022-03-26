@@ -6,7 +6,6 @@ class ConstFoldingASTVisitor(ASTVisitor):
     def visitProgNode(self, node):
         for StatementNode in node.StatementNodes:
             self.visit(StatementNode)
-            print(type(StatementNode))
         return 0
 
     def visitAssignNode(self, node):
@@ -44,7 +43,6 @@ class ConstFoldingASTVisitor(ASTVisitor):
             elif type(node.Parent) is IdNode:
                 node.Parent.ExpressionNode = folded_node
             elif type(node.Parent) is BinaryExpressionNode:
-                print("hehehehj")
                 if node.Parent.lhs == node:
                     node.Parent.lhs = folded_node
                 else:

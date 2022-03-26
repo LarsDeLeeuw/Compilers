@@ -17,11 +17,11 @@ def main(argv):
     AST = builder.getAST()
     ASTVisualDOT = VisualASTVisitor()
     ASTConstFolding = ConstFoldingASTVisitor()
-    AST.accept(ASTConstFolding)
+    # AST.accept(ASTConstFolding)
     AST.accept(ASTVisualDOT)
+    AST.save("fie")
     outputdotfile = open("output.dot", 'w')
-    outputdotfile.write("digraph {" + ASTVisualDOT.labelbuffer + ASTVisualDOT.edgebuffer + "}")
-
+    outputdotfile.write("digraph {" + ASTVisualDOT.labelbuffer + ASTVisualDOT.edgebuffer + "}")    
     # print(ASTVisualDOT.labelbuffer)
     # print(ASTVisualDOT.edgebuffer)
 

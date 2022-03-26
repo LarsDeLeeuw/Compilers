@@ -21,7 +21,7 @@ expr
     ;
 
 lit
-    : lit_prim=(CHAR|INT|FLOAT)             # primLit
+    : lit_prim=(BOOL|CHAR|INT|FLOAT)             # primLit
     ;
 
 prim
@@ -52,5 +52,9 @@ KEY_FLOAT : 'float' ;
 CHAR : [.~] ;
 INT : [0-9]+ ;
 FLOAT : [0-9]+ '.' [0-9]+ ;
+BOOL 
+    : 'true'
+    | 'false'
+    ;
 ID  : [a-zA-Z]+ ;
 WS: [ \n\t\r]+ -> skip;

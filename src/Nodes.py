@@ -3,9 +3,13 @@ class AbstractNode:
     
     def __init__(self):
         self.Parent = None
+        self.serial = None
 
     def setParent(self, node):
         self.Parent = node
+    
+    def save(self):
+        return "AbstractNode save method used, something went wrong"
     
 
 class ProgNode(AbstractNode):
@@ -14,7 +18,24 @@ class ProgNode(AbstractNode):
         super().__init__()
         self.StatementNodes = []
 
-class AssignNode(AbstractNode):
+    def save(self):
+        progsavebuffer = ''
+        nodesavebuffer = ''
+        for stat in self.StatementNodes:
+            switcher = {
+                type(IdNode()) : 'idnode',
+                type(AssignNode()) : 'assignnode' 
+            }
+            nodetype = switcher.get(type(stat), str(type(stat)))
+            progsavebuffer += '\t\t\t<'+nodetype+'>' + str(stat.serial) + '</'+nodetype+'>\n'
+            nodesavebuffer += stat.save()
+
+        return '\t<PROG>\n\t\t<STATS>\n' + progsavebuffer + '\t\t</STATS>\n\t</PROG>\n' + nodesavebuffer
+        
+class StatementNode(AbstractNode):
+    pass
+
+class AssignNode(StatementNode):
 
     def __init__(self):
         super().__init__()
@@ -32,6 +53,10 @@ class BinaryExpressionNode (ExpressionNode):
         self.rhs = None
         self.op = None
 
+    def save(self):
+        innersavebuffer = '\t<BINOPNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n\t</BINOPNODE>\n'
+        return innersavebuffer
+        
 class AdditionNode (BinaryExpressionNode):
     pass
 
@@ -99,15 +124,21 @@ class PrimitiveNode(AbstractNode):
     pass
 
 class PrimitiveCharNode(PrimitiveNode):
-    pass
+    
+    def save(self):
+        return '\t<PRIMCHARNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n\t</PRIMCHARNODE>\n'
 
 class PrimitiveFloatNode(PrimitiveNode):
-    pass
+
+    def save(self):
+        return '\t<PRIMFLOATNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n\t</PRIMFLOATNODE>\n'
 
 class PrimitiveIntNode(PrimitiveNode):
-    pass
 
-class IdNode(ExpressionNode):
+    def save(self):
+        return '\t<PRIMINTNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n\t</PRIMINTNODE>\n'
+
+class IdNode(StatementNode):
 
     def __init__(self):
         super().__init__()
@@ -115,5 +146,14 @@ class IdNode(ExpressionNode):
         self.ID = None
         self.ExpressionNode = None
 
+    def save(self):
+        innersavebuffer = '\t<IDNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'
+        innersavebuffer += '\t\t<primitive>'+str(self.PrimitiveNode.serial)+'</primitive>\n'
+        innersavebuffer += '\t\t<id>'+str(self.ID)+'</id>\n'
+        innersavebuffer += '\t\t<expression>'+str(self.ExpressionNode.serial)+'</expression>\n'+'\t</IDNODE>\n'
 
+        innersavebuffer += self.PrimitiveNode.save()
+        innersavebuffer += self.ExpressionNode.save()
+
+        return innersavebuffer
 

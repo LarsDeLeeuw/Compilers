@@ -17,7 +17,6 @@ class VisualASTVisitor(ASTVisitor):
             self.labelbuffer += "n"+str(self.nodecount)+' [label="Statement"];\n'
             self.nodecount += 1
             self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount-1))+"\n"
-            print(type(StatementNode))
             self.visit(StatementNode)
         return 0
 

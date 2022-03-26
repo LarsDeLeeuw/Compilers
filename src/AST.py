@@ -20,3 +20,11 @@ class AST:
     def accept(self, visitor):
         node = self.root
         visitor.visit(node)
+    
+    def save(self, file):
+        output = open(file, 'w')
+        output.write("<Ast>\n" + self.root.save() + "</Ast>")
+        return 0
+    
+    def load(self, file):
+        return 0

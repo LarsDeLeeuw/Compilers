@@ -15,6 +15,11 @@ class BuildASTVisitor(GrammarVisitor):
     def __init__(self):
         self.AST = AST()
         self.memory = {}
+        self.serial = -1
+    
+    def claimSerial(self):
+        self.serial += 1
+        return self.serial
 
     def getAST(self):
         return self.AST
@@ -22,9 +27,11 @@ class BuildASTVisitor(GrammarVisitor):
     # Visit a parse tree produced by GrammarParser#prog.
     def visitProg(self, ctx:GrammarParser.ProgContext):
         node = ProgNode()
+        node.serial = self.claimSerial()
         for Statement in ctx.stat():
             stat_node = self.visit(Statement)
             stat_node.setParent(node)
+            stat_node.serial = self.claimSerial()
             node.StatementNodes.append(stat_node)
         self.AST.root = node
         return 0
@@ -45,13 +52,13 @@ class BuildASTVisitor(GrammarVisitor):
 
         prim_node = self.visit(ctx.prim())
         prim_node.setParent(node)
+        prim_node.serial = self.claimSerial()
         node.PrimitiveNode = prim_node
-
 
         lit_node = self.visit(ctx.expr())
         lit_node.setParent(node)
+        lit_node.serial = self.claimSerial()
         node.ExpressionNode = lit_node
-
         self.memory[node.ID] = ctx.expr()
 
         return node
@@ -64,10 +71,12 @@ class BuildASTVisitor(GrammarVisitor):
 
         id_node = self.visit(ctx.lhs)
         id_node.setParent(node)
+        id_node.serial = self.claimSerial()
         node.IdNode = id_node
 
         lit_node = self.visit(ctx.rhs)
         lit_node.setParent(node)
+        lit_node.serial = self.claimSerial()
         node.LiteralNode = lit_node
 
         return node
@@ -95,14 +104,17 @@ class BuildASTVisitor(GrammarVisitor):
         
         node_lhs = self.visit(ctx.left)
         node_lhs.setParent(node)
+        node_lhs.serial = self.claimSerial()
         node.lhs = node_lhs
 
         node_rhs = self.visit(ctx.right)
         node_rhs.setParent(node)
+        node_rhs.serial = self.claimSerial()
         node.rhs = node_rhs
 
         node_op = switcher.get(ctx.op.type, None)
         node_op.setParent(node)
+        node_op.serial = self.claimSerial()
         node.op = node_op
 
         return node
@@ -116,6 +128,7 @@ class BuildASTVisitor(GrammarVisitor):
             node = NegateNode()
             node_expr = self.visit(ctx.expr())
             node_expr.setParent(node)
+            node.serial = self.claimSerial()
             if ctx.op.type == GrammarLexer.NOT:
                 node.boolean = True
             else:
