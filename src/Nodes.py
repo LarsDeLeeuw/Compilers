@@ -30,7 +30,7 @@ class ProgNode(AbstractNode):
             progsavebuffer += '\t\t\t<'+nodetype+'>' + str(stat.serial) + '</'+nodetype+'>\n'
             nodesavebuffer += stat.save()
 
-        return '\t<PROG>\n\t\t<STATS>\n' + progsavebuffer + '\t\t</STATS>\n\t</PROG>\n' + nodesavebuffer
+        return '\t<PROG>\n\t\t<serial>'+str(self.serial)+'</serial>\n\t\t<STATS>\n' + progsavebuffer + '\t\t</STATS>\n\t</PROG>\n' + nodesavebuffer
         
 class StatementNode(AbstractNode):
     pass
@@ -54,47 +54,93 @@ class BinaryExpressionNode (ExpressionNode):
         self.op = None
 
     def save(self):
-        innersavebuffer = '\t<BINOPNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n\t</BINOPNODE>\n'
+        innersavebuffer = '\t<BINOPNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'
+        innersavebuffer += '\t\t<lhs>'+str(self.lhs.serial)+'</lhs>\n'
+        innersavebuffer += '\t\t<op>'+str(self.op.serial)+'</op>\n'
+        innersavebuffer += '\t\t<rhs>'+str(self.rhs.serial)+'</rhs>\n\t</BINOPNODE>\n'
+
+        innersavebuffer += self.lhs.save()
+        innersavebuffer += self.op.save()
+        innersavebuffer += self.rhs.save()
         return innersavebuffer
         
 class AdditionNode (BinaryExpressionNode):
-    pass
+
+    def save(self):
+        innerbuffer = '\t<ADDNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</ADDNODE>\n'
+        return innerbuffer
 
 class SubstractionNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<SUBNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</SUBNODE>\n'
+        return innerbuffer
 
 class MultiplicationNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<MULNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</MULNODE>\n'
+        return innerbuffer
 
 class DivisionNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<DIVNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</DIVNODE>\n'
+        return innerbuffer
 
 class LessThanNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<LSTNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</LSTNODE>\n'
+        return innerbuffer
 
 class GreaterThanNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<GRTNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</GRTNODE>\n'
+        return innerbuffer
 
 class IsEqualNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<EQNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</EQNODE>\n'
+        return innerbuffer
 
 class IsNotEqualNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<NEQNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</NEQNODE>\n'
+        return innerbuffer
 
 class LessOrEqualNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<LEQNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</LEQNODE>\n'
+        return innerbuffer
 
 class GreaterOrEqualNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<GEQNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</GEQNODE>\n'
+        return innerbuffer
 
 class AndNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<ANDNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</ANDNODE>\n'
+        return innerbuffer
 
 class OrNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<ORNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</ORNODE>\n'
+        return innerbuffer
 
 class ModulusNode (BinaryExpressionNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<MODNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'+'\t</MODNODE>\n'
+        return innerbuffer
 
 class NegateNode (ExpressionNode):
     
@@ -111,13 +157,25 @@ class LiteralNode (ExpressionNode):
         self.value = None
 
 class IntegerNode (LiteralNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<INTNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'
+        innerbuffer += '\t\t<value>'+str(self.value)+'</value>\n\t</INTNODE>\n'
+        return innerbuffer
 
 class FloatNode (LiteralNode):
-    pass
+    
+    def save(self):
+        innerbuffer = '\t<FLOATNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'
+        innerbuffer += '\t\t<value>'+str(self.value)+'</value>\n\t</FLOATNODE>\n'
+        return innerbuffer   
 
 class CharNode (LiteralNode):
-    pass
+
+    def save(self):
+        innerbuffer = '\t<CHARNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'
+        innerbuffer += '\t\t<value>'+str(self.value)+'</value>\n\t</CHARNODE>\n'
+        return innerbuffer
 
 
 class PrimitiveNode(AbstractNode):
