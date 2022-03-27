@@ -24,7 +24,8 @@ class ProgNode(AbstractNode):
         for stat in self.StatementNodes:
             switcher = {
                 type(IdNode()) : 'idnode',
-                type(AssignNode()) : 'assignnode' 
+                type(AssignNode()) : 'assignnode',
+                type(BinaryExpressionNode()) : 'binexpression'
             }
             nodetype = switcher.get(type(stat), str(type(stat)))
             progsavebuffer += '\t\t\t<'+nodetype+'>' + str(stat.serial) + '</'+nodetype+'>\n'
