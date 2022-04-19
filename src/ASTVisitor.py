@@ -5,6 +5,9 @@ class ASTVisitor:
     def visitProgNode(self, node):
         pass
 
+    def visitStatementNode(self, node):
+        pass
+
     def visitAssignNode(self, node):
         pass
 
@@ -32,6 +35,8 @@ class ASTVisitor:
 
         if node_type is ProgNode:
             return self.visitProgNode(node)
+        elif node_type is StatementNode:
+            return self.visitStatementNode(node)
         elif node_type is AssignNode:
             return self.visitAssignNode(node)
         elif node_type is IdNode:

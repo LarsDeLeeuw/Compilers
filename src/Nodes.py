@@ -24,17 +24,20 @@ class ProgNode(AbstractNode):
         for stat in self.StatementNodes:
             switcher = {
                 type(IdNode()) : 'idnode',
-                type(AssignNode()) : 'assignnode',
-                type(BinaryExpressionNode()) : 'binexpression'
+                type(AssignNode()) : 'assignnode'
             }
-            nodetype = switcher.get(type(stat), str(type(stat)))
+            nodetype = switcher.get(type(stat), 'expression')
             progsavebuffer += '\t\t\t<'+nodetype+'>' + str(stat.serial) + '</'+nodetype+'>\n'
             nodesavebuffer += stat.save()
 
         return '\t<PROG>\n\t\t<serial>'+str(self.serial)+'</serial>\n\t\t<STATS>\n' + progsavebuffer + '\t\t</STATS>\n\t</PROG>\n' + nodesavebuffer
         
 class StatementNode(AbstractNode):
-    pass
+
+    def __init__(self):
+        super().__init__()
+        self.IdNode = None
+        self.InnerNode = None
 
 class AssignNode(StatementNode):
 
@@ -149,6 +152,12 @@ class NegateNode (ExpressionNode):
         super().__init__()
         self.boolean = None
         self.InnerNode = None
+
+    def save(self):
+        innerbuffer = '\t<NEGATENODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'
+        innerbuffer += '\t\t<innernode>'+str(self.InnerNode.serial)+'</innernode>\n\t</NEGATENODE>\n'
+        innerbuffer += self.InnerNode.save()
+        return innerbuffer
 
 
 class LiteralNode (ExpressionNode):

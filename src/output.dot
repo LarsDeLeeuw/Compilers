@@ -1,74 +1,58 @@
 digraph {n0 [label="File"];
 n1 [label="Statement"];
-n2 [label="+"];
-n3 [label="5"];
-n4 [label="2"];
+n2 [label="9"];
+n3 [label="Statement"];
+n4 [label="19"];
 n5 [label="Statement"];
-n6 [label="-"];
-n7 [label="3"];
-n8 [label="3"];
+n6 [label="1"];
+n7 [label="Statement"];
+n8 [label="1"];
 n9 [label="Statement"];
-n10 [label="*"];
-n11 [label="2"];
-n12 [label="45"];
+n10 [label="27"];
+n11 [label="Statement"];
+n12 [label="162"];
 n13 [label="Statement"];
-n14 [label="/"];
-n15 [label="222"];
-n16 [label="2"];
+n14 [label="3"];
+n15 [label="Statement"];
+n16 [label="1"];
 n17 [label="Statement"];
-n18 [label="-"];
-n19 [label="2"];
+n18 [label="0"];
+n19 [label="Statement"];
 n20 [label="1"];
 n21 [label="Statement"];
-n22 [label="+"];
-n23 [label="3"];
-n24 [label="156"];
+n22 [label="0"];
+n23 [label="Statement"];
+n24 [label="1"];
 n25 [label="Statement"];
-n26 [label="/"];
-n27 [label="*"];
-n28 [label="3333"];
-n29 [label="99"];
-n30 [label="2"];
-n31 [label="Statement"];
-n32 [label="+"];
-n33 [label="5"];
-n34 [label="*"];
-n35 [label="3"];
-n36 [label="3"];
+n26 [label="0"];
+n27 [label="Statement"];
+n28 [label="1"];
 n0 -> n1
 n1 -> n2
-n2 -> n3
-n2 -> n4
+n0 -> n3
+n3 -> n4
 n0 -> n5
 n5 -> n6
-n6 -> n7
-n6 -> n8
+n0 -> n7
+n7 -> n8
 n0 -> n9
 n9 -> n10
-n10 -> n11
-n10 -> n12
+n0 -> n11
+n11 -> n12
 n0 -> n13
 n13 -> n14
-n14 -> n15
-n14 -> n16
+n0 -> n15
+n15 -> n16
 n0 -> n17
 n17 -> n18
-n18 -> n19
-n18 -> n20
+n0 -> n19
+n19 -> n20
 n0 -> n21
 n21 -> n22
-n22 -> n23
-n22 -> n24
+n0 -> n23
+n23 -> n24
 n0 -> n25
 n25 -> n26
-n26 -> n27
+n0 -> n27
 n27 -> n28
-n27 -> n29
-n26 -> n30
-n0 -> n31
-n31 -> n32
-n32 -> n33
-n32 -> n34
-n34 -> n35
-n34 -> n36
 }

@@ -29,10 +29,19 @@ class BuildASTVisitor(GrammarVisitor):
         node = ProgNode()
         node.serial = self.claimSerial()
         for Statement in ctx.stat():
+            # Create a container node for statement.
+            statement_node = StatementNode()
+            statement_node.setParent(node)
+            statement_node.serial = self.claimSerial()
+
             stat_node = self.visit(Statement)
-            stat_node.setParent(node)
+            stat_node.setParent(statement_node)
             stat_node.serial = self.claimSerial()
-            node.StatementNodes.append(stat_node)
+
+            statement_node.InnerNode = stat_node
+
+            node.StatementNodes.append(statement_node)
+
         self.AST.root = node
         return 0
 
@@ -46,6 +55,7 @@ class BuildASTVisitor(GrammarVisitor):
         if (ctx.ID().getText() in self.memory):
             return -1
         
+        print(ctx.start.line)
         node = IdNode()
         
         node.ID = ctx.ID().getText()
@@ -127,7 +137,9 @@ class BuildASTVisitor(GrammarVisitor):
         else:
             node = NegateNode()
             node_expr = self.visit(ctx.expr())
+            node_expr.serial = self.claimSerial()
             node_expr.setParent(node)
+            node.InnerNode = node_expr
             node.serial = self.claimSerial()
             if ctx.op.type == GrammarLexer.NOT:
                 node.boolean = True

@@ -11,7 +11,7 @@ expr
     : '(' expr ')'                          # parensExpr
     | op=('+'|'-'|'!') expr                 # unaryExpr
     | left=expr op=('*'|'/') right=expr     # binExpr
-    | left=expr op=('+'|'-') right=expr     # binExpr
+    | left=expr op=('+'|'-'|'%') right=expr # binExpr
     | left=expr op=('>'|'<') right=expr     # binExpr
     | left=expr op=('=='|'>=') right=expr   # binExpr
     | left=expr op=('<='|'!=') right=expr   # binExpr

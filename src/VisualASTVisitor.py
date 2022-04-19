@@ -23,6 +23,9 @@ class VisualASTVisitor(ASTVisitor):
             self.refcount = storeref
         return 0
 
+    def visitStatementNode(self, node):
+        return self.visit(node.InnerNode)
+
     def visitAssignNode(self, node):
         pass
 
@@ -87,7 +90,19 @@ class VisualASTVisitor(ASTVisitor):
         # self.nodecount += 1
     
     def visitNegateNode(self, node):
-        pass
+        # Declare this_node to reference to later in block, connect parent_node and this_node.
+        this_node = "n"+str((self.nodecount))
+        if node.boolean:
+            label = "!"
+        else:
+            label = "-"
+        self.edgebuffer +=  "n"+str((self.refcount)) +" -> "+ this_node +"\n"
+        self.labelbuffer += this_node+' [label="'+ label +'"];\n'
+        self.refcount = self.nodecount
+        storeref = self.refcount
+        self.nodecount += 1
+        self.visit(node.InnerNode)
+        self.refcount = storeref
 
     def visitLiteralNode(self, node):
         # Declare this_node to reference to later in block, connect parent_node and this_node.
