@@ -26,8 +26,42 @@ class BuildASTVisitor(GrammarVisitor):
         return self.AST
 
     # Visit a parse tree produced by GrammarParser#prog.
+    # def visitProg(self, ctx:GrammarParser.ProgContext):
+    #     node = ProgNode()
+    #     node.serial = self.claimSerial()
+    #     for Statement in ctx.stat():
+    #         # Create a container node for statement.
+    #         statement_node = StatementNode()
+    #         statement_node.setParent(node)
+    #         statement_node.serial = self.claimSerial()
+
+    #         stat_node = self.visit(Statement)
+    #         stat_node.setParent(statement_node)
+    #         stat_node.serial = self.claimSerial()
+
+    #         statement_node.InnerNode = stat_node
+
+    #         node.StatementNodes.append(statement_node)
+
+    #     self.AST.root = node
+    #     return 0
+
+    # Visit a parse tree produced by GrammarParser#prog.
     def visitProg(self, ctx:GrammarParser.ProgContext):
         node = ProgNode()
+        node.serial = self.claimSerial()
+        for Scope in ctx.scope():
+            scope_node = self.visit(Scope)
+            node.ScopeNodes.append(scope_node)
+        self.AST.root = node
+        return 0
+
+
+    # Visit a parse tree produced by GrammarParser#globalScope.
+    def visitGlobalScope(self, ctx:GrammarParser.GlobalScopeContext):
+        print("Global")
+        node = ScopeNode()
+        node.ScopeID = "global"
         node.serial = self.claimSerial()
         for Statement in ctx.stat():
             # Create a container node for statement.
@@ -41,10 +75,16 @@ class BuildASTVisitor(GrammarVisitor):
 
             statement_node.InnerNode = stat_node
 
-            node.StatementNodes.append(statement_node)
+            node.ChildNodes.append(statement_node)
 
-        self.AST.root = node
-        return 0
+        return node
+
+
+    # Visit a parse tree produced by GrammarParser#localScope.
+    def visitLocalScope(self, ctx:GrammarParser.LocalScopeContext):
+        print("local")
+        return self.visitChildren(ctx)
+
 
 
     # Visit a parse tree produced by GrammarParser#exprStat.

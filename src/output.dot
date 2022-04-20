@@ -1,36 +1,104 @@
 digraph {n0 [label="File"];
-n1 [label="Statement"];
-n2 [label="INIT"];
-n3 [label="0"];
-n4 [label="int"];
-n5 [label="x"];
-n6 [label="Statement"];
-n7 [label="INIT"];
-n8 [label="16"];
-n9 [label="float"];
-n10 [label="y"];
-n11 [label="Statement"];
-n12 [label="INIT"];
-n13 [label="85"];
-n14 [label="float"];
-n15 [label="result"];
-n16 [label="Statement"];
-n17 [label="printf"];
+n1 [label="global"];
+n2 [label="Statement"];
+n3 [label="INIT"];
+n4 [label="*"];
+n5 [label="5"];
+n6 [label="+"];
+n7 [label="/"];
+n8 [label="3"];
+n9 [label="10"];
+n10 [label="/"];
+n11 [label="9"];
+n12 [label="10"];
+n13 [label="int"];
+n14 [label="x"];
+n15 [label="Statement"];
+n16 [label="INIT"];
+n17 [label="+"];
+n18 [label="/"];
+n19 [label="*"];
+n20 [label="x"];
+n21 [label="2"];
+n22 [label="+"];
+n23 [label="+"];
+n24 [label="2"];
+n25 [label="/"];
+n26 [label="*"];
+n27 [label="1"];
+n28 [label="2"];
+n29 [label="3"];
+n30 [label="x"];
+n31 [label="*"];
+n32 [label="8"];
+n33 [label="/"];
+n34 [label="8"];
+n35 [label="4"];
+n36 [label="float"];
+n37 [label="y"];
+n38 [label="Statement"];
+n39 [label="INIT"];
+n40 [label="+"];
+n41 [label="+"];
+n42 [label="x"];
+n43 [label="y"];
+n44 [label="69"];
+n45 [label="float"];
+n46 [label="result"];
+n47 [label="Statement"];
+n48 [label="INIT"];
+n49 [label="2"];
+n50 [label="int"];
+n51 [label="f"];
 n0 -> n1
 n1 -> n2
 n2 -> n3
-n2 -> n4
-n2 -> n5
-n0 -> n6
+n3 -> n4
+n4 -> n5
+n4 -> n6
 n6 -> n7
 n7 -> n8
 n7 -> n9
-n7 -> n10
-n0 -> n11
-n11 -> n12
-n12 -> n13
-n12 -> n14
-n12 -> n15
-n0 -> n16
+n6 -> n10
+n10 -> n11
+n10 -> n12
+n3 -> n13
+n3 -> n14
+n1 -> n15
+n15 -> n16
 n16 -> n17
+n17 -> n18
+n18 -> n19
+n19 -> n20
+n19 -> n21
+n18 -> n22
+n22 -> n23
+n23 -> n24
+n23 -> n25
+n25 -> n26
+n26 -> n27
+n26 -> n28
+n25 -> n29
+n22 -> n30
+n17 -> n31
+n31 -> n32
+n31 -> n33
+n33 -> n34
+n33 -> n35
+n16 -> n36
+n16 -> n37
+n1 -> n38
+n38 -> n39
+n39 -> n40
+n40 -> n41
+n41 -> n42
+n41 -> n43
+n40 -> n44
+n39 -> n45
+n39 -> n46
+n1 -> n47
+n47 -> n48
+n48 -> n49
+n48 -> n50
+n48 -> n51
 }

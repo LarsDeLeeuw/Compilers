@@ -1,11 +1,15 @@
 grammar Grammar;
 
-prog: stat+ ;
+prog: scope+ ;
 
-stat: expr ';'                                                  # exprStat
-    | KEY_CONST prim ID '=' expr ';'                 # constInitStat
+scope: stat+                                #globalScope
+    | '{' (stat|scope)+ '}'                 #localScope
+    ;
+
+stat: expr ';'                             # exprStat
+    | KEY_CONST prim ID '=' expr ';'       # constInitStat
     | prim ID '=' expr ';'                 # initStat
-    | ID '=' rhs=expr ';'                                   # assignStat
+    | ID '=' rhs=expr ';'                  # assignStat
     ;
 
 expr

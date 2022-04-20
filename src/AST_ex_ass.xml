@@ -2,10 +2,6 @@
 	<PROG>
 		<serial>0</serial>
 		<STATS>
-			<expression>1</expression>
-			<expression>19</expression>
-			<expression>52</expression>
-			<expression>64</expression>
 		</STATS>
 	</PROG>
-AbstractNode save method used, something went wrongAbstractNode save method used, something went wrongAbstractNode save method used, something went wrongAbstractNode save method used, something went wrong</Ast>
+</Ast>

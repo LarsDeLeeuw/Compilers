@@ -16,7 +16,7 @@ class ProgNode(AbstractNode):
 
     def __init__(self):
         super().__init__()
-        self.StatementNodes = []
+        self.ScopeNodes = []
 
     def save(self):
         progsavebuffer = ''
@@ -32,6 +32,13 @@ class ProgNode(AbstractNode):
 
         return '\t<PROG>\n\t\t<serial>'+str(self.serial)+'</serial>\n\t\t<STATS>\n' + progsavebuffer + '\t\t</STATS>\n\t</PROG>\n' + nodesavebuffer
         
+class ScopeNode(AbstractNode):
+
+    def __init__(self):
+        super().__init__()
+        self.ScopeID = None # String
+        self.ChildNodes = []
+
 class StatementNode(AbstractNode):
 
     def __init__(self):

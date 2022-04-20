@@ -9,11 +9,38 @@ class VisualASTVisitor(ASTVisitor):
         self.nodecount = 0
         self.refcount = 0
 
+    # def visitProgNode(self, node):
+    #     self.labelbuffer += "n"+str(self.nodecount)+' [label="File"];\n'
+    #     self.nodecount += 1
+    #     thisnode = "n"+str((self.nodecount-1))
+    #     for StatementNode in node.StatementNodes:
+    #         self.labelbuffer += "n"+str(self.nodecount)+' [label="Statement"];\n'
+    #         self.refcount = self.nodecount
+    #         storeref = self.refcount
+    #         self.nodecount += 1
+    #         self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount-1))+"\n"
+    #         self.visit(StatementNode)
+    #         self.refcount = storeref
+    #     return 0
+
     def visitProgNode(self, node):
         self.labelbuffer += "n"+str(self.nodecount)+' [label="File"];\n'
         self.nodecount += 1
         thisnode = "n"+str((self.nodecount-1))
-        for StatementNode in node.StatementNodes:
+        for StatementNode in node.ScopeNodes:
+            storeref = self.refcount
+            self.visit(StatementNode)
+            self.refcount = storeref
+        return 0
+
+    def visitScopeNode(self, node):
+        thisnode = "n"+str((self.nodecount))
+        self.edgebuffer +=  "n"+str((self.nodecount-1)) +" -> "+ thisnode +"\n"
+        self.refcount = self.nodecount
+        storeref = self.refcount
+        self.nodecount += 1
+        self.labelbuffer += thisnode+' [label="'+ str("global") +'"];\n'
+        for StatementNode in node.ChildNodes:
             self.labelbuffer += "n"+str(self.nodecount)+' [label="Statement"];\n'
             self.refcount = self.nodecount
             storeref = self.refcount
@@ -21,7 +48,7 @@ class VisualASTVisitor(ASTVisitor):
             self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount-1))+"\n"
             self.visit(StatementNode)
             self.refcount = storeref
-        return 0
+
 
     def visitStatementNode(self, node):
         return self.visit(node.InnerNode)

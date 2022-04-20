@@ -17,6 +17,24 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GrammarParser#globalScope.
+    def enterGlobalScope(self, ctx:GrammarParser.GlobalScopeContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#globalScope.
+    def exitGlobalScope(self, ctx:GrammarParser.GlobalScopeContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#localScope.
+    def enterLocalScope(self, ctx:GrammarParser.LocalScopeContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#localScope.
+    def exitLocalScope(self, ctx:GrammarParser.LocalScopeContext):
+        pass
+
+
     # Enter a parse tree produced by GrammarParser#exprStat.
     def enterExprStat(self, ctx:GrammarParser.ExprStatContext):
         pass
