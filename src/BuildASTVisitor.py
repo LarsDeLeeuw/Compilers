@@ -8,6 +8,7 @@ from AST import AST
 from Nodes import *
 from GrammarLexer import GrammarLexer
 from GrammarVisitor import GrammarVisitor
+import copy
 
 
 class BuildASTVisitor(GrammarVisitor):
@@ -56,8 +57,12 @@ class BuildASTVisitor(GrammarVisitor):
             return -1
         
         print(ctx.start.line)
+
+        init_node = InitNode()
+
         node = IdNode()
-        
+        node.Parent = init_node
+        node.serial = self.claimSerial()
         node.ID = ctx.ID().getText()
 
         prim_node = self.visit(ctx.prim())
@@ -69,9 +74,14 @@ class BuildASTVisitor(GrammarVisitor):
         lit_node.setParent(node)
         lit_node.serial = self.claimSerial()
         node.ExpressionNode = lit_node
-        self.memory[node.ID] = ctx.expr()
+        # Create a deepcopy of the IdNode
+        temp_node = copy.deepcopy(node)
+        temp_node.serial = self.claimSerial()
+        self.memory[node.ID] = temp_node
 
-        return node
+        init_node.InnerNode = node
+
+        return init_node
 
 
     # Visit a parse tree produced by GrammarParser#assignStat.
@@ -79,18 +89,27 @@ class BuildASTVisitor(GrammarVisitor):
         
         node = AssignNode()
 
-        id_node = self.visit(ctx.lhs)
+        id_node = self.memory[ctx.ID().getText()]
         id_node.setParent(node)
         id_node.serial = self.claimSerial()
         node.IdNode = id_node
 
-        lit_node = self.visit(ctx.rhs)
-        lit_node.setParent(node)
-        lit_node.serial = self.claimSerial()
-        node.LiteralNode = lit_node
+        new_expr_node = self.visit(ctx.rhs)
+        new_expr_node.setParent(node)
+        new_expr_node.serial = self.claimSerial()
+        node.NewExpressionNode = new_expr_node
 
         return node
 
+    # Visit a parse tree produced by GrammarParser#PrintExpr.
+    def visitPrintExpr(self, ctx:GrammarParser.PrintExprContext):
+        node = FunctionNode()
+        node.ID = "printf"
+        if ctx.ID():
+            node.Args = ctx.ID().getText()
+        else:
+            node.Args = ctx.lit().getText()
+        return node
 
     # Visit a parse tree produced by GrammarParser#binExpr.
     def visitBinExpr(self, ctx:GrammarParser.BinExprContext):
@@ -161,7 +180,7 @@ class BuildASTVisitor(GrammarVisitor):
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
         if ctx.ID().getText() in self.memory:
-            return self.visit(self.memory[ctx.ID().getText()])
+            return self.memory[ctx.ID().getText()]
         
         print("Use of undeclared identifier")
         return None

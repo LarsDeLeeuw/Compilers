@@ -2,14 +2,15 @@ grammar Grammar;
 
 prog: stat+ ;
 
-stat: expr ';'                              # exprStat
-    | prim ID '=' expr ';'                  # initStat
-    | lhs=ID '=' rhs=expr ';'               # assignStat
+stat: expr ';'                                                  # exprStat
+    | KEY_CONST prim ID '=' expr ';'                 # constInitStat
+    | prim ID '=' expr ';'                 # initStat
+    | ID '=' rhs=expr ';'                                   # assignStat
     ;
 
 expr
     : '(' expr ')'                          # parensExpr
-    | op=('+'|'-'|'!') expr                 # unaryExpr
+    | op=('+'|'-'|'!'|'*'|'&') expr         # unaryExpr
     | left=expr op=('*'|'/') right=expr     # binExpr
     | left=expr op=('+'|'-'|'%') right=expr # binExpr
     | left=expr op=('>'|'<') right=expr     # binExpr
@@ -18,6 +19,7 @@ expr
     | left=expr op=('||'|'&&') right=expr   # binExpr
     | ID                                    # idExpr
     | value=lit                             # litExpr
+    | 'printf' '(' (ID | lit) ')'           # PrintExpr
     ;
 
 lit
@@ -28,6 +30,9 @@ prim
     : KEY_CHAR                              # charPrim
     | KEY_FLOAT                             # floatPrim
     | KEY_INT                               # intPrim
+    | KEY_CHARPTR                           # charptrPrim
+    | KEY_FLOATPTR                          # floatptrPrim
+    | KEY_INTPTR                            # intptrPrim
     ;
 
 MUL : '*' ;
@@ -44,11 +49,19 @@ NOT : '!' ;
 AND : '&&';
 OR  : '||';
 MOD : '%' ;
+DRF : '&' ;
 
+KEY_CHARPTR : 'char' '*' ;
+KEY_FLOATPTR    : 'float' '*' ;
+KEY_INTPTR :'int' '*' ;
 KEY_CHAR : 'char' ;
 KEY_INT : 'int' ;
 KEY_FLOAT : 'float' ;
 
+KEY_CONST : 'const' ;
+
+MULTICOMMENT : '/*' .*? '*/' -> skip;
+SINGLECOMMENT: '//' .*? '\n' -> skip;
 CHAR : [.~] ;
 INT : [0-9]+ ;
 FLOAT : [0-9]+ '.' [0-9]+ ;
@@ -56,5 +69,5 @@ BOOL
     : 'true'
     | 'false'
     ;
-ID  : [a-zA-Z]+ ;
+ID  : [a-zA-Z_]{1}[a-zA-Z0-9_]* ;
 WS: [ \n\t\r]+ -> skip;

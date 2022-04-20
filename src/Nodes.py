@@ -44,10 +44,23 @@ class AssignNode(StatementNode):
     def __init__(self):
         super().__init__()
         self.IdNode = None
-        self.LiteralNode = None
+        self.NewExpressionNode = None
+
+class InitNode(StatementNode):
+    
+    def __init__(self):
+        super().__init__()
+        self.InnerNode = None
 
 class ExpressionNode (AbstractNode):
     pass
+
+class FunctionNode(ExpressionNode):
+
+    def __init__(self):
+        super().__init__()
+        self.ID = None
+        self.Args = None
 
 class BinaryExpressionNode (ExpressionNode):
     
@@ -213,6 +226,14 @@ class IdNode(StatementNode):
         self.PrimitiveNode = None
         self.ID = None
         self.ExpressionNode = None
+        self.IsConst = None
+
+    def isConst(self):
+        if self.IsConst is None:
+            print("IdNode {" + str(self.ID) + "} failed to initialise correctly!")
+            return -1
+        else:
+            return self.IsConst
 
     def save(self):
         innersavebuffer = '\t<IDNODE>\n\t\t<serial>'+str(self.serial)+'</serial>\n'

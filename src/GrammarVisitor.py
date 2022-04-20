@@ -19,6 +19,11 @@ class GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by GrammarParser#constInitStat.
+    def visitConstInitStat(self, ctx:GrammarParser.ConstInitStatContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by GrammarParser#initStat.
     def visitInitStat(self, ctx:GrammarParser.InitStatContext):
         return self.visitChildren(ctx)
@@ -49,6 +54,11 @@ class GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by GrammarParser#PrintExpr.
+    def visitPrintExpr(self, ctx:GrammarParser.PrintExprContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
         return self.visitChildren(ctx)
@@ -71,6 +81,21 @@ class GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by GrammarParser#intPrim.
     def visitIntPrim(self, ctx:GrammarParser.IntPrimContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#charptrPrim.
+    def visitCharptrPrim(self, ctx:GrammarParser.CharptrPrimContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#floatptrPrim.
+    def visitFloatptrPrim(self, ctx:GrammarParser.FloatptrPrimContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#intptrPrim.
+    def visitIntptrPrim(self, ctx:GrammarParser.IntptrPrimContext):
         return self.visitChildren(ctx)
 
 

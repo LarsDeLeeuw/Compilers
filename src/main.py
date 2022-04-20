@@ -6,6 +6,7 @@ from BuildASTVisitor import BuildASTVisitor
 from VisualASTVisitor import VisualASTVisitor
 from ConstFoldingASTVisitor import ConstFoldingASTVisitor
 from AST import AST
+from LLVMASTVisitor import LLVMASTVisitor
 from subprocess import check_call
 
 def main(argv):
@@ -19,7 +20,9 @@ def main(argv):
     ASTree= builder.getAST()
     ASTVisualDOT = VisualASTVisitor()
     ASTConstFolding = ConstFoldingASTVisitor()
-    ASTree.accept(ASTConstFolding)
+    ASTLLVM = LLVMASTVisitor()
+    # ASTree.accept(ASTConstFolding)
+    ASTree.accept(ASTLLVM)
     ASTree.accept(ASTVisualDOT)
     ASTree.save("AST_ex_ass.xml")
     outputdotfile = open("output.dot", 'w')
@@ -28,7 +31,9 @@ def main(argv):
     # print(ASTVisualDOT.edgebuffer)import pydot
     outputdotfile.close()
 
-    check_call(['dot','-Tpng','output.dot','-o','OutputFile.png'])
+    check_call(['dot','-Tjpg','output.dot','-o','OutputFile.jpg'])
+    # Convert to darkmode to spare my eyes.
+    check_call(['magick','OutputFile.jpg','-negate','OutputFile.jpg'])
 
 if __name__ == '__main__':
     main(sys.argv)

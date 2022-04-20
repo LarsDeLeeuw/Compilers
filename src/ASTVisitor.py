@@ -11,6 +11,12 @@ class ASTVisitor:
     def visitAssignNode(self, node):
         pass
 
+    def visitInitNode(self, node):
+        pass
+
+    def visitFunctionNode(self, node):
+        pass
+
     def visitBinaryExpressionNode(self, node):
         pass
 
@@ -39,10 +45,14 @@ class ASTVisitor:
             return self.visitStatementNode(node)
         elif node_type is AssignNode:
             return self.visitAssignNode(node)
+        elif node_type is InitNode:
+            return self.visitInitNode(node)
         elif node_type is IdNode:
             return self.visitIdNode(node) 
         elif node_type is BinaryExpressionNode:
             return self.visitBinaryExpressionNode(node)
+        elif node_type is FunctionNode:
+            return self.visitFunctionNode(node)
         elif node_type is NegateNode:
             return self.visitNegateNode(node)
         elif node_type is IdNode:

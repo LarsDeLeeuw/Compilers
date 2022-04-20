@@ -26,6 +26,15 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GrammarParser#constInitStat.
+    def enterConstInitStat(self, ctx:GrammarParser.ConstInitStatContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#constInitStat.
+    def exitConstInitStat(self, ctx:GrammarParser.ConstInitStatContext):
+        pass
+
+
     # Enter a parse tree produced by GrammarParser#initStat.
     def enterInitStat(self, ctx:GrammarParser.InitStatContext):
         pass
@@ -80,6 +89,15 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GrammarParser#PrintExpr.
+    def enterPrintExpr(self, ctx:GrammarParser.PrintExprContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#PrintExpr.
+    def exitPrintExpr(self, ctx:GrammarParser.PrintExprContext):
+        pass
+
+
     # Enter a parse tree produced by GrammarParser#idExpr.
     def enterIdExpr(self, ctx:GrammarParser.IdExprContext):
         pass
@@ -122,6 +140,33 @@ class GrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by GrammarParser#intPrim.
     def exitIntPrim(self, ctx:GrammarParser.IntPrimContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#charptrPrim.
+    def enterCharptrPrim(self, ctx:GrammarParser.CharptrPrimContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#charptrPrim.
+    def exitCharptrPrim(self, ctx:GrammarParser.CharptrPrimContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#floatptrPrim.
+    def enterFloatptrPrim(self, ctx:GrammarParser.FloatptrPrimContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#floatptrPrim.
+    def exitFloatptrPrim(self, ctx:GrammarParser.FloatptrPrimContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#intptrPrim.
+    def enterIntptrPrim(self, ctx:GrammarParser.IntptrPrimContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#intptrPrim.
+    def exitIntptrPrim(self, ctx:GrammarParser.IntptrPrimContext):
         pass
 
 
