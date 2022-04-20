@@ -21,14 +21,12 @@ def main(argv):
     ASTVisualDOT = VisualASTVisitor()
     ASTConstFolding = ConstFoldingASTVisitor()
     ASTLLVM = LLVMASTVisitor()
-    # ASTree.accept(ASTConstFolding)
+    ASTree.accept(ASTConstFolding)
     ASTree.accept(ASTLLVM)
     ASTree.accept(ASTVisualDOT)
     ASTree.save("AST_ex_ass.xml")
     outputdotfile = open("output.dot", 'w')
-    outputdotfile.write("digraph {" + ASTVisualDOT.labelbuffer + ASTVisualDOT.edgebuffer + "}")    
-    # print(ASTVisualDOT.labelbuffer)
-    # print(ASTVisualDOT.edgebuffer)import pydot
+    outputdotfile.write("digraph {" + ASTVisualDOT.labelbuffer + ASTVisualDOT.edgebuffer + "}")
     outputdotfile.close()
 
     check_call(['dot','-Tjpg','output.dot','-o','OutputFile.jpg'])

@@ -32,7 +32,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("=") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("ASSIGN") +'"];\n'
         
         self.visit(node.IdNode)
    
@@ -47,7 +47,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("=") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("INIT") +'"];\n'
         
         self.visit(node.InnerNode.ExpressionNode)
    

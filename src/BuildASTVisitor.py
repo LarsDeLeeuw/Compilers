@@ -188,14 +188,19 @@ class BuildASTVisitor(GrammarVisitor):
 
     # Visit a parse tree produced by GrammarParser#charLit.
     def visitPrimLit(self, ctx:GrammarParser.PrimLitContext):
-        switcher = {
-            GrammarLexer.CHAR  : CharNode(),
-            GrammarLexer.INT   : IntegerNode(),
-            GrammarLexer.FLOAT : FloatNode()
-        }
-        node = switcher.get(ctx.lit_prim.type, 'None')
-        node.value = ctx.getText()
-        # node.value not currently typetested
+
+        if ctx.lit_prim.type == GrammarLexer.CHAR:
+            node = CharNode()
+            node.value = chr(ctx.getText())
+        elif ctx.lit_prim.type == GrammarLexer.INT:
+            node = IntegerNode()
+            node.value = int(ctx.getText())
+        elif ctx.lit_prim.type == GrammarLexer.FLOAT:
+            node = FloatNode()
+            node.value = float(ctx.getText())
+        else:
+            node = AbstractNode()
+
         return node
 
 

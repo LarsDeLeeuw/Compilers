@@ -59,7 +59,7 @@ class FunctionNode(ExpressionNode):
 
     def __init__(self):
         super().__init__()
-        self.ID = None
+        self.ID = None # String
         self.Args = None
 
 class BinaryExpressionNode (ExpressionNode):
@@ -224,7 +224,7 @@ class IdNode(StatementNode):
     def __init__(self):
         super().__init__()
         self.PrimitiveNode = None
-        self.ID = None
+        self.ID = None # String
         self.ExpressionNode = None
         self.IsConst = None
 

@@ -6,6 +6,10 @@ My grammar is in src/Grammar.g4,
 
 The rest is bits and pieces of different assignments, in the email I will provide context.
 
+TODO:
+    Loading and saving of AST probably busted with small modification of Nodes.
+    Test files may need to be regenerated because slicht modification in serials
+    
 
 # About
 This compiler is written in python and attempts to succesfully compile a subset of the C language to MIPS instructions using ANTLR.
