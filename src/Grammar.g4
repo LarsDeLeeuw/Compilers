@@ -1,33 +1,35 @@
 grammar Grammar;
 
-prog: scope+ ;
+prog: (KEY_INCLUDE LIB)* decl+ ;
 
-scope: stat+                                #globalScope
-    | '{' (stat|scope)+ '}'                 #localScope
+decl: prim ID ('=' expr)? ';'                                                               #varDecl
+    | (prim | KEY_VOID) ID '('( ( (prim ID)(','prim ID)* ) | prim ID )?')' ';'              #funcheadsupDecl           
+    | (prim | KEY_VOID) ID '(' ( ( (prim ID)(','prim ID)* ) | prim ID )? ')' '{' stat* '}'  #funcDecl
     ;
 
-stat: expr ';'                             # exprStat
-    | KEY_CONST prim ID '=' expr ';'       # constInitStat
-    | prim ID '=' expr ';'                 # initStat
-    | ID '=' rhs=expr ';'                  # assignStat
+stat: expr ';'                                                       # exprStat
+    | KEY_CONST? prim ID ('=' expr)? ';'                             # declStat
+    | KEY_WHILE '(' expr ')' '{' stat* '}'                           # whileStat
+    | KEY_IF '(' expr ')' '{' stat* '}' (KEY_ELSE '{' stat* '}')?    # ifStat
+    | KEY_RETURN expr ';'                                            # returnStat
     ;
 
 expr
     : '(' expr ')'                          # parensExpr
     | op=('+'|'-'|'!'|'*'|'&') expr         # unaryExpr
-    | left=expr op=('*'|'/') right=expr     # binExpr
+    | left=expr op=('*'|'/'|'=') right=expr # binExpr
     | left=expr op=('+'|'-'|'%') right=expr # binExpr
     | left=expr op=('>'|'<') right=expr     # binExpr
     | left=expr op=('=='|'>=') right=expr   # binExpr
     | left=expr op=('<='|'!=') right=expr   # binExpr
     | left=expr op=('||'|'&&') right=expr   # binExpr
+    | ID '(' ( ( ((ID|lit))(','(ID|lit))* ) | (ID|lit) )? ')'   # callExpr
     | ID                                    # idExpr
     | value=lit                             # litExpr
-    | 'printf' '(' (ID | lit) ')'           # PrintExpr
     ;
 
 lit
-    : lit_prim=(BOOL|CHAR|INT|FLOAT)             # primLit
+    : lit_prim=(STRING|CHAR|INT|FLOAT)             # primLit
     ;
 
 prim
@@ -54,6 +56,7 @@ AND : '&&';
 OR  : '||';
 MOD : '%' ;
 DRF : '&' ;
+ASS : '=' ;
 
 KEY_CHARPTR : 'char' '*' ;
 KEY_FLOATPTR    : 'float' '*' ;
@@ -61,12 +64,20 @@ KEY_INTPTR :'int' '*' ;
 KEY_CHAR : 'char' ;
 KEY_INT : 'int' ;
 KEY_FLOAT : 'float' ;
+KEY_VOID : 'void' ;
 
 KEY_CONST : 'const' ;
+KEY_INCLUDE : '#include' ;
+KEY_FOR : 'for' ;
+KEY_WHILE : 'while' ;
+KEY_IF : 'if' ;
+KEY_ELSE : 'else' ;
+KEY_RETURN : 'return' ;
 
 MULTICOMMENT : '/*' .*? '*/' -> skip;
 SINGLECOMMENT: '//' .*? '\n' -> skip;
-CHAR : [.~] ;
+CHAR : ['] [.~] ['] ;
+STRING : ["] .*? ["] ;
 INT : [0-9]+ ;
 FLOAT : [0-9]+ '.' [0-9]+ ;
 BOOL 
@@ -74,4 +85,5 @@ BOOL
     | 'false'
     ;
 ID  : [a-zA-Z_]{1}[a-zA-Z0-9_]* ;
+LIB : '<' [a-z]+ '.h>' ;
 WS: [ \n\t\r]+ -> skip;

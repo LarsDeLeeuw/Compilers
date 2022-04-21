@@ -1,41 +1,65 @@
-from Nodes import *
+from ASTNodes import *
 
 class ASTVisitor:
 
     def visitProgNode(self, node):
         pass
 
-    def visitStatementNode(self, node):
+    def visitVarDeclNode(self, node):
         pass
 
-    def visitScopeNode(self, node):
+    def visitFunctionDeclNode(self, node):
         pass
 
-    def visitAssignNode(self, node):
+    def visitParmVarDeclNode(self, node):
         pass
 
-    def visitInitNode(self, node):
+    def visitScopeStmtNode(self, node):
         pass
 
-    def visitFunctionNode(self, node):
+    def visitDeclStmtNode(self, node):
         pass
 
-    def visitBinaryExpressionNode(self, node):
+    def visitExprStmtNode(self, node):
         pass
 
-    def visitNegateNode(self, node):
+    def visitIfStmtNode(self, node):
         pass
 
-    def visitIdNode(self, node):
+    def visitWhileStmtNode(self, node):
         pass
 
-    def visitLiteralNode(self, node):
+    def visitReturnStmtNode(self, node):
         pass
 
-    def visitPrimitiveNode(self, node):
+    def visitBinExprNode(self, node):
         pass
 
-    def visitIdNode(self, node):
+    def visitUnaryExprNode(self, node):
+        pass
+
+    def visitCallExprNode(self, node):
+        pass
+
+    def visitDeclRefExprNode(self, node):
+        pass
+
+    def visitImplicitCastExprNode(self, node):
+        pass
+
+    def visitInitListExprNode(self, node):
+        pass
+
+    def visitIntegerLiteralNode(self, node):
+        pass
+
+    def visitFloatingLiteralNode(self, node):
+        pass
+
+    def visitCharacterLiteralNode(self, node):
+        pass
+
+    def visitStringLiteralNode(self, node):
         pass
 
     def visit(self, node):
@@ -44,34 +68,44 @@ class ASTVisitor:
 
         if node_type is ProgNode:
             return self.visitProgNode(node)
-        elif node_type is ScopeNode:
-            return self.visitScopeNode(node)
-        elif node_type is StatementNode:
-            return self.visitStatementNode(node)
-        elif node_type is AssignNode:
-            return self.visitAssignNode(node)
-        elif node_type is InitNode:
-            return self.visitInitNode(node)
-        elif node_type is IdNode:
-            return self.visitIdNode(node) 
-        elif node_type is BinaryExpressionNode:
-            return self.visitBinaryExpressionNode(node)
-        elif node_type is FunctionNode:
-            return self.visitFunctionNode(node)
-        elif node_type is NegateNode:
-            return self.visitNegateNode(node)
-        elif node_type is IdNode:
-            return self.visitIdNode(node)
-        elif node_type is LiteralNode:
-            return self.visitLiteralNode(node)
-        elif node_type is IntegerNode:
-            return self.visitLiteralNode(node)
-        elif node_type is CharNode:
-            return self.visitLiteralNode(node)   
-        elif node_type is FloatNode:
-            return self.visitLiteralNode(node)
-        elif node_type is PrimitiveNode:
-            return self.visitPrimitiveNode(node)
+        elif node_type is VarDeclNode:
+            return self.visitVarDeclNode(node)
+        elif node_type is FunctionDeclNode:
+            return self.visitFunctionDeclNode(node)
+        elif node_type is ParmVarDeclNode:
+            return self.visitParmVarDeclNode(node)
+        elif node_type is ScopeStmtNode:
+            return self.visitScopeStmtNode(node)
+        elif node_type is DeclStmtNode:
+            return self.visitDeclStmtNode(node) 
+        elif node_type is ExprStmtNode():
+            return self.visitExprStmtNode(node)
+        elif node_type is IfStmtNode:
+            return self.visitIfStmtNode(node)
+        elif node_type is WhileStmtNode:
+            return self.visitWhileStmtNode(node)
+        elif node_type is ReturnStmtNode:
+            return self.visitReturnStmtNode(node)
+        elif node_type is BinExprNode:
+            return self.visitBinExprNode(node)
+        elif node_type is UnaryExprNode:
+            return self.visitUnaryExprNode(node)
+        elif node_type is CallExprNode:
+            return self.visitCallExprNode(node)  
+        elif node_type is DeclRefExprNode:
+            return self.visitDeclRefExprNode(node)
+        elif node_type is ImplicitCastExprNode:
+            return self.visitImplicitCastExprNode(node)
+        elif node_type is InitListExprNode:
+            return self.visitInitListExprNode(node)
+        elif node_type is IntergerLiteralNode:
+            return self.visitIntegerLiteralNode(node)
+        elif node_type is FloatingLiteralNode:
+            return self.visitFloatingLiteralNode(node)
+        elif node_type is CharacterLiteralNode:
+            return self.visitCharacterLiteralNode(node)
+        elif node_type is StringLiteralNode:
+            return self.visitStringLiteralNode(node)
         else:
             print("Tried visiting undefined node")
             print(type(node))

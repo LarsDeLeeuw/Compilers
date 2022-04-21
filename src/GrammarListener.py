@@ -17,21 +17,30 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by GrammarParser#globalScope.
-    def enterGlobalScope(self, ctx:GrammarParser.GlobalScopeContext):
+    # Enter a parse tree produced by GrammarParser#varDecl.
+    def enterVarDecl(self, ctx:GrammarParser.VarDeclContext):
         pass
 
-    # Exit a parse tree produced by GrammarParser#globalScope.
-    def exitGlobalScope(self, ctx:GrammarParser.GlobalScopeContext):
+    # Exit a parse tree produced by GrammarParser#varDecl.
+    def exitVarDecl(self, ctx:GrammarParser.VarDeclContext):
         pass
 
 
-    # Enter a parse tree produced by GrammarParser#localScope.
-    def enterLocalScope(self, ctx:GrammarParser.LocalScopeContext):
+    # Enter a parse tree produced by GrammarParser#funcheadsupDecl.
+    def enterFuncheadsupDecl(self, ctx:GrammarParser.FuncheadsupDeclContext):
         pass
 
-    # Exit a parse tree produced by GrammarParser#localScope.
-    def exitLocalScope(self, ctx:GrammarParser.LocalScopeContext):
+    # Exit a parse tree produced by GrammarParser#funcheadsupDecl.
+    def exitFuncheadsupDecl(self, ctx:GrammarParser.FuncheadsupDeclContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#funcDecl.
+    def enterFuncDecl(self, ctx:GrammarParser.FuncDeclContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#funcDecl.
+    def exitFuncDecl(self, ctx:GrammarParser.FuncDeclContext):
         pass
 
 
@@ -44,30 +53,39 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by GrammarParser#constInitStat.
-    def enterConstInitStat(self, ctx:GrammarParser.ConstInitStatContext):
+    # Enter a parse tree produced by GrammarParser#declStat.
+    def enterDeclStat(self, ctx:GrammarParser.DeclStatContext):
         pass
 
-    # Exit a parse tree produced by GrammarParser#constInitStat.
-    def exitConstInitStat(self, ctx:GrammarParser.ConstInitStatContext):
-        pass
-
-
-    # Enter a parse tree produced by GrammarParser#initStat.
-    def enterInitStat(self, ctx:GrammarParser.InitStatContext):
-        pass
-
-    # Exit a parse tree produced by GrammarParser#initStat.
-    def exitInitStat(self, ctx:GrammarParser.InitStatContext):
+    # Exit a parse tree produced by GrammarParser#declStat.
+    def exitDeclStat(self, ctx:GrammarParser.DeclStatContext):
         pass
 
 
-    # Enter a parse tree produced by GrammarParser#assignStat.
-    def enterAssignStat(self, ctx:GrammarParser.AssignStatContext):
+    # Enter a parse tree produced by GrammarParser#whileStat.
+    def enterWhileStat(self, ctx:GrammarParser.WhileStatContext):
         pass
 
-    # Exit a parse tree produced by GrammarParser#assignStat.
-    def exitAssignStat(self, ctx:GrammarParser.AssignStatContext):
+    # Exit a parse tree produced by GrammarParser#whileStat.
+    def exitWhileStat(self, ctx:GrammarParser.WhileStatContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#ifStat.
+    def enterIfStat(self, ctx:GrammarParser.IfStatContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#ifStat.
+    def exitIfStat(self, ctx:GrammarParser.IfStatContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#returnStat.
+    def enterReturnStat(self, ctx:GrammarParser.ReturnStatContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#returnStat.
+    def exitReturnStat(self, ctx:GrammarParser.ReturnStatContext):
         pass
 
 
@@ -98,21 +116,21 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GrammarParser#callExpr.
+    def enterCallExpr(self, ctx:GrammarParser.CallExprContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#callExpr.
+    def exitCallExpr(self, ctx:GrammarParser.CallExprContext):
+        pass
+
+
     # Enter a parse tree produced by GrammarParser#litExpr.
     def enterLitExpr(self, ctx:GrammarParser.LitExprContext):
         pass
 
     # Exit a parse tree produced by GrammarParser#litExpr.
     def exitLitExpr(self, ctx:GrammarParser.LitExprContext):
-        pass
-
-
-    # Enter a parse tree produced by GrammarParser#PrintExpr.
-    def enterPrintExpr(self, ctx:GrammarParser.PrintExprContext):
-        pass
-
-    # Exit a parse tree produced by GrammarParser#PrintExpr.
-    def exitPrintExpr(self, ctx:GrammarParser.PrintExprContext):
         pass
 
 

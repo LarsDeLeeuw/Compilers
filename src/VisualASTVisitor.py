@@ -1,5 +1,5 @@
 from ASTVisitor import ASTVisitor
-from Nodes import *
+from ASTNodes import *
 
 class VisualASTVisitor(ASTVisitor):
 
@@ -9,38 +9,11 @@ class VisualASTVisitor(ASTVisitor):
         self.nodecount = 0
         self.refcount = 0
 
-    # def visitProgNode(self, node):
-    #     self.labelbuffer += "n"+str(self.nodecount)+' [label="File"];\n'
-    #     self.nodecount += 1
-    #     thisnode = "n"+str((self.nodecount-1))
-    #     for StatementNode in node.StatementNodes:
-    #         self.labelbuffer += "n"+str(self.nodecount)+' [label="Statement"];\n'
-    #         self.refcount = self.nodecount
-    #         storeref = self.refcount
-    #         self.nodecount += 1
-    #         self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount-1))+"\n"
-    #         self.visit(StatementNode)
-    #         self.refcount = storeref
-    #     return 0
-
     def visitProgNode(self, node):
         self.labelbuffer += "n"+str(self.nodecount)+' [label="File"];\n'
         self.nodecount += 1
         thisnode = "n"+str((self.nodecount-1))
-        for StatementNode in node.ScopeNodes:
-            storeref = self.refcount
-            self.visit(StatementNode)
-            self.refcount = storeref
-        return 0
-
-    def visitScopeNode(self, node):
-        thisnode = "n"+str((self.nodecount))
-        self.edgebuffer +=  "n"+str((self.nodecount-1)) +" -> "+ thisnode +"\n"
-        self.refcount = self.nodecount
-        storeref = self.refcount
-        self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("global") +'"];\n'
-        for StatementNode in node.ChildNodes:
+        for StatementNode in node.children:
             self.labelbuffer += "n"+str(self.nodecount)+' [label="Statement"];\n'
             self.refcount = self.nodecount
             storeref = self.refcount
@@ -48,27 +21,9 @@ class VisualASTVisitor(ASTVisitor):
             self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount-1))+"\n"
             self.visit(StatementNode)
             self.refcount = storeref
+        return 0
 
-
-    def visitStatementNode(self, node):
-        return self.visit(node.InnerNode)
-
-    def visitAssignNode(self, node):
-        thisnode = "n"+str((self.nodecount))
-        self.edgebuffer +=  "n"+str((self.nodecount-1)) +" -> "+ thisnode +"\n"
-        self.refcount = self.nodecount
-        storeref = self.refcount
-        self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("ASSIGN") +'"];\n'
-        
-        self.visit(node.IdNode)
-   
-        self.refcount = storeref
-
-        self.visit(node.NewExpressionNode)
-        
-
-    def visitInitNode(self, node):
+    def visitVarDeclNode(self, node):
         thisnode = "n"+str((self.nodecount))
         self.edgebuffer +=  "n"+str((self.nodecount-1)) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
@@ -76,117 +31,67 @@ class VisualASTVisitor(ASTVisitor):
         self.nodecount += 1
         self.labelbuffer += thisnode+' [label="'+ str("INIT") +'"];\n'
         
-        self.visit(node.InnerNode.ExpressionNode)
+        #self.visit(node.InnerNode.ExpressionNode)
    
         self.refcount = storeref
 
-        self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ self.visitPrimitiveNode(node.InnerNode.PrimitiveNode) +'"];\n'
+        self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ node.type +'"];\n'
         self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount))+"\n"
         self.nodecount += 1
-        self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ str(node.InnerNode.ID) +'"];\n'
+        self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ node.id +'"];\n'
         self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount))+"\n"
         self.nodecount += 1
 
-    def visitIdNode(self, node):
-        this_node = "n"+str((self.nodecount))
-        self.edgebuffer +=  "n"+str((self.refcount)) +" -> "+ this_node +"\n"
-        self.labelbuffer += this_node+' [label="'+ str(node.ID) +'"];\n'
-        self.nodecount += 1
-        
-        #self.visit(node.ExpressionNode)
-   
-        #self.refcount = storeref
+    def visitFunctionDeclNode(self, node):
+        pass
 
-       # self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ self.visitPrimitiveNode(node.PrimitiveNode) +'"];\n'
-        #self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount))+"\n"
-        #self.nodecount += 1
-       # self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ str(node.ID) +'"];\n'
-       # self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount))+"\n"
-       # self.nodecount += 1
+    def visitParmVarDeclNode(self, node):
+        pass
 
-        # self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ str(node.ExpressionNode.value) +'"];\n'
-        # self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount))+"\n"
-        # self.nodecount += 1
+    def visitScopeStmtNode(self, node):
+        pass
 
-    def visitFunctionNode(self, node):
-        thisnode = "n"+str((self.nodecount))
-        self.edgebuffer +=  "n"+str((self.nodecount-1)) +" -> "+ thisnode +"\n"
-        self.refcount = self.nodecount
-        storeref = self.refcount
-        self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("printf") +'"];\n'
-        
-        #self.visit(node.IdNode)
-   
-        #self.refcount = storeref
+    def visitDeclStmtNode(self, node):
+        pass
 
-        #self.visit(node.Args)
+    def visitExprStmtNode(self, node):
+        pass
 
-    def visitBinaryExpressionNode(self, node):
+    def visitIfStmtNode(self, node):
+        pass
 
-        switcher = {
-            type(AdditionNode()) : "+",
-            type(SubstractionNode()) : "-",
-            type(MultiplicationNode()) : "*",
-            type(DivisionNode()) : "/",
-            type(LessThanNode()) : "<",
-            type(GreaterThanNode()) : ">",
-            type(IsEqualNode()) : "==",
-            type(IsNotEqualNode()) : "!=",
-            type(LessOrEqualNode()) : "<=",
-            type(GreaterOrEqualNode()) : ">=",
-            type(AndNode()) : "&&",
-            type(OrNode()) : "||",
-            type(ModulusNode()) : '%'
-        }
+    def visitWhileStmtNode(self, node):
+        pass
 
-        # Declare this_node to reference to later in block, connect parent_node and this_node.
-        this_node = "n"+str((self.nodecount))
-        self.edgebuffer +=  "n"+str((self.refcount)) +" -> "+ this_node +"\n"
-        self.labelbuffer += this_node+' [label="'+ switcher.get(type(node.op), "???") +'"];\n'
-        self.refcount = self.nodecount
-        storeref = self.refcount
-        self.nodecount += 1
+    def visitReturnStmtNode(self, node):
+        pass
 
-        self.visit(node.lhs)
-        # self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ str(node.lhs.value) +'"];\n'
-        # self.edgebuffer += this_node +" -> "+"n"+str((self.nodecount))+"\n"
-        # self.nodecount += 1
+    def visitBinExprNode(self, node):
+        pass
 
-        self.refcount = storeref
-        self.visit(node.rhs)
-        # self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ str(node.rhs.value) +'"];\n'
-        # self.edgebuffer += this_node +" -> "+"n"+str((self.nodecount))+"\n"
-        # self.nodecount += 1
-    
-    def visitNegateNode(self, node):
-        # Declare this_node to reference to later in block, connect parent_node and this_node.
-        this_node = "n"+str((self.nodecount))
-        if node.boolean:
-            label = "!"
-        else:
-            label = "-"
-        self.edgebuffer +=  "n"+str((self.refcount)) +" -> "+ this_node +"\n"
-        self.labelbuffer += this_node+' [label="'+ label +'"];\n'
-        self.refcount = self.nodecount
-        storeref = self.refcount
-        self.nodecount += 1
-        self.visit(node.InnerNode)
-        self.refcount = storeref
+    def visitUnaryExprNode(self, node):
+        pass
 
-    def visitLiteralNode(self, node):
-        # Declare this_node to reference to later in block, connect parent_node and this_node.
-        this_node = "n"+str((self.nodecount))
-        self.edgebuffer +=  "n"+str((self.refcount)) +" -> "+ this_node +"\n"
-        self.labelbuffer += this_node+' [label="'+ str(node.value) +'"];\n'
-        self.nodecount += 1
-    
+    def visitCallExprNode(self, node):
+        pass
 
-    def visitPrimitiveNode(self, node):
-        switcher = {
-            type(PrimitiveCharNode()) : "char",
-            type(PrimitiveFloatNode()) : "float",
-            type(PrimitiveIntNode()) : "int"
-        }
+    def visitDeclRefExprNode(self, node):
+        pass
 
-        return switcher.get(type(node), "?!?")
+    def visitImplicitCastExprNode(self, node):
+        pass
+
+    def visitInitListExprNode(self, node):
+        pass
+
+    def visitIntegerLiteralNode(self, node):
+        pass
+
+    def visitFloatingLiteralNode(self, node):
+        pass
+
+    def visitCharacterLiteralNode(self, node):
+        pass
+
+    def visitStringLiteralNode(self, node):
+        pass

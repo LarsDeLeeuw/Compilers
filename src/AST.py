@@ -9,7 +9,7 @@
 #===================================================================#
 
 import xml.etree.ElementTree as ET
-from Nodes import *
+from ASTNodes import *
 
 
 class AST:

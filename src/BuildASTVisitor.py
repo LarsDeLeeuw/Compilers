@@ -5,16 +5,19 @@ else:
     from GrammarParser import GrammarParser
 
 from AST import AST
-from Nodes import *
+from STT import STT, STNode
+from ASTNodes import *
 from GrammarLexer import GrammarLexer
 from GrammarVisitor import GrammarVisitor
-import copy
 
 
 class BuildASTVisitor(GrammarVisitor):
 
     def __init__(self):
         self.AST = AST()
+        self.STT = STT()
+        self.currentST = STNode()
+        self.STT.root = self.currentST
         self.memory = {}
         self.serial = -1
     
@@ -25,187 +28,160 @@ class BuildASTVisitor(GrammarVisitor):
     def getAST(self):
         return self.AST
 
-    # Visit a parse tree produced by GrammarParser#prog.
-    # def visitProg(self, ctx:GrammarParser.ProgContext):
-    #     node = ProgNode()
-    #     node.serial = self.claimSerial()
-    #     for Statement in ctx.stat():
-    #         # Create a container node for statement.
-    #         statement_node = StatementNode()
-    #         statement_node.setParent(node)
-    #         statement_node.serial = self.claimSerial()
-
-    #         stat_node = self.visit(Statement)
-    #         stat_node.setParent(statement_node)
-    #         stat_node.serial = self.claimSerial()
-
-    #         statement_node.InnerNode = stat_node
-
-    #         node.StatementNodes.append(statement_node)
-
-    #     self.AST.root = node
-    #     return 0
-
-    # Visit a parse tree produced by GrammarParser#prog.
+        # Visit a parse tree produced by GrammarParser#prog.
     def visitProg(self, ctx:GrammarParser.ProgContext):
         node = ProgNode()
-        node.serial = self.claimSerial()
-        for Scope in ctx.scope():
-            scope_node = self.visit(Scope)
-            node.ScopeNodes.append(scope_node)
+        # TODO: Process include header(s)
+        # print(ctx.LIB()[0].getText())
+        for Decl in ctx.decl():
+            decl_node = self.visit(Decl)
+            decl_node.parent = node
+            node.children.append(decl_node)
         self.AST.root = node
         return 0
 
 
-    # Visit a parse tree produced by GrammarParser#globalScope.
-    def visitGlobalScope(self, ctx:GrammarParser.GlobalScopeContext):
-        print("Global")
-        node = ScopeNode()
-        node.ScopeID = "global"
-        node.serial = self.claimSerial()
-        for Statement in ctx.stat():
-            # Create a container node for statement.
-            statement_node = StatementNode()
-            statement_node.setParent(node)
-            statement_node.serial = self.claimSerial()
+    # Visit a parse tree produced by GrammarParser#varDecl.
+    def visitVarDecl(self, ctx:GrammarParser.VarDeclContext):
+        node = VarDeclNode()
+        node.id = ctx.ID().getText()
+        node.line = ctx.start.line
+        node.type = ctx.prim().getText()
+        if(ctx.expr() is None):
+            pass
+        else:
+            node.init_expr = self.visit(ctx.expr())
+            node.init = True
+        return node
 
-            stat_node = self.visit(Statement)
-            stat_node.setParent(statement_node)
-            stat_node.serial = self.claimSerial()
 
-            statement_node.InnerNode = stat_node
-
-            node.ChildNodes.append(statement_node)
+    # Visit a parse tree produced by GrammarParser#funcheadsupDecl.
+    def visitFuncheadsupDecl(self, ctx:GrammarParser.FuncheadsupDeclContext):
+        node = FunctionDeclNode()
+        node.line = ctx.start.line
+        if(ctx.KEY_VOID() is None):
+            node.return_type = ctx.prim()[0].getText()
+        node.id = ctx.ID()[0].getText()
+        if(len(ctx.prim()) > 1):
+            for i in range(len(ctx.prim())-1):
+                parm_type = ctx.prim()[i+1].getText()
+                parm_id = ctx.ID()[i+1].getText()
+                node.signature.append(parm_type)
+                parm_var = ParmVarDeclNode()
+                parm_var.type = parm_type
+                parm_var.id = parm_id
+                node.children.append(parm_var)
 
         return node
 
 
-    # Visit a parse tree produced by GrammarParser#localScope.
-    def visitLocalScope(self, ctx:GrammarParser.LocalScopeContext):
-        print("local")
-        return self.visitChildren(ctx)
-
+    # Visit a parse tree produced by GrammarParser#funcDecl.
+    def visitFuncDecl(self, ctx:GrammarParser.FuncDeclContext):
+        node = FunctionDeclNode()
+        node.line = ctx.start.line
+        if(ctx.KEY_VOID() is None):
+            node.return_type = ctx.prim()[0].getText()
+        node.id = ctx.ID()[0].getText()
+        if(len(ctx.prim()) > 1):
+            for i in range(len(ctx.prim())-1):
+                parm_type = ctx.prim()[i+1].getText()
+                parm_id = ctx.ID()[i+1].getText()
+                node.signature.append(parm_type)
+                parm_var = ParmVarDeclNode()
+                parm_var.type = parm_type
+                parm_var.id = parm_id
+                parm_var.parent = node
+                node.children.append(parm_var)
+        
+        scope_node = ScopeStmtNode()
+        scope_node.parent = node
+        for Statement in ctx.stat():
+            stat_node = self.visit(Statement)
+            stat_node.parent = scope_node
+            scope_node.children.append(stat_node)
+        
+        node.children.append(scope_node)
+        return node
 
 
     # Visit a parse tree produced by GrammarParser#exprStat.
     def visitExprStat(self, ctx:GrammarParser.ExprStatContext):
-        return self.visit(ctx.expr())
-
-    # Visit a parse tree produced by GrammarParser#initStat.
-    def visitInitStat(self, ctx:GrammarParser.InitStatContext):
-        if (ctx.ID().getText() in self.memory):
-            return -1
-        
-        print(ctx.start.line)
-
-        init_node = InitNode()
-
-        node = IdNode()
-        node.Parent = init_node
-        node.serial = self.claimSerial()
-        node.ID = ctx.ID().getText()
-
-        prim_node = self.visit(ctx.prim())
-        prim_node.setParent(node)
-        prim_node.serial = self.claimSerial()
-        node.PrimitiveNode = prim_node
-
-        lit_node = self.visit(ctx.expr())
-        lit_node.setParent(node)
-        lit_node.serial = self.claimSerial()
-        node.ExpressionNode = lit_node
-        # Create a deepcopy of the IdNode
-        temp_node = copy.deepcopy(node)
-        temp_node.serial = self.claimSerial()
-        self.memory[node.ID] = temp_node
-
-        init_node.InnerNode = node
-
-        return init_node
-
-
-    # Visit a parse tree produced by GrammarParser#assignStat.
-    def visitAssignStat(self, ctx:GrammarParser.AssignStatContext):
-        
-        node = AssignNode()
-
-        id_node = self.memory[ctx.ID().getText()]
-        id_node.setParent(node)
-        id_node.serial = self.claimSerial()
-        node.IdNode = id_node
-
-        new_expr_node = self.visit(ctx.rhs)
-        new_expr_node.setParent(node)
-        new_expr_node.serial = self.claimSerial()
-        node.NewExpressionNode = new_expr_node
-
+        node = self.visit(ctx.expr())
         return node
 
-    # Visit a parse tree produced by GrammarParser#PrintExpr.
-    def visitPrintExpr(self, ctx:GrammarParser.PrintExprContext):
-        node = FunctionNode()
-        node.ID = "printf"
-        if ctx.ID():
-            node.Args = ctx.ID().getText()
+    # Visit a parse tree produced by GrammarParser#declStat.
+    def visitDeclStat(self, ctx:GrammarParser.DeclStatContext):
+        node = DeclStmtNode()
+        var_decl = VarDeclNode()
+        var_decl.parent = node
+        var_decl.id = ctx.ID().getText()
+        var_decl.line = ctx.start.line
+        node.line = var_decl.line
+        var_decl.type = ctx.prim().getText()
+        if(ctx.expr() is None):
+            pass
         else:
-            node.Args = ctx.lit().getText()
+            var_decl.init_expr = self.visit(ctx.expr())
+            var_decl.init = True
+        node.child = var_decl
         return node
+
+
+    # Visit a parse tree produced by GrammarParser#whileStat.
+    def visitWhileStat(self, ctx:GrammarParser.WhileStatContext):
+        node = WhileStmtNode()
+        return node
+
+
+    # Visit a parse tree produced by GrammarParser#ifStat.
+    def visitIfStat(self, ctx:GrammarParser.IfStatContext):
+        node = IfStmtNode()
+        return node
+
+
+    # Visit a parse tree produced by GrammarParser#returnStat.
+    def visitReturnStat(self, ctx:GrammarParser.ReturnStatContext):
+        node = ReturnStmtNode()
+        return node
+
 
     # Visit a parse tree produced by GrammarParser#binExpr.
     def visitBinExpr(self, ctx:GrammarParser.BinExprContext):
+        node = BinExprNode()
         switcher = {
-            GrammarLexer.ADD : AdditionNode(),
-            GrammarLexer.SUB : SubstractionNode(),
-            GrammarLexer.MUL : MultiplicationNode(),
-            GrammarLexer.DIV : DivisionNode(),
-            GrammarLexer.GRT : GreaterThanNode(),
-            GrammarLexer.LST : LessThanNode(),
-            GrammarLexer.EQ : IsEqualNode(),
-            GrammarLexer.NEQ : IsNotEqualNode(),
-            GrammarLexer.GEQ : GreaterOrEqualNode(),
-            GrammarLexer.LEQ : LessOrEqualNode(),
-            GrammarLexer.AND : AndNode(),
-            GrammarLexer.OR : OrNode(),
-            GrammarLexer.MOD : ModulusNode()
+            GrammarLexer.ADD : "+",
+            GrammarLexer.SUB : "-",
+            GrammarLexer.MUL : "*",
+            GrammarLexer.DIV : "/",
+            GrammarLexer.GRT : ">",
+            GrammarLexer.LST : "<",
+            GrammarLexer.EQ : "==",
+            GrammarLexer.NEQ : "!=",
+            GrammarLexer.GEQ : ">=",
+            GrammarLexer.LEQ : "<=",
+            GrammarLexer.AND : "&&",
+            GrammarLexer.OR : "||",
+            GrammarLexer.MOD : "%",
+            GrammarLexer.ASS : "="
         }
+        # TODO: Op compatible with lhs and rhs?
+        #       Expected type?
+        node.operation = switcher.get(ctx.op.type, None)
+        node.type = "int"
+        lhs_node = self.visit(ctx.left)
+        lhs_node.parent = node
+        rhs_node = self.visit(ctx.right)
+        rhs_node.parent = node
 
-        node = BinaryExpressionNode()
-        
-        node_lhs = self.visit(ctx.left)
-        node_lhs.setParent(node)
-        node_lhs.serial = self.claimSerial()
-        node.lhs = node_lhs
-
-        node_rhs = self.visit(ctx.right)
-        node_rhs.setParent(node)
-        node_rhs.serial = self.claimSerial()
-        node.rhs = node_rhs
-
-        node_op = switcher.get(ctx.op.type, None)
-        node_op.setParent(node)
-        node_op.serial = self.claimSerial()
-        node.op = node_op
-
+        node.lhs_child = lhs_node
+        node.rhs_child = rhs_node
         return node
 
 
     # Visit a parse tree produced by GrammarParser#unaryExpr.
     def visitUnaryExpr(self, ctx:GrammarParser.UnaryExprContext):
-        if (ctx.op.type == GrammarLexer.ADD):
-            return self.visit(ctx.expr())
-        else:
-            node = NegateNode()
-            node_expr = self.visit(ctx.expr())
-            node_expr.serial = self.claimSerial()
-            node_expr.setParent(node)
-            node.InnerNode = node_expr
-            node.serial = self.claimSerial()
-            if ctx.op.type == GrammarLexer.NOT:
-                node.boolean = True
-            else:
-                node.boolean = False
-            return node
-        
+        node = UnaryExprNode()
+        return node
 
 
     # Visit a parse tree produced by GrammarParser#parensExpr.
@@ -213,50 +189,57 @@ class BuildASTVisitor(GrammarVisitor):
         return self.visit(ctx.expr())
 
 
+    # Visit a parse tree produced by GrammarParser#callExpr.
+    def visitCallExpr(self, ctx:GrammarParser.CallExprContext):
+        node = CallExprNode()
+        return node
+
+
     # Visit a parse tree produced by GrammarParser#litExpr.
     def visitLitExpr(self, ctx:GrammarParser.LitExprContext):
-        return self.visit(ctx.value)
+        node = LiteralNode()
+        return node
+
 
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
-        if ctx.ID().getText() in self.memory:
-            return self.memory[ctx.ID().getText()]
-        
-        print("Use of undeclared identifier")
-        return None
-
-
-    # Visit a parse tree produced by GrammarParser#charLit.
-    def visitPrimLit(self, ctx:GrammarParser.PrimLitContext):
-
-        if ctx.lit_prim.type == GrammarLexer.CHAR:
-            node = CharNode()
-            node.value = chr(ctx.getText())
-        elif ctx.lit_prim.type == GrammarLexer.INT:
-            node = IntegerNode()
-            node.value = int(ctx.getText())
-        elif ctx.lit_prim.type == GrammarLexer.FLOAT:
-            node = FloatNode()
-            node.value = float(ctx.getText())
-        else:
-            node = AbstractNode()
-
+        node = DeclRefExprNode()
         return node
+
+
+    # Visit a parse tree produced by GrammarParser#primLit.
+    def visitPrimLit(self, ctx:GrammarParser.PrimLitContext):
+        return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by GrammarParser#charPrim.
     def visitCharPrim(self, ctx:GrammarParser.CharPrimContext):
-        return PrimitiveCharNode()
+        return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by GrammarParser#floatPrim.
     def visitFloatPrim(self, ctx:GrammarParser.FloatPrimContext):
-        return PrimitiveFloatNode()
+        return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GrammarParser#intFloat.
+    # Visit a parse tree produced by GrammarParser#intPrim.
     def visitIntPrim(self, ctx:GrammarParser.IntPrimContext):
-        return PrimitiveIntNode()
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#charptrPrim.
+    def visitCharptrPrim(self, ctx:GrammarParser.CharptrPrimContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#floatptrPrim.
+    def visitFloatptrPrim(self, ctx:GrammarParser.FloatptrPrimContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#intptrPrim.
+    def visitIntptrPrim(self, ctx:GrammarParser.IntptrPrimContext):
+        return self.visitChildren(ctx)
 
 
 
