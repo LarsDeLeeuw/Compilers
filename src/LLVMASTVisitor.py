@@ -9,6 +9,9 @@ class LLVMASTVisitor(ASTVisitor):
         self.str_constants = {}
         self.call_count = 0
         self.register_count = 0
+        self.lor_count = 0
+        self.land_count = 0
+        self.current_label = None
 
     def checkST(self, id, st_node):
         if id in st_node.symbols:
@@ -127,6 +130,7 @@ class LLVMASTVisitor(ASTVisitor):
                     self.buffer["functs"] += ", "
             
             self.buffer["functs"] += ") {\nentry:\n"
+            self.current_label = "entry"
 
             if node.id == "main":
                 self.buffer["functs"] += "\t" + "%retval = alloca i32, align 4\n"
@@ -201,6 +205,7 @@ class LLVMASTVisitor(ASTVisitor):
                 self.visit(node.child)
         else:
             self.visit(node.child)
+            
 
     def visitCallExprNode(self, node):
         funct_node = node.children[0]
@@ -326,7 +331,295 @@ class LLVMASTVisitor(ASTVisitor):
             elif node.type == 'float':
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = fdiv float %"+str(lhs_register_count)+", %"+str(rhs_register_count)+"\n"
                 self.register_count += 1
+        elif node.operation == ">":
+            fcomp = False
+            if node.lhs_child.type == "int" and node.rhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(lhs_register_count) + " to float\n"
+                self.register_count += 1
+                lhs_register_count = self.register_count - 1
+            elif node.lhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr > ", node.lhs_child.type)
+
+            if node.rhs_child.type == "int" and node.lhs_child.type == "int":
+                pass
+            elif node.rhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(rhs_register_count) + " to float\n"
+                self.register_count += 1
+                rhs_register_count = self.register_count - 1
+            elif node.rhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr >", node.rhs_child.type)
+
+            if fcomp:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp ogt float %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            else:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp sgt i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
+        elif node.operation == "<":
+            fcomp = False
+            if node.lhs_child.type == "int" and node.rhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(lhs_register_count) + " to float\n"
+                self.register_count += 1
+                lhs_register_count = self.register_count - 1
+            elif node.lhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr < ", node.lhs_child.type)
+
+            if node.rhs_child.type == "int" and node.lhs_child.type == "int":
+                pass
+            elif node.rhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(rhs_register_count) + " to float\n"
+                self.register_count += 1
+                rhs_register_count = self.register_count - 1
+            elif node.rhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr <", node.rhs_child.type)
+
+            if fcomp:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp olt float %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            else:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp slt i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
+        elif node.operation == "<=":
+            fcomp = False
+            if node.lhs_child.type == "int" and node.rhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(lhs_register_count) + " to float\n"
+                self.register_count += 1
+                lhs_register_count = self.register_count - 1
+            elif node.lhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr <= ", node.lhs_child.type)
+
+            if node.rhs_child.type == "int" and node.lhs_child.type == "int":
+                pass
+            elif node.rhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(rhs_register_count) + " to float\n"
+                self.register_count += 1
+                rhs_register_count = self.register_count - 1
+            elif node.rhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr <=", node.rhs_child.type)
+
+            if fcomp:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp ole float %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            else:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp sle i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
+        elif node.operation == ">=":
+            fcomp = False
+            if node.lhs_child.type == "int" and node.rhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(lhs_register_count) + " to float\n"
+                self.register_count += 1
+                lhs_register_count = self.register_count - 1
+            elif node.lhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr >= ", node.lhs_child.type)
+
+            if node.rhs_child.type == "int" and node.lhs_child.type == "int":
+                pass
+            elif node.rhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(rhs_register_count) + " to float\n"
+                self.register_count += 1
+                rhs_register_count = self.register_count - 1
+            elif node.rhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr >=", node.rhs_child.type)
+
+            if fcomp:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp oge float %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            else:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp sge i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
+        elif node.operation == "!=":
+            fcomp = False
+            if node.lhs_child.type == "int" and node.rhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(lhs_register_count) + " to float\n"
+                self.register_count += 1
+                lhs_register_count = self.register_count - 1
+            elif node.lhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr != ", node.lhs_child.type)
+
+            if node.rhs_child.type == "int" and node.lhs_child.type == "int":
+                pass
+            elif node.rhs_child.type == "int" and node.rhs_child.type == "float":
+                # Implicit cast: sitofp
+                fcomp = True
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(rhs_register_count) + " to float\n"
+                self.register_count += 1
+                rhs_register_count = self.register_count - 1
+            elif node.rhs_child.type == "float":
+                fcomp = True
+            else:
+                raise Exception("Bad BinExpr !=", node.rhs_child.type)
+
+            if fcomp:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            else:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
+        elif node.operation == "||":
+            label_true = "lor.end" + str(self.lor_count)
+            label_false = "lor.rhs" + str(self.lor_count)
+            label_prev = self.current_label
+            self.lor_count += 1
+            if node.lhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "float":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(lhs_register_count) + ", 0.000000e+00\n"
+                self.register_count += 1
+            self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_true + ", label %" + label_false + "\n\n"
+
+            self.buffer["functs"] += label_false + ":\n"
+            self.current_label = label_false
+            if node.rhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(rhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.rhs_child.type == "float":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(rhs_register_count) + ", 0.000000e+00\n"
+                self.register_count += 1
+            self.buffer["functs"] += "\tbr label %" + label_true + "\n\n"
+
+            self.buffer["functs"] += label_true + ":\n"
+            self.current_label = label_true
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = phi i1 [ true, %" + label_prev + " ], [ %" + str(self.register_count-1) + ", %" + label_false + " ]\n"
+            self.register_count += 1
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
+            
+        elif node.operation == "&&":
+            label_true = "land.rhs" + str(self.land_count)
+            label_false = "land.end" + str(self.land_count)
+            label_prev = self.current_label
+            self.land_count += 1
+            if node.lhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "float":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(lhs_register_count) + ", 0.000000e+00\n"
+                self.register_count += 1
+            self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_true + ", label %" + label_false + "\n\n"
+
+            self.buffer["functs"] += label_true + ":\n"
+            self.current_label = label_true
+            if node.rhs_child.type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(rhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.rhs_child.type == "float":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(rhs_register_count) + ", 0.000000e+00\n"
+                self.register_count += 1
+            self.buffer["functs"] += "\tbr label %" + label_false + "\n\n"
+
+            self.buffer["functs"] += label_false + ":\n"
+            self.current_label = label_false
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = phi i1 [ false, %" + label_prev + " ], [ %" + str(self.register_count-1) + ", %" + label_true + " ]\n"
+            self.register_count += 1
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
+
+    def visitUnaryExprNode(self, node):
         
+        child_register_count = self.register_count + 1
+
+        if issubclass(type(node.child), LiteralNode):
+            if node.child.type == 'int':
+                self.buffer["functs"] += "\t%" + str(child_register_count-1) + " = alloca i32, align 4\n"
+                self.buffer["functs"] += "\tstore i32 " + str(node.child.value) + ", i32* %"+ str(child_register_count-1) +", align 4\n"
+                self.register_count += 1
+                self.buffer["functs"] += "\t%" + str(child_register_count) + " = load i32, i32* %"+str(child_register_count-1)+", align 4\n"
+                self.register_count += 1
+            elif node.child.type == 'float':
+                self.buffer["functs"] += "\t%" + str(child_register_count-1) + " = alloca float, align 4\n"
+                self.buffer["functs"] += "\tstore float " + str(node.child.value) + ", float* %"+ str(child_register_count-1) +", align 4\n"
+                self.register_count += 1
+                self.buffer["functs"] += "\t%" + str(child_register_count) + " = load float, float* %"+str(child_register_count-1)+", align 4\n"
+                self.register_count += 1
+            else:
+                raise Exception("LLVM panic")
+        else:
+            if type(node.child) is BinExprNode:
+                self.visitBinExprNode(node.child)
+                child_register_count = self.register_count - 1
+            elif type(node.child) is UnaryExprNode:
+                self.visitUnaryExprNode(node.child)
+                child_register_count = self.register_count - 1
+            elif type(node.child) is DeclRefExprNode:
+                self.visitDeclRefExprNode(node.child)
+                child_register_count = self.register_count - 1
+            else:
+                raise Exception("Bad UnaryExpr")
+        
+        if node.operation == "!":
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(child_register_count) + ", 0\n"
+            self.register_count += 1
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = xor i1 %" +str(self.register_count-1)+", true\n"
+            self.register_count += 1
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
 
     def visitInitListExprNode(self, node):
         pass

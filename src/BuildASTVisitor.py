@@ -340,13 +340,33 @@ class BuildASTVisitor(GrammarVisitor):
 
             node.lhs_child = lhs_node
             node.rhs_child = rhs_node
-            node.type = node.lhs_child.type
+            if node.operation == "&&" or node.operation == "||" or node.operation == "!=":
+                node.type = 'int'
+            elif node.operation == ">" or node.operation == "<" or node.operation == ">=" or node.operation == "<=":
+                node.type = 'int'
+            else:
+                node.type = node.lhs_child.type
             return node
 
 
     # Visit a parse tree produced by GrammarParser#unaryExpr.
     def visitUnaryExpr(self, ctx:GrammarParser.UnaryExprContext):
         node = UnaryExprNode()
+        switcher = {
+            GrammarLexer.ADD : "+",
+            GrammarLexer.SUB : "-",
+            GrammarLexer.NOT : "!",
+            GrammarLexer.DRF : "&",
+            GrammarLexer.MUL : "*"
+        }
+        expr_node = self.visit(ctx.expr())
+        expr_node.parent = node
+        node.operation = switcher.get(ctx.op.type, None)
+        if node.operation == "!":
+                node.type = 'int'
+        else:
+                node.type = node.child.type
+        node.child = expr_node
         return node
 
 
