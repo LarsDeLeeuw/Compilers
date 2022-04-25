@@ -54,6 +54,11 @@ class GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by GrammarParser#alias.
+    def visitAlias(self, ctx:GrammarParser.AliasContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by GrammarParser#binExpr.
     def visitBinExpr(self, ctx:GrammarParser.BinExprContext):
         return self.visitChildren(ctx)

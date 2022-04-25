@@ -86,6 +86,8 @@ class ASTVisitor:
             return self.visitWhileStmtNode(node)
         elif node_type is ReturnStmtNode:
             return self.visitReturnStmtNode(node)
+        elif node_type is ExprStmtNode:
+            return self.visitExprStmtNode(node)
         elif node_type is BinExprNode:
             return self.visitBinExprNode(node)
         elif node_type is UnaryExprNode:

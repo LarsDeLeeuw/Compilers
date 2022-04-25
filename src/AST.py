@@ -16,6 +16,7 @@ class AST:
 
     def __init__(self): 
         self.root = None
+        self.stt = None
 
     def setRoot(self, node):
         self.root = node

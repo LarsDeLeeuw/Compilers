@@ -6,7 +6,7 @@ from BuildASTVisitor import BuildASTVisitor
 from VisualASTVisitor import VisualASTVisitor
 # from ConstFoldingASTVisitor import ConstFoldingASTVisitor
 from AST import AST
-# from LLVMASTVisitor import LLVMASTVisitor
+from LLVMASTVisitor import LLVMASTVisitor
 from subprocess import check_call
 
 def main(argv):
@@ -18,11 +18,12 @@ def main(argv):
     builder = BuildASTVisitor()
     builder.visit(cst)
     ASTree= builder.getAST()
+    ASTree.stt.generateImage()
     ASTVisualDOT = VisualASTVisitor()
     #ASTConstFolding = ConstFoldingASTVisitor()
-    #ASTLLVM = LLVMASTVisitor()
+    ASTLLVM = LLVMASTVisitor()
     #ASTree.accept(ASTConstFolding)
-    #ASTree.accept(ASTLLVM)
+    ASTree.accept(ASTLLVM)
     ASTree.accept(ASTVisualDOT)
     #ASTree.save("AST_ex_ass.xml")
     outputdotfile = open("output.dot", 'w')

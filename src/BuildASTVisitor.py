@@ -9,6 +9,7 @@ from STT import STT, STNode
 from ASTNodes import *
 from GrammarLexer import GrammarLexer
 from GrammarVisitor import GrammarVisitor
+import copy
 
 
 class BuildASTVisitor(GrammarVisitor):
@@ -16,9 +17,7 @@ class BuildASTVisitor(GrammarVisitor):
     def __init__(self):
         self.AST = AST()
         self.STT = STT()
-        self.currentST = STNode()
-        self.STT.root = self.currentST
-        self.memory = {}
+        self.currentST = None
         self.serial = -1
     
     def claimSerial(self):
@@ -32,13 +31,50 @@ class BuildASTVisitor(GrammarVisitor):
     def visitProg(self, ctx:GrammarParser.ProgContext):
         node = ProgNode()
         # TODO: Process include header(s)
-        # print(ctx.LIB()[0].getText())
+
+        # Create 'global' SymbolTree
+        self.currentST = STNode()
+        self.STT.root = self.currentST
+        self.AST.stt = self.STT
+        store_refST = self.currentST     
+
+        if len(ctx.LIB()) > 0:
+            if ctx.LIB()[0].getText() == "<stdio.h>":
+                node.includes["<stdio.h>"] = ["declare dso_local i32 @printf(i8*, ...)"]
+                dummy_node = FunctionDeclNode()
+                dummy_node.init = True
+                dummy_node.id = "printf"
+                dummy_node.included = True
+                dummy_node.symboltable = self.currentST
+                (idIsOk, idIndex) = self.checkCurrentST("printf")
+                if idIsOk:
+                    self.currentST.symbols["printf"] = [idIndex, dummy_node, copy.deepcopy(dummy_node)]
+   
         for Decl in ctx.decl():
+            self.currentST = store_refST
             decl_node = self.visit(Decl)
             decl_node.parent = node
             node.children.append(decl_node)
         self.AST.root = node
         return 0
+
+    def checkCurrentST(self, id):
+
+        if id in self.currentST.symbols:
+            return (False, 0)
+        index = self.currentST.index
+        self.currentST.index += 1
+        return (True, index)
+
+    def findST(self, id):
+        lookST = self.currentST
+
+        while not lookST is None:
+            if id in lookST.symbols:
+                return (True, lookST.symbols[id])
+            lookST = lookST.parent
+        
+        return (False, None)
 
 
     # Visit a parse tree produced by GrammarParser#varDecl.
@@ -47,11 +83,37 @@ class BuildASTVisitor(GrammarVisitor):
         node.id = ctx.ID().getText()
         node.line = ctx.start.line
         node.type = ctx.prim().getText()
-        if(ctx.expr() is None):
-            pass
+
+        if ctx.INT() is None:
+            node.array = False
         else:
-            node.init_expr = self.visit(ctx.expr())
-            node.init = True
+            node.array = True
+            node.len = int(ctx.INT().getText())
+
+        if len(ctx.expr()) == 0:
+            node.init = False
+        else:
+            if node.array:
+                init_list_node = InitListExprNode()
+                init_list_node.parent = node
+                # Check if supplied init array is same len as array
+                if node.len != len(ctx.expr()):
+                    raise Exception("Array initialised with incorrect amount of elements")
+                for Expr in ctx.expr():
+                    expr_node = self.visit(Expr)
+                    expr_node.parent = init_list_node
+                    init_list_node.children.append(expr_node)
+                node.init = True
+                node.init_expr = init_list_node
+            else:
+                node.init_expr = self.visit(ctx.expr())
+                node.init_expr.parent = node
+                node.init = True
+
+        (idIsOk, idIndex) = self.checkCurrentST(node.id)
+        if idIsOk:
+            self.currentST.symbols[node.id] = [idIndex, node, copy.deepcopy(node)]
+
         return node
 
 
@@ -59,6 +121,7 @@ class BuildASTVisitor(GrammarVisitor):
     def visitFuncheadsupDecl(self, ctx:GrammarParser.FuncheadsupDeclContext):
         node = FunctionDeclNode()
         node.line = ctx.start.line
+
         if(ctx.KEY_VOID() is None):
             node.return_type = ctx.prim()[0].getText()
         node.id = ctx.ID()[0].getText()
@@ -79,34 +142,59 @@ class BuildASTVisitor(GrammarVisitor):
     def visitFuncDecl(self, ctx:GrammarParser.FuncDeclContext):
         node = FunctionDeclNode()
         node.line = ctx.start.line
+        node.init = True
+        node.id = ctx.ID()[0].getText()
+
+        # Create SymbolTable for function
+        newST = STNode()
+        newST.parent = self.currentST
+        self.currentST.children.append(newST)
+        store_refST = self.currentST
+        self.currentST = newST
+
         if(ctx.KEY_VOID() is None):
             node.return_type = ctx.prim()[0].getText()
-        node.id = ctx.ID()[0].getText()
         if(len(ctx.prim()) > 1):
             for i in range(len(ctx.prim())-1):
                 parm_type = ctx.prim()[i+1].getText()
                 parm_id = ctx.ID()[i+1].getText()
-                node.signature.append(parm_type)
+                node.arg_types.append(parm_type)
                 parm_var = ParmVarDeclNode()
                 parm_var.type = parm_type
                 parm_var.id = parm_id
                 parm_var.parent = node
                 node.children.append(parm_var)
         
+        for Parm in node.children:
+            (idIsOk, idIndex) = self.checkCurrentST(Parm.id)
+            if idIsOk:
+                self.currentST.symbols[Parm.id] = [idIndex, Parm, copy.deepcopy(Parm)]
+
         scope_node = ScopeStmtNode()
         scope_node.parent = node
+        store_thisST = self.currentST
         for Statement in ctx.stat():
+            self.currentST = store_thisST
             stat_node = self.visit(Statement)
             stat_node.parent = scope_node
             scope_node.children.append(stat_node)
         
+        scope_node.symboltable = store_thisST
         node.children.append(scope_node)
+
+        self.currentST = store_refST
+        (idIsOk, idIndex) = self.checkCurrentST(node.id)
+        if idIsOk:
+            self.currentST.symbols[node.id] = [idIndex, node, copy.deepcopy(node)]
         return node
 
 
     # Visit a parse tree produced by GrammarParser#exprStat.
     def visitExprStat(self, ctx:GrammarParser.ExprStatContext):
-        node = self.visit(ctx.expr())
+        node = ExprStmtNode()
+        expr_node = self.visit(ctx.expr())
+        expr_node.parent = node
+        node.child = expr_node
         return node
 
     # Visit a parse tree produced by GrammarParser#declStat.
@@ -115,6 +203,7 @@ class BuildASTVisitor(GrammarVisitor):
         var_decl = VarDeclNode()
         var_decl.parent = node
         var_decl.id = ctx.ID().getText()
+
         var_decl.line = ctx.start.line
         node.line = var_decl.line
         var_decl.type = ctx.prim().getText()
@@ -124,6 +213,12 @@ class BuildASTVisitor(GrammarVisitor):
             var_decl.init_expr = self.visit(ctx.expr())
             var_decl.init = True
         node.child = var_decl
+
+        (idIsOk, idIndex) = self.checkCurrentST(var_decl.id)
+        if idIsOk:
+            self.currentST.symbols[var_decl.id] = [idIndex, var_decl, copy.deepcopy(var_decl)]
+
+
         return node
 
 
@@ -136,12 +231,61 @@ class BuildASTVisitor(GrammarVisitor):
     # Visit a parse tree produced by GrammarParser#ifStat.
     def visitIfStat(self, ctx:GrammarParser.IfStatContext):
         node = IfStmtNode()
+        cond_node = self.visit(ctx.expr())
+        cond_node.parent = node
+        node.children.append(cond_node)
+
+        # Create SymbolTable for ifblock
+        newST = STNode()
+        newST.parent = self.currentST
+        self.currentST.children.append(newST)
+        store_refST = self.currentST
+        self.currentST = newST
+
+        if_scope = ScopeStmtNode()
+        if_scope.parent = node
+        store_ifST = newST
+        for Statement in ctx.stat():
+            self.currentST = store_ifST
+            stat_node = self.visit(Statement)
+            stat_node.parent = if_scope
+            if_scope.children.append(stat_node)
+        node.children.append(if_scope)
+
+        self.currentST = store_refST
+
+        if ctx.KEY_ELSE() is None:
+            pass
+        else:
+             # Create SymbolTable for fblock
+            newST = STNode()
+            newST.parent = self.currentST
+            self.currentST.children.append(newST)
+            self.currentST = newST
+
+            node.has_else = True
+            else_scope = ScopeStmtNode()
+            else_scope.parent = node
+            store_elseST = newST
+            for Statement in ctx.alias().stat():
+                self.currentST = store_elseST
+                stat_node = self.visit(Statement)
+                stat_node.parent = else_scope
+                else_scope.children.append(stat_node)
+            node.children.append(else_scope)
+            self.currentST = store_refST
+
         return node
 
 
     # Visit a parse tree produced by GrammarParser#returnStat.
     def visitReturnStat(self, ctx:GrammarParser.ReturnStatContext):
         node = ReturnStmtNode()
+        if ctx.expr() is None:
+            raise Exception("Return of empty expr not supported")
+        return_expr = self.visit(ctx.expr())
+        return_expr.parent = node
+        node.child = return_expr
         return node
 
 
@@ -167,15 +311,37 @@ class BuildASTVisitor(GrammarVisitor):
         # TODO: Op compatible with lhs and rhs?
         #       Expected type?
         node.operation = switcher.get(ctx.op.type, None)
-        node.type = "int"
-        lhs_node = self.visit(ctx.left)
-        lhs_node.parent = node
-        rhs_node = self.visit(ctx.right)
-        rhs_node.parent = node
+        if node.operation == "=":
+            try:
+                ref_id = ctx.left.ID().getText()
+                (IdDecl, Ref) = self.findST(ref_id)
+                if(IdDecl):
+                    Ref[1].init = True
+                    expr_node = self.visit(ctx.right)
+                    expr_node.parent = Ref[1]
+                    Ref[2].init = True
+                    Ref[2].init_expr = expr_node
+                    node.lhs_child = DeclRefExprNode()
+                    node.lhs_child.parent = node
+                    node.lhs_child.ref = Ref[2]
+                    node.lhs_child.id = ref_id
+                    node.rhs_child = expr_node
+                else:
+                    print("Undeclared ID")
 
-        node.lhs_child = lhs_node
-        node.rhs_child = rhs_node
-        return node
+                return node
+            except AttributeError:
+                print("caught")
+        else:    
+            lhs_node = self.visit(ctx.left)
+            lhs_node.parent = node
+            rhs_node = self.visit(ctx.right)
+            rhs_node.parent = node
+
+            node.lhs_child = lhs_node
+            node.rhs_child = rhs_node
+            node.type = node.lhs_child.type
+            return node
 
 
     # Visit a parse tree produced by GrammarParser#unaryExpr.
@@ -192,24 +358,58 @@ class BuildASTVisitor(GrammarVisitor):
     # Visit a parse tree produced by GrammarParser#callExpr.
     def visitCallExpr(self, ctx:GrammarParser.CallExprContext):
         node = CallExprNode()
+        call_id = ctx.ID().getText()
+        node.line = ctx.start.line
+        (IdDecl, Ref) = self.findST(call_id)
+        if(IdDecl):
+            node.children.append(Ref[1])
+        
+        for arg in ctx.expr():
+            arg_node = self.visit(arg)
+            arg_node.parent = node
+            node.children.append(arg_node)
+
         return node
 
 
     # Visit a parse tree produced by GrammarParser#litExpr.
     def visitLitExpr(self, ctx:GrammarParser.LitExprContext):
-        node = LiteralNode()
-        return node
+        return self.visit(ctx.value)
 
 
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
         node = DeclRefExprNode()
-        return node
 
+        (IdDecl, Ref) = self.findST(ctx.ID().getText())
+        if(IdDecl):
+            node.ref = Ref[2]
+            Ref[1].used = True
+            node.id = Ref[1].id
+        else:
+            print("undeclared idvisited")
+
+        return node
 
     # Visit a parse tree produced by GrammarParser#primLit.
     def visitPrimLit(self, ctx:GrammarParser.PrimLitContext):
-        return self.visitChildren(ctx)
+
+        if ctx.lit_prim.type == GrammarLexer.CHAR:
+            node = CharacterLiteralNode()
+            node.setValue(ctx.getText())
+        elif ctx.lit_prim.type == GrammarLexer.INT:
+            node = IntergerLiteralNode()
+            node.setValue(ctx.getText())
+        elif ctx.lit_prim.type == GrammarLexer.FLOAT:
+            node = FloatingLiteralNode()
+            node.setValue(ctx.getText())
+        elif ctx.lit_prim.type == GrammarLexer.STRING:
+            node = StringLiteralNode()
+            node.setValue(ctx.getText())
+        else:
+            node = AbstractNode()
+
+        return node
 
 
     # Visit a parse tree produced by GrammarParser#charPrim.

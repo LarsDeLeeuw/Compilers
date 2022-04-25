@@ -89,6 +89,15 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GrammarParser#alias.
+    def enterAlias(self, ctx:GrammarParser.AliasContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#alias.
+    def exitAlias(self, ctx:GrammarParser.AliasContext):
+        pass
+
+
     # Enter a parse tree produced by GrammarParser#binExpr.
     def enterBinExpr(self, ctx:GrammarParser.BinExprContext):
         pass

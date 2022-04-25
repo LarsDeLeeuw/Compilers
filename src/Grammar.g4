@@ -2,7 +2,7 @@ grammar Grammar;
 
 prog: (KEY_INCLUDE LIB)* decl+ ;
 
-decl: prim ID ('=' expr)? ';'                                                               #varDecl
+decl: prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'                                                               #varDecl
     | (prim | KEY_VOID) ID '('( ( (prim ID)(','prim ID)* ) | prim ID )?')' ';'              #funcheadsupDecl           
     | (prim | KEY_VOID) ID '(' ( ( (prim ID)(','prim ID)* ) | prim ID )? ')' '{' stat* '}'  #funcDecl
     ;
@@ -10,20 +10,25 @@ decl: prim ID ('=' expr)? ';'                                                   
 stat: expr ';'                                                       # exprStat
     | KEY_CONST? prim ID ('=' expr)? ';'                             # declStat
     | KEY_WHILE '(' expr ')' '{' stat* '}'                           # whileStat
-    | KEY_IF '(' expr ')' '{' stat* '}' (KEY_ELSE '{' stat* '}')?    # ifStat
+    | KEY_IF '(' expr ')' '{' stat* '}' (KEY_ELSE '{' alias '}')?    # ifStat
     | KEY_RETURN expr ';'                                            # returnStat
     ;
+
+alias: stat* ;
+
+
 
 expr
     : '(' expr ')'                          # parensExpr
     | op=('+'|'-'|'!'|'*'|'&') expr         # unaryExpr
-    | left=expr op=('*'|'/'|'=') right=expr # binExpr
+    | left=expr op=('*'|'/') right=expr     # binExpr
     | left=expr op=('+'|'-'|'%') right=expr # binExpr
     | left=expr op=('>'|'<') right=expr     # binExpr
     | left=expr op=('=='|'>=') right=expr   # binExpr
     | left=expr op=('<='|'!=') right=expr   # binExpr
     | left=expr op=('||'|'&&') right=expr   # binExpr
-    | ID '(' ( ( ((ID|lit))(','(ID|lit))* ) | (ID|lit) )? ')'   # callExpr
+    | left=expr op='=' right=expr           # binExpr
+    | ID '(' ( ( ((expr))(','(expr))* ) | (expr) )? ')'   # callExpr
     | ID                                    # idExpr
     | value=lit                             # litExpr
     ;
@@ -51,12 +56,12 @@ EQ  : '==';
 GEQ : '>=';
 LEQ : '<=';
 NEQ : '!=';
+ASS : '=' ;
 NOT : '!' ;
 AND : '&&';
 OR  : '||';
 MOD : '%' ;
 DRF : '&' ;
-ASS : '=' ;
 
 KEY_CHARPTR : 'char' '*' ;
 KEY_FLOATPTR    : 'float' '*' ;

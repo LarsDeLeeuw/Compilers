@@ -17,6 +17,7 @@ class ProgNode(AbstractNode):
     '''
     def __init__(self):
         self.children = []
+        self.includes = {}
         
 class DeclNode(AbstractNode):
     """Superclass for DeclNodes"""
@@ -50,12 +51,27 @@ class FunctionDeclNode(DeclNode):
     
     def __init__(self):
         self.line = None
-        self.defined = False
+        self.init = False
         self.used = False
         self.id = None
+        self.included = False
+        self.symboltable = None
         self.return_type = None # string, if no return_type -> 'void'
-        self.signature = []     # [string, ...)
+        self.arg_types = []     # [string, ...)
         self.children = []      # first signature.len are ParmVar, last is ScopeStmt
+
+    def getSignature(self):
+        output = self.return_type + " ("
+        index = 0
+        lensign = len(self.arg_types)
+        for sign in self.arg_types:
+            if(index == lensign - 1):
+               output += sign
+            else:
+                output += sign + ", "
+            index += 1
+        output += ")"
+        return output
 
 class ParmVarDeclNode(DeclNode):
     
@@ -64,6 +80,7 @@ class ParmVarDeclNode(DeclNode):
         self.type = None
         self.array = False
         self.len = None
+        self.init = False
 
     def getLen(self):
         if(self.array):
@@ -82,6 +99,7 @@ class ScopeStmtNode(StmtNode):
     '''Node containing statements in same scope'''
     
     def __init__(self):
+        self.symboltable = None
         self.children = []
 
 class DeclStmtNode(StmtNode):
@@ -98,7 +116,7 @@ class IfStmtNode(StmtNode):
     
     def __init__(self):
         self.has_else = False
-        self.children = []
+        self.children = []      # first child is cond, next is ifblock, optional else block
 
 class WhileStmtNode(StmtNode):
     
@@ -206,7 +224,7 @@ class StringLiteralNode(LiteralNode):
     # Not sure about this one atm
      def setValue(self, value):
         try:
-            self.value = str(value)
+            self.value = str(value[1:-1])
             self.type = "string"
         except:
             raise Exception("Failed setting value for StringLiteralNode")
