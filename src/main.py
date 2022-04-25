@@ -34,5 +34,7 @@ def main(argv):
     # Convert to darkmode to spare my eyes.
     check_call(['magick','OutputFile.jpg','-negate','OutputFile.jpg'])
 
+    check_call(['lli','main.ll'])
+
 if __name__ == '__main__':
     main(sys.argv)

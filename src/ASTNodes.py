@@ -18,6 +18,7 @@ class ProgNode(AbstractNode):
     def __init__(self):
         self.children = []
         self.includes = {}
+        self.symboltable = None
         
 class DeclNode(AbstractNode):
     """Superclass for DeclNodes"""
@@ -165,6 +166,7 @@ class DeclRefExprNode(ExprNode):
         self.function = False
         self.ref = None
         self.id = None
+        self.symboltable = None
 
 class ImplicitCastExprNode(ExprNode):
     
@@ -215,7 +217,7 @@ class CharacterLiteralNode(LiteralNode):
 
      def setValue(self, value):
         try:
-            self.value = chr(value)
+            self.value = ord(value)
             self.type = "char"
         except:
             raise Exception("Failed setting value for CharacterLiteralNode")

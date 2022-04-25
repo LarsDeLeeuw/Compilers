@@ -12,6 +12,7 @@ class LLVMASTVisitor(ASTVisitor):
         self.lor_count = 0
         self.land_count = 0
         self.current_label = None
+        self.currentST = None
 
     def checkST(self, id, st_node):
         if id in st_node.symbols:
@@ -162,31 +163,46 @@ class LLVMASTVisitor(ASTVisitor):
                 var = node.symboltable.symbols[Symbol][1]
                 # Allocate
                 if var.type == 'int':
-                    self.buffer["functs"] += "\t" + "%" + var.id
+                    self.buffer["functs"] += "\t" + "%" + str(self.register_count)
                     self.buffer["functs"] += " = alloca i32, align 4\n"
                 elif var.type == 'float':
-                    self.buffer["functs"] += "\t" + "%" + var.id
+                    self.buffer["functs"] += "\t" + "%" + str(self.register_count)
                     self.buffer["functs"] += " = alloca float, align 4\n"
+                elif var.type == 'char':
+                    self.buffer["functs"] += "\t" + "%" + str(self.register_count)
+                    self.buffer["functs"] += " = alloca i8, align 4\n"
+                self.register_count += 1
                 if var.init:
                     if not var.init_expr is None and issubclass(type(var.init_expr), LiteralNode):
                         # Init
                         if var.type == 'int':
                             self.buffer["functs"] += "\t" + "store i32 " + str(var.init_expr.value)
-                            self.buffer["functs"] += ", i32* %" + var.id + ", align 4\n"
+                            self.buffer["functs"] += ", i32* %" + str(self.register_count-1) + ", align 4\n"
                         elif var.type == 'float':
                             self.buffer["functs"] += "\t" + "store float " + str(var.init_expr.value)
-                            self.buffer["functs"] += ", float* %" + var.id + ", align 4\n"
+                            self.buffer["functs"] += ", float* %" + str(self.register_count-1) + ", align 4\n"
+                        elif var.type == 'char':
+                            self.buffer["functs"] += "\t" + "store i8 " + str(var.init_expr.value)
+                            self.buffer["functs"] += ", i8* %" + str(self.register_count-1) + ", align 4\n"
 
         self.call_count = 0
+
+        returnFlag = False
 
         for StmtNode in node.children:
             # DeclStmts already done above with symboltable
             if type(StmtNode) is DeclNode:
                 pass
             else:
+                if type(StmtNode) is ReturnStmtNode:
+                    returnFlag = True
                 self.visit(StmtNode)
-
-    
+        
+        if not returnFlag:
+            self.buffer["functs"] += "\tstore i32 "+str(0)+", i32* %retval, align 4\n"
+            self.buffer["functs"] += "\t%"+str(self.register_count)+" = load i32, i32* %retval, align 4\n"
+            self.buffer["functs"] += "\tret i32 %"+str(self.register_count)+"\n"
+            self.register_count += 1
         
         self.call_count = 0
 
@@ -218,24 +234,47 @@ class LLVMASTVisitor(ASTVisitor):
                     else:
                         self.str_constants[node.children[1].value] = "@.str." + str(len(self.str_constants))
                         self.buffer["str"] += self.str_constants[node.children[1].value] + " = private unnamed_addr constant ["
-                        self.buffer["str"] += str(len(node.children[1].value)+1) + ' x i8] c"' + node.children[1].value + "\\00" +'", align 1\n'
+                        self.buffer["str"] += str(len(node.children[1].value)+2) + ' x i8] c"' + node.children[1].value + "\\0A\\00" +'", align 1\n'
                     
-                    self.visit(node.children[2])
+                    hold = {}
 
-                    if node.children[2].type == "int":
-                        format_type = "i32"
-                        self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
-                        self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ str(len(node.children[1].value)+1) +" x i8], ["+str(len(node.children[1].value)+1)
-                        self.buffer["functs"] += " x i8]* "+ self.str_constants[node.children[1].value] +", i32 0, i32 0), "+format_type+" %"+str(self.register_count-1)+")\n"
-                        self.call_count += 1
-                    elif node.children[2].type == "float":
-                        format_type = "double"
-                        self.buffer["functs"] += "\t%" + str(self.register_count) + " = fpext float %"+str(self.register_count-1)+" to double\n"
-                        self.register_count += 1
-                        self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
-                        self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ str(len(node.children[1].value)+1) +" x i8], ["+str(len(node.children[1].value)+1)
-                        self.buffer["functs"] += " x i8]* "+ self.str_constants[node.children[1].value] +", i32 0, i32 0), "+format_type+" %"+str(self.register_count-1)+")\n"
-                        self.call_count += 1
+                    for form_data in node.children[2:(len(node.children))]:
+                        self.visit(form_data)
+                        if form_data.type == 'int':
+                            hold[str(self.register_count-1)] = "i32"
+                        elif form_data.type == 'float':
+                            self.buffer["functs"] += "\t%" + str(self.register_count) + " = fpext float %"+str(self.register_count-1)+" to double\n"
+                            self.register_count += 1
+                            hold[str(self.register_count-1)] = "double"
+                        elif form_data.type == 'char':
+                            hold[str(self.register_count-1)] = "i8"
+
+                    format_type = "i32"
+                    self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
+                    self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ str(len(node.children[1].value)+2) +" x i8], ["+str(len(node.children[1].value)+2)
+                    self.buffer["functs"] += " x i8]* "+ self.str_constants[node.children[1].value] +", i32 0, i32 0), "
+                    for i, form_data in enumerate(hold):
+                        if i == len(hold) - 1:
+                            self.buffer["functs"] += hold[form_data]+" %" + form_data + ")\n"
+                        else:
+                            self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
+                    self.call_count += 1
+
+
+                    # if node.children[2].type == "int":
+                    #     format_type = "i32"
+                    #     self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
+                    #     self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ str(len(node.children[1].value)+1) +" x i8], ["+str(len(node.children[1].value)+1)
+                    #     self.buffer["functs"] += " x i8]* "+ self.str_constants[node.children[1].value] +", i32 0, i32 0), "+format_type+" %"+str(self.register_count-1)+")\n"
+                    #     self.call_count += 1
+                    # elif node.children[2].type == "float":
+                    #     format_type = "double"
+                    #     self.buffer["functs"] += "\t%" + str(self.register_count) + " = fpext float %"+str(self.register_count-1)+" to double\n"
+                    #     self.register_count += 1
+                    #     self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
+                    #     self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ str(len(node.children[1].value)+1) +" x i8], ["+str(len(node.children[1].value)+1)
+                    #     self.buffer["functs"] += " x i8]* "+ self.str_constants[node.children[1].value] +", i32 0, i32 0), "+format_type+" %"+str(self.register_count-1)+")\n"
+                    #     self.call_count += 1
 
 
         else:
@@ -620,6 +659,36 @@ class LLVMASTVisitor(ASTVisitor):
             self.register_count += 1
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
             self.register_count += 1
+
+    def visitDeclStmtNode(self, node):
+        pass
+        # if node.child.init:
+        #     if node.child.type == "int":
+        #         self.buffer["functs"] += "\t%" + str(self.register_count) + " = alloca i32, align 4\n"
+        #         self.register_count += 1
+        #     elif node.child.type == "float":
+        #         self.buffer["functs"] += "\t%" + str(self.register_count) + " = alloca float, align 4\n"
+        #         self.register_count += 1
+        # else:
+        #     if node.child.type == "int":
+        #             self.buffer["functs"] += "\t%" + str(self.register_count) + " = alloca i32, align 4\n"
+        #             self.register_count += 1
+        #     elif node.child.type == "float":
+        #         self.buffer["functs"] += "\t%" + str(self.register_count) + " = alloca float, align 4\n"
+        #         self.register_count += 1
+
+    def visitDeclRefExprNode(self, node):
+        (Ok, Ref) = self.findST(node.ref.id, node.symboltable)
+        if Ok:
+            if Ref[1].type == "int":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* %"+str(Ref[0])+", align 4\n"
+                self.register_count += 1
+            elif Ref[1].type == "float":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* %"+str(Ref[0])+", align 4\n"
+                self.register_count += 1
+            elif Ref[1].type == "char":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* %"+str(Ref[0])+", align 4\n"
+                self.register_count += 1
 
     def visitInitListExprNode(self, node):
         pass

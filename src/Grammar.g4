@@ -8,7 +8,7 @@ decl: prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? 
     ;
 
 stat: expr ';'                                                       # exprStat
-    | KEY_CONST? prim ID ('=' expr)? ';'                             # declStat
+    | KEY_CONST? prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'      # declStat
     | KEY_WHILE '(' expr ')' '{' stat* '}'                           # whileStat
     | KEY_IF '(' expr ')' '{' stat* '}' (KEY_ELSE '{' alias '}')?    # ifStat
     | KEY_RETURN expr ';'                                            # returnStat
@@ -81,7 +81,7 @@ KEY_RETURN : 'return' ;
 
 MULTICOMMENT : '/*' .*? '*/' -> skip;
 SINGLECOMMENT: '//' .*? '\n' -> skip;
-CHAR : ['] [.~] ['] ;
+CHAR : ['] . ['] ;
 STRING : ["] .*? ["] ;
 INT : [0-9]+ ;
 FLOAT : [0-9]+ '.' [0-9]+ ;

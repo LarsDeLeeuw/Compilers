@@ -40,7 +40,7 @@ class BuildASTVisitor(GrammarVisitor):
 
         if len(ctx.LIB()) > 0:
             if ctx.LIB()[0].getText() == "<stdio.h>":
-                node.includes["<stdio.h>"] = ["declare dso_local i32 @printf(i8*, ...)"]
+                node.includes["<stdio.h>"] = ["declare dso_local i32 @printf(i8*, ...)\n"]
                 dummy_node = FunctionDeclNode()
                 dummy_node.init = True
                 dummy_node.id = "printf"
@@ -55,6 +55,7 @@ class BuildASTVisitor(GrammarVisitor):
             decl_node = self.visit(Decl)
             decl_node.parent = node
             node.children.append(decl_node)
+        node.symboltable = store_refST
         self.AST.root = node
         return 0
 
@@ -106,7 +107,7 @@ class BuildASTVisitor(GrammarVisitor):
                 node.init = True
                 node.init_expr = init_list_node
             else:
-                node.init_expr = self.visit(ctx.expr())
+                node.init_expr = self.visit(ctx.expr()[0])
                 node.init_expr.parent = node
                 node.init = True
 
@@ -207,11 +208,41 @@ class BuildASTVisitor(GrammarVisitor):
         var_decl.line = ctx.start.line
         node.line = var_decl.line
         var_decl.type = ctx.prim().getText()
-        if(ctx.expr() is None):
-            pass
+
+        if ctx.INT() is None:
+            var_decl.array = False
         else:
-            var_decl.init_expr = self.visit(ctx.expr())
-            var_decl.init = True
+            var_decl.array = True
+            var_decl.len = int(ctx.INT().getText())
+
+        if len(ctx.expr()) == 0:
+            var_decl.init = False
+        else:
+            if var_decl.array:
+                init_list_node = InitListExprNode()
+                init_list_node.parent = var_decl
+                # Check if supplied init array is same len as array
+                if var_decl.len != len(ctx.expr()):
+                    raise Exception("Array initialised with incorrect amount of elements")
+                for Expr in ctx.expr():
+                    expr_node = self.visit(Expr)
+                    expr_node.parent = init_list_node
+                    init_list_node.children.append(expr_node)
+                var_decl.init = True
+                var_decl.init_expr = init_list_node
+            else:
+                var_decl.init_expr = self.visit(ctx.expr()[0])
+                var_decl.init_expr.parent = var_decl
+                var_decl.init = True
+                if var_decl.type == var_decl.init_expr.type:
+                    pass
+                else:
+                    cast_node = ImplicitCastExprNode()
+                    cast_node.parent = var_decl
+                    cast_node.type = var_decl.type
+                    cast_node.cast = var_decl.init_expr
+                    var_decl.init_expr = cast_node
+
         node.child = var_decl
 
         (idIsOk, idIndex) = self.checkCurrentST(var_decl.id)
@@ -322,10 +353,18 @@ class BuildASTVisitor(GrammarVisitor):
                     Ref[2].init = True
                     Ref[2].init_expr = expr_node
                     node.lhs_child = DeclRefExprNode()
+                    node.lhs_child.symboltable = self.currentST
                     node.lhs_child.parent = node
                     node.lhs_child.ref = Ref[2]
                     node.lhs_child.id = ref_id
-                    node.rhs_child = expr_node
+                    if Ref[2].type == expr_node.type:
+                        node.rhs_child = expr_node
+                    else:
+                        cast_node = ImplicitCastExprNode()
+                        cast_node.parent = node
+                        cast_node.type = Ref[2].type
+                        cast_node.cast = expr_node
+                        node.rhs_child = cast_node
                 else:
                     print("Undeclared ID")
 
@@ -400,12 +439,14 @@ class BuildASTVisitor(GrammarVisitor):
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
         node = DeclRefExprNode()
+        node.symboltable = self.currentST
 
         (IdDecl, Ref) = self.findST(ctx.ID().getText())
         if(IdDecl):
             node.ref = Ref[2]
             Ref[1].used = True
             node.id = Ref[1].id
+            node.type = Ref[1].type
         else:
             print("undeclared idvisited")
 
@@ -416,7 +457,7 @@ class BuildASTVisitor(GrammarVisitor):
 
         if ctx.lit_prim.type == GrammarLexer.CHAR:
             node = CharacterLiteralNode()
-            node.setValue(ctx.getText())
+            node.setValue(ctx.getText()[1:-1])
         elif ctx.lit_prim.type == GrammarLexer.INT:
             node = IntergerLiteralNode()
             node.setValue(ctx.getText())
