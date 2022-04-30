@@ -249,6 +249,7 @@ class LLVMASTVisitor(ASTVisitor):
                         elif form_data.type == 'char':
                             hold[str(self.register_count-1)] = "i8"
 
+                    print(hold)
                     format_type = "i32"
                     self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
                     self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ str(len(node.children[1].value)+2) +" x i8], ["+str(len(node.children[1].value)+2)
@@ -259,22 +260,6 @@ class LLVMASTVisitor(ASTVisitor):
                         else:
                             self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
                     self.call_count += 1
-
-
-                    # if node.children[2].type == "int":
-                    #     format_type = "i32"
-                    #     self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
-                    #     self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ str(len(node.children[1].value)+1) +" x i8], ["+str(len(node.children[1].value)+1)
-                    #     self.buffer["functs"] += " x i8]* "+ self.str_constants[node.children[1].value] +", i32 0, i32 0), "+format_type+" %"+str(self.register_count-1)+")\n"
-                    #     self.call_count += 1
-                    # elif node.children[2].type == "float":
-                    #     format_type = "double"
-                    #     self.buffer["functs"] += "\t%" + str(self.register_count) + " = fpext float %"+str(self.register_count-1)+" to double\n"
-                    #     self.register_count += 1
-                    #     self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
-                    #     self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ str(len(node.children[1].value)+1) +" x i8], ["+str(len(node.children[1].value)+1)
-                    #     self.buffer["functs"] += " x i8]* "+ self.str_constants[node.children[1].value] +", i32 0, i32 0), "+format_type+" %"+str(self.register_count-1)+")\n"
-                    #     self.call_count += 1
 
 
         else:
@@ -693,4 +678,20 @@ class LLVMASTVisitor(ASTVisitor):
     def visitInitListExprNode(self, node):
         pass
 
+    def visitIntegerLiteralNode(self, node):
+        self.buffer["functs"] += "\t%" + str(self.register_count) + " = alloca i32, align 4\n"
+        self.buffer["functs"] += "\tstore i32 " + str(node.value) + ", i32* %"+ str(self.register_count) +", align 4\n"
+        self.register_count += 1
+        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* %"+str(self.register_count-1)+", align 4\n"
+        self.register_count += 1
+
+    def visitFloatingLiteralNode(self, node):
+        self.buffer["functs"] += "\t%" + str(self.register_count) + " = alloca float, align 4\n"
+        self.buffer["functs"] += "\tstore float " + str(node.value) + ", float* %"+ str(self.register_count) +", align 4\n"
+        self.register_count += 1
+        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* %"+str(self.register_count-1)+", align 4\n"
+        self.register_count += 1
+
+    def visitCharacterLiteralNode(self, node):
+        pass
     

@@ -400,6 +400,7 @@ class BuildASTVisitor(GrammarVisitor):
         }
         expr_node = self.visit(ctx.expr())
         expr_node.parent = node
+        node.child = expr_node
         node.operation = switcher.get(ctx.op.type, None)
         if node.operation == "!":
                 node.type = 'int'

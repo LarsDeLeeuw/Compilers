@@ -174,7 +174,22 @@ class VisualASTVisitor(ASTVisitor):
         pass
 
     def visitCallExprNode(self, node):
-        pass
+        thisnode = "n"+str((self.nodecount))
+        self.labelbuffer += thisnode+' [label="'+ str("CallExpr") +'"];\n'
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
+        self.refcount = self.nodecount
+        storeref = self.refcount
+        self.nodecount += 1
+
+        call_node = "n"+str((self.nodecount))
+        call_node_label = node.children[0].id + "()"
+
+        self.labelbuffer += call_node+' [label="'+ call_node_label +'"];\n'
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ call_node +"\n"
+        self.refcount = self.nodecount
+        storeref = self.refcount
+        self.nodecount += 1
+        #self.visit(node.child)
 
     def visitDeclRefExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
@@ -193,10 +208,14 @@ class VisualASTVisitor(ASTVisitor):
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitFloatingLiteralNode(self, node):
-        pass
+        thisnode = "n"+str((self.nodecount))
+        self.labelbuffer += thisnode+' [label="'+ str(node.value) +'"];\n'
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitCharacterLiteralNode(self, node):
-        pass
+        thisnode = "n"+str((self.nodecount))
+        self.labelbuffer += thisnode+' [label="'+ "'"+ chr(node.value)+ "'" +'"];\n'
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitStringLiteralNode(self, node):
         pass

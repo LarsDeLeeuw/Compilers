@@ -4,7 +4,7 @@ from GrammarLexer import GrammarLexer
 from GrammarParser import GrammarParser
 from BuildASTVisitor import BuildASTVisitor
 from VisualASTVisitor import VisualASTVisitor
-# from ConstFoldingASTVisitor import ConstFoldingASTVisitor
+from ConstFoldingASTVisitor import ConstFoldingASTVisitor
 from AST import AST
 from LLVMASTVisitor import LLVMASTVisitor
 from subprocess import check_call
@@ -20,9 +20,9 @@ def main(argv):
     ASTree= builder.getAST()
     ASTree.stt.generateImage()
     ASTVisualDOT = VisualASTVisitor()
-    #ASTConstFolding = ConstFoldingASTVisitor()
+    ASTConstFolding = ConstFoldingASTVisitor()
     ASTLLVM = LLVMASTVisitor()
-    #ASTree.accept(ASTConstFolding)
+    ASTree.accept(ASTConstFolding)
     ASTree.accept(ASTLLVM)
     ASTree.accept(ASTVisualDOT)
     #ASTree.save("AST_ex_ass.xml")

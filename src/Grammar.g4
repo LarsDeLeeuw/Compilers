@@ -16,8 +16,6 @@ stat: expr ';'                                                       # exprStat
 
 alias: stat* ;
 
-
-
 expr
     : '(' expr ')'                          # parensExpr
     | op=('+'|'-'|'!'|'*'|'&') expr         # unaryExpr

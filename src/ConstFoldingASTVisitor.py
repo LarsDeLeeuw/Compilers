@@ -1,137 +1,131 @@
 from ASTVisitor import ASTVisitor
-from Nodes import *
+from ASTNodes import *
 
 class ConstFoldingASTVisitor(ASTVisitor):
 
     def visitProgNode(self, node):
-        for StatementNode in node.StatementNodes:
-            self.visit(StatementNode)
+        for DeclNode in node.children:
+            self.visit(DeclNode)
         return 0
 
-    def visitAssignNode(self, node):
-        return self.visit(node.NewExpressionNode)
+    def visitVarDeclNode(self, node):
+        if node.init:
+            if issubclass(type(node.getInitExpr()), LiteralNode):
+                return 0
+            else:
+                self.visit(node.init_expr)
+        return 0
+    
+    def visitFunctionDeclNode(self, node):
+        if node.init:
+            # Visit the function's scope node, located at end of children
+            self.visit(node.children[-1])
 
-    def visitInitNode(self, node):
-        return self.visit(node.InnerNode)
+    def visitScopeStmtNode(self, node):
+        for StmtNode in node.children:
+            self.visit(StmtNode)
+    
+    def visitExprStmtNode(self, node):
+        self.visit(node.child)
+
+    def visitDeclStmtNode(self, node):
+        self.visit(node.child)
+
+    def visitCallExprNode(self, node):
+        if len(node.children) > 1:
+            for Arg in node.children[1:]:
+                self.visit(Arg)
 
     def visitStatementNode(self, node):
         return self.visit(node.InnerNode)
 
-    def visitBinaryExpressionNode(self, node):
+    def visitBinExprNode(self, node):
+        lhs_checked = node.lhs_child
+        rhs_checked = node.rhs_child
 
-        lhs_checked = node.lhs
-        rhs_checked = node.rhs
-
-        if type(lhs_checked) is IdNode:
-            lhs_checked = self.visit(lhs_checked)
-
-        if type(rhs_checked) is IdNode:
-            rhs_checked = self.visit(rhs_checked)
+        # Try and get literal
+        if not (issubclass(type(lhs_checked), LiteralNode)):
+            self.visit(lhs_checked)
+        if not (issubclass(type(rhs_checked), LiteralNode)):
+            self.visit(rhs_checked)
+        lhs_checked = node.lhs_child
+        rhs_checked = node.rhs_child
 
         if (issubclass(type(lhs_checked), LiteralNode) and issubclass(type(rhs_checked), LiteralNode)) and (type(lhs_checked) == type(rhs_checked)):
-
-            if type(lhs_checked) is IntegerNode:
-                
-                folded_node = IntegerNode()
-
-                if type(node.op) is AdditionNode:
+        # Only fold if lhs and rhs are same type
+            if node.type == "int":
+                folded_node = IntergerLiteralNode()
+                if node.operation == "+":
                     folded_node.value = int(lhs_checked.value) + int(rhs_checked.value)
-                elif type(node.op) is SubstractionNode:
+                elif node.operation == "-":
                     folded_node.value = int(lhs_checked.value) - int(rhs_checked.value)
-                elif type(node.op) is MultiplicationNode:
+                elif node.operation == "*":
                     folded_node.value = int(lhs_checked.value) * int(rhs_checked.value)
-                elif type(node.op) is DivisionNode:
+                elif node.operation == "/":
                     folded_node.value = int(int(lhs_checked.value) / int(rhs_checked.value))
-                elif type(node.op) is GreaterThanNode:
+                elif node.operation == ">":
                     folded_node.value = int (1) if int(lhs_checked.value) > int(rhs_checked.value) else 0
-                elif type(node.op) is LessThanNode:
+                elif node.operation == "<":
                     folded_node.value = int (1) if int(lhs_checked.value) < int(rhs_checked.value) else 0
-                elif type(node.op) is IsEqualNode:
+                elif node.operation == "==":
                     folded_node.value = int (1) if int(lhs_checked.value) == int(rhs_checked.value) else 0
                 else:
                     folded_node.value = "?"
-            elif type(lhs_checked) is FloatNode:
-                folded_node = FloatNode()
-
-                if type(node.op) is AdditionNode:
+            elif node.type == "float":
+                folded_node = FloatingLiteralNode()
+                if node.operation == "+":
                     folded_node.value = float(lhs_checked.value) + float(rhs_checked.value)
-                elif type(node.op) is SubstractionNode:
+                elif node.operation == "-":
                     folded_node.value = float(lhs_checked.value) - float(rhs_checked.value)
-                elif type(node.op) is MultiplicationNode:
+                elif node.operation == "*":
                     folded_node.value = float(lhs_checked.value) * float(rhs_checked.value)
-                elif type(node.op) is DivisionNode:
+                elif node.operation == "/":
                     folded_node.value = float(int(lhs_checked.value) / float(rhs_checked.value))
-                elif type(node.op) is GreaterThanNode:
+                elif node.operation == ">":
                     folded_node.value = float (1) if int(lhs_checked.value) > float(rhs_checked.value) else 0
-                elif type(node.op) is LessThanNode:
+                elif node.operation == "<":
                     folded_node.value = int (1) if float(lhs_checked.value) < float(rhs_checked.value) else 0
-                elif type(node.op) is IsEqualNode:
+                elif node.operation == "==":
                     folded_node.value = int (1) if float(lhs_checked.value) == float(rhs_checked.value) else 0
                 else:
                     folded_node.value = "?"
             else:
                 print("ERRORINFOLDINGCAUSE")
 
-            folded_node.Parent = node.Parent
-            folded_node.serial = node.serial
-            
-            if node.Parent is ProgNode:
-                index = node.Parent.StatementNodes.index(node)
-                node.Parent.StatementNodes.insert(index, folded_node)
-                node.Parent.StatementNodes.remove(node)
-            elif type(node.Parent) is IdNode:
-                node.Parent.ExpressionNode = folded_node
-            elif type(node.Parent) is BinaryExpressionNode:
-                if node.Parent.lhs == node:
-                    node.Parent.lhs = folded_node
+            folded_node.parent = node.parent
+            folded_node.type = node.type
+
+            if type(node.parent) is VarDeclNode:
+                node.parent.init_expr = folded_node
+            elif type(node.parent) is DeclRefExprNode:
+                node.parent.ref = folded_node
+            elif type(node.parent) is BinExprNode:
+                if node.parent.lhs_child == node:
+                    node.parent.lhs_child = folded_node
                 else:
-                    node.Parent.rhs = folded_node
-                self.visit(node.Parent)
-            elif type(node.Parent) is StatementNode:
-               node.Parent.InnerNode = folded_node
-            
+                    node.parent.rhs_child = folded_node
+                # self.visit(node.Parent)
+            elif type(node.parent) is UnaryExprNode:
+               node.parent.child = folded_node
+            elif type(node.parent) is CallExprNode:
+                node.parent.children.insert(node.parent.children.index(node), folded_node)
+                node.parent.children.remove(node)
             return 0
+        
+    def visitUnaryExprNode(self, node):
+        child_checked = node.child
 
-        if type(lhs_checked) is BinaryExpressionNode or type(lhs_checked) is NegateNode:
-            lhs_checked = self.visit(node.lhs) 
+        if type(child_checked) is UnaryExprNode:
+            pass
 
-        if type(rhs_checked) is BinaryExpressionNode or type(rhs_checked) is NegateNode:
-            rhs_checked = self.visit(node.rhs)
+        if not (issubclass(type(child_checked), LiteralNode)):
+            child_checked = self.visit(child_checked)
+        
+        if issubclass(type(child_checked), LiteralNode):
+            pass
 
-        if issubclass(type(lhs_checked), LiteralNode) and issubclass(type(rhs_checked), LiteralNode):
-
-            folded_node = IntegerNode()
-
-            switcher = {
-                AdditionNode        : int(lhs_checked.value) + int(rhs_checked.value),
-                SubstractionNode    : int(lhs_checked.value) - int(rhs_checked.value),
-                MultiplicationNode  : int(lhs_checked.value) * int(rhs_checked.value),
-                DivisionNode        : int(int(lhs_checked.value) / int(rhs_checked.value)),
-                GreaterThanNode     : int (1) if int(lhs_checked.value) > int(rhs_checked.value) else 0,
-                LessThanNode        : int (1) if int(lhs_checked.value) < int(rhs_checked.value) else 0,
-                IsEqualNode         : int (1) if int(lhs_checked.value) == int(rhs_checked.value) else 0,
-            }
-
-            folded_node.value = switcher.get(type(node.op), "?")
-            folded_node.Parent = node.Parent
-            folded_node.serial = node.serial
-            
-            if node.Parent is ProgNode:
-                index = node.Parent.StatementNodes.index(node)
-                node.Parent.StatementNodes.insert(index, folded_node)
-                node.Parent.StatementNodes.remove(node)
-            elif type(node.Parent) is IdNode:
-                node.Parent.ExpressionNode = folded_node
-            elif type(node.Parent) is BinaryExpressionNode:
-                if node.Parent.lhs == node:
-                    node.Parent.lhs = folded_node
-                else:
-                    node.Parent.rhs = folded_node
-                self.visit(node.Parent)
-            elif type(node.Parent) is StatementNode:
-               node.Parent.InnerNode = folded_node
-
-            return 0
+    def visitDeclRefExprNode(self, node):
+        pass
         
     def visitNegateNode(self, node):
 

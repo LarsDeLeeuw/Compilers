@@ -55,7 +55,7 @@ class FunctionDeclNode(DeclNode):
         self.init = False
         self.used = False
         self.id = None
-        self.included = False
+        self.included = False   # true if included from outer lib
         self.symboltable = None
         self.return_type = None # string, if no return_type -> 'void'
         self.arg_types = []     # [string, ...)
