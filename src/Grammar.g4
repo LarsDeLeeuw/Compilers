@@ -2,16 +2,16 @@ grammar Grammar;
 
 prog: (KEY_INCLUDE LIB)* decl+ ;
 
-decl: prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'                                                               #varDecl
-    | (prim | KEY_VOID) ID '('( ( (prim ID)(','prim ID)* ) | prim ID )?')' ';'              #funcheadsupDecl           
-    | (prim | KEY_VOID) ID '(' ( ( (prim ID)(','prim ID)* ) | prim ID )? ')' '{' stat* '}'  #funcDecl
+decl: KEY_CONST? prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'      #varDecl
+    | (prim | KEY_VOID) ID '('( ( (prim ID)(','prim ID)* ) | prim ID )?')' ';'                      #funcheadsupDecl           
+    | (prim | KEY_VOID) ID '(' ( ( (prim ID)(','prim ID)* ) | prim ID )? ')' '{' stat* '}'          #funcDecl
     ;
 
-stat: expr ';'                                                       # exprStat
+stat: expr ';'                                                                                      # exprStat
     | KEY_CONST? prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'      # declStat
-    | KEY_WHILE '(' expr ')' '{' stat* '}'                           # whileStat
-    | KEY_IF '(' expr ')' '{' stat* '}' (KEY_ELSE '{' alias '}')?    # ifStat
-    | KEY_RETURN expr ';'                                            # returnStat
+    | KEY_WHILE '(' expr ')' '{' stat* '}'                                                          # whileStat
+    | KEY_IF '(' expr ')' '{' stat* '}' (KEY_ELSE '{' alias '}')?                                   # ifStat
+    | KEY_RETURN expr ';'                                                                           # returnStat
     ;
 
 alias: stat* ;
@@ -76,6 +76,8 @@ KEY_WHILE : 'while' ;
 KEY_IF : 'if' ;
 KEY_ELSE : 'else' ;
 KEY_RETURN : 'return' ;
+KEY_BREAK : 'break' ;
+KEY_CONTINUE : 'continue' ;
 
 MULTICOMMENT : '/*' .*? '*/' -> skip;
 SINGLECOMMENT: '//' .*? '\n' -> skip;

@@ -85,6 +85,14 @@ class BuildASTVisitor(GrammarVisitor):
         node.line = ctx.start.line
         node.type = ctx.prim().getText()
 
+        print("he")
+        print(ctx.KEY_CONST())
+
+        if ctx.KEY_CONST() is None:
+            node.const = False
+        else:
+            node.const = True
+
         if ctx.INT() is None:
             node.array = False
         else:
@@ -205,6 +213,11 @@ class BuildASTVisitor(GrammarVisitor):
         var_decl.parent = node
         var_decl.id = ctx.ID().getText()
 
+        if ctx.KEY_CONST() is None:
+            var_decl.const = False
+        else:
+            var_decl.const = True
+
         var_decl.line = ctx.start.line
         node.line = var_decl.line
         var_decl.type = ctx.prim().getText()
@@ -281,6 +294,7 @@ class BuildASTVisitor(GrammarVisitor):
             stat_node = self.visit(Statement)
             stat_node.parent = if_scope
             if_scope.children.append(stat_node)
+        if_scope.symboltable = newST
         node.children.append(if_scope)
 
         self.currentST = store_refST
@@ -303,6 +317,7 @@ class BuildASTVisitor(GrammarVisitor):
                 stat_node = self.visit(Statement)
                 stat_node.parent = else_scope
                 else_scope.children.append(stat_node)
+            else_scope.symboltable = newST
             node.children.append(else_scope)
             self.currentST = store_refST
 
@@ -380,9 +395,9 @@ class BuildASTVisitor(GrammarVisitor):
             node.lhs_child = lhs_node
             node.rhs_child = rhs_node
             if node.operation == "&&" or node.operation == "||" or node.operation == "!=":
-                node.type = 'int'
+                node.type = 'bool'
             elif node.operation == ">" or node.operation == "<" or node.operation == ">=" or node.operation == "<=":
-                node.type = 'int'
+                node.type = 'bool'
             else:
                 node.type = node.lhs_child.type
             return node

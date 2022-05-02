@@ -22,7 +22,7 @@ def main(argv):
     ASTVisualDOT = VisualASTVisitor()
     ASTConstFolding = ConstFoldingASTVisitor()
     ASTLLVM = LLVMASTVisitor()
-    ASTree.accept(ASTConstFolding)
+    #ASTree.accept(ASTConstFolding)
     ASTree.accept(ASTLLVM)
     ASTree.accept(ASTVisualDOT)
     #ASTree.save("AST_ex_ass.xml")

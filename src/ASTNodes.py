@@ -27,12 +27,14 @@ class DeclNode(AbstractNode):
 class VarDeclNode(DeclNode):
     
     def __init__(self):
-        self.line = None        # tuple(int row, int column)
+        self.line = None        # int row
+        self.column = None
         self.used = False
         self.id = None          # string
         self.type = None        # string
         self.array = False
         self.len = None
+        self.const = False
         self.init = False       
         self.init_expr = None   # InitListExprNode or LiteralNode
 
@@ -190,6 +192,7 @@ class LiteralNode(ExprNode):
     def __init__(self):
         self.type = None
         self.value = None
+        self.offset = 0
 
     def setValue(self, value):
         pass
@@ -226,7 +229,25 @@ class StringLiteralNode(LiteralNode):
     # Not sure about this one atm
      def setValue(self, value):
         try:
-            self.value = str(value[1:-1])
+            ''' When setting the value, first parse the string because escapechars are not behaving
+                Using offset because len('\n') = 1 but len('\0A') = 3 so this info needs to be kept.
+            '''
+            buffer = ""
+            escape_flag = False
+            for character in str(value[1:-1]):
+                if escape_flag:
+                    if character == "n":
+                        buffer += "\\0A"
+                        self.offset -= 2
+                    else:
+                        buffer += "\\" + character
+                    escape_flag = False
+                    continue
+                if character == '\\':
+                    escape_flag = True
+                else:
+                    buffer += character
+            self.value = buffer
             self.type = "string"
         except:
             raise Exception("Failed setting value for StringLiteralNode")

@@ -26,12 +26,12 @@ X: Niet werkend of niet geïmplementeerd
 |       | &,*                            | V |
 | 1.2.2 | UnaryOp Optional               | X |
 |       | ++, --                         | X |
-| 1.3.1 | Reserved Words Mandatory      | - |
+| 1.3.1 | Reserved Words Mandatory       | - |
 |       | char, int, float               | V |
 |       | const                          | V |
-|       | if, else, while                | - |
+|       | if, else, while                | V |
 |       | for, break, continue           | - |
-|       | return, void                   | - |
+|       | return, void                   | V |
 | 1.3.2 | Reserved Words Optional        | X |
 |       | switch, case, default          | X |
 | 1.4   | Variables                      | V |

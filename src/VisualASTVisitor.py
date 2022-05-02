@@ -26,13 +26,19 @@ class VisualASTVisitor(ASTVisitor):
         storeref = self.refcount
         self.nodecount += 1
         self.labelbuffer += thisnode+' [label="'+ str("VarDecl") +'"];\n'
+        
+        nodelabel = ""
+        if node.const:
+            nodelabel += "const " + node.type
+        else:
+            nodelabel += node.type
 
         if node.array:
-            self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ node.type +"["+ str(node.len) +"]"+'"];\n'
+            self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ nodelabel +"["+ str(node.len) +"]"+'"];\n'
             self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount))+"\n"
             self.nodecount += 1
         else:
-            self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ node.type +'"];\n'
+            self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ nodelabel +'"];\n'
             self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount))+"\n"
             self.nodecount += 1
 
