@@ -26,7 +26,7 @@ X: Niet werkend of niet geïmplementeerd
 |       | &,*                            | V |
 | 1.2.2 | UnaryOp Optional               | X |
 |       | ++, --                         | X |
-| 1.3.1 | Reserverd Words Mandatory      | - |
+| 1.3.1 | Reserved Words Mandatory      | - |
 |       | char, int, float               | V |
 |       | const                          | V |
 |       | if, else, while                | - |
