@@ -85,9 +85,6 @@ class BuildASTVisitor(GrammarVisitor):
         node.line = ctx.start.line
         node.type = ctx.prim().getText()
 
-        print("he")
-        print(ctx.KEY_CONST())
-
         if ctx.KEY_CONST() is None:
             node.const = False
         else:
@@ -119,10 +116,14 @@ class BuildASTVisitor(GrammarVisitor):
                 node.init_expr.parent = node
                 node.init = True
 
+        node.symboltable = self.currentST
+
         (idIsOk, idIndex) = self.checkCurrentST(node.id)
         if idIsOk:
             self.currentST.symbols[node.id] = [idIndex, node, copy.deepcopy(node)]
-
+        else:
+            raise Exception("panic +- line 126 BuildAst")
+        
         return node
 
 
@@ -257,12 +258,14 @@ class BuildASTVisitor(GrammarVisitor):
                     var_decl.init_expr = cast_node
 
         node.child = var_decl
+        node.child.symboltable = self.currentST
 
         (idIsOk, idIndex) = self.checkCurrentST(var_decl.id)
         if idIsOk:
             self.currentST.symbols[var_decl.id] = [idIndex, var_decl, copy.deepcopy(var_decl)]
-
-
+        else:
+            raise Exception("panic circa line 267 BuildAst")
+        
         return node
 
 
@@ -357,6 +360,7 @@ class BuildASTVisitor(GrammarVisitor):
         # TODO: Op compatible with lhs and rhs?
         #       Expected type?
         node.operation = switcher.get(ctx.op.type, None)
+        node.line = ctx.start.line 
         if node.operation == "=":
             try:
                 ref_id = ctx.left.ID().getText()
@@ -394,7 +398,7 @@ class BuildASTVisitor(GrammarVisitor):
 
             node.lhs_child = lhs_node
             node.rhs_child = rhs_node
-            if node.operation == "&&" or node.operation == "||" or node.operation == "!=":
+            if node.operation == "&&" or node.operation == "||" or node.operation == "!=" or node.operation == "==":
                 node.type = 'bool'
             elif node.operation == ">" or node.operation == "<" or node.operation == ">=" or node.operation == "<=":
                 node.type = 'bool'

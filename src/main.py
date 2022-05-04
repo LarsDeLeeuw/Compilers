@@ -7,10 +7,23 @@ from VisualASTVisitor import VisualASTVisitor
 from ConstFoldingASTVisitor import ConstFoldingASTVisitor
 from AST import AST
 from LLVMASTVisitor import LLVMASTVisitor
-from subprocess import check_call
+from subprocess import call, check_call
+import argparse
+
+# Argument parsing
+parser = argparse.ArgumentParser()
+
+# -f INPUT -c CONFIG { 0 : (default, generates LLVM code for single inputfile), 1 : (folder, generates LLVM code for all inputfiles in folder)}
+# -v VISUALS {True, False} -o OPTIMIZATIONS
+parser.add_argument("-f", "--input", dest = "path", default = "No input", help = "Input path")
+parser.add_argument("-c", "--config", dest = "config", default=0, help="Config 0 for single inputfile, 1 for folder, 2 devmode", type=int)
+parser.add_argument("-v", "--visualize", dest = "visual", default=0, help="Visualization level: 0 (default) no visuals, 1 AST visuals, 2 AST + STT visuals", type=int)
+parser.add_argument("-o", "--optimizations", dest="optimizations", default=0, help="Optimization level: 0 (default) no optimizations, 1 placeholder, 2 max optimizations", type=int)
+
+args = parser.parse_args()
 
 def main(argv):
-    input_stream = FileStream(argv[1])
+    input_stream = FileStream(args.path)
     lexer = GrammarLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = GrammarParser(stream)
@@ -18,23 +31,30 @@ def main(argv):
     builder = BuildASTVisitor()
     builder.visit(cst)
     ASTree= builder.getAST()
-    ASTree.stt.generateImage()
-    ASTVisualDOT = VisualASTVisitor()
-    ASTConstFolding = ConstFoldingASTVisitor()
+
+    if args.optimizations == 2:
+        ASTConstFolding = ConstFoldingASTVisitor()
+        ASTree.accept(ASTConstFolding)
+    if args.visual >= 1:
+        ASTVisualDOT = VisualASTVisitor()
+        ASTree.accept(ASTVisualDOT)
+        # TODO: write generateImage()
+        outputdotfile = open("output.dot", 'w')
+        outputdotfile.write("digraph {" + ASTVisualDOT.labelbuffer + ASTVisualDOT.edgebuffer + "}")
+        outputdotfile.close()
+        check_call(['dot','-Tjpg','output.dot','-o','OutputFile.jpg'])
+        # Convert to darkmode
+        check_call(['magick','OutputFile.jpg','-negate','OutputFile.jpg'])
+    if args.visual == 2:
+        ASTree.stt.generateImage()
+    
     ASTLLVM = LLVMASTVisitor()
-    #ASTree.accept(ASTConstFolding)
     ASTree.accept(ASTLLVM)
-    ASTree.accept(ASTVisualDOT)
-    #ASTree.save("AST_ex_ass.xml")
-    outputdotfile = open("output.dot", 'w')
-    outputdotfile.write("digraph {" + ASTVisualDOT.labelbuffer + ASTVisualDOT.edgebuffer + "}")
-    outputdotfile.close()
 
-    check_call(['dot','-Tjpg','output.dot','-o','OutputFile.jpg'])
-    # Convert to darkmode to spare my eyes.
-    check_call(['magick','OutputFile.jpg','-negate','OutputFile.jpg'])
-
-    check_call(['lli','main.ll'])
+    if args.config == 2:
+        call(['lli','main.ll'])
+    
+    return 0
 
 if __name__ == '__main__':
     main(sys.argv)

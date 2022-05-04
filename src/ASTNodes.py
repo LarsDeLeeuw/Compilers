@@ -168,7 +168,6 @@ class DeclRefExprNode(ExprNode):
         self.function = False
         self.ref = None
         self.id = None
-        self.symboltable = None
 
 class ImplicitCastExprNode(ExprNode):
     

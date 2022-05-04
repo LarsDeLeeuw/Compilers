@@ -134,7 +134,7 @@ class LLVMASTVisitor(ASTVisitor):
             
             self.buffer["functs"] += ") {\nentry:\n"
             self.current_label = "entry"
-
+            self.currentST = node.symboltable
             if node.id == "main":
                 self.buffer["functs"] += "\t" + "%retval = alloca i32, align 4\n"
 
@@ -199,6 +199,28 @@ class LLVMASTVisitor(ASTVisitor):
                     returnFlag = True
                 self.visit(StmtNode)
         
+        if not returnFlag and type(node.parent) is FunctionDeclNode:
+            # Check return type of function
+            if node.parent.return_type == "void":
+                pass
+            elif node.parent.return_type == "int":
+                self.buffer["functs"] += "\tstore i32 0, i32* %retval, align 4\n"
+                self.buffer["functs"] += "\t%"+str(self.register_count)+" = load i32, i32* %retval, align 4\n"
+                self.buffer["functs"] += "\tret i32 %"+str(self.register_count)+"\n"
+                self.register_count += 1
+            elif node.parent.return_type == "float":
+                self.buffer["functs"] += "\tstore float 0.0, float* %retval, align 4\n"
+                self.buffer["functs"] += "\t%"+str(self.register_count)+" = load float, float* %retval, align 4\n"
+                self.buffer["functs"] += "\tret float %"+str(self.register_count)+"\n"
+                self.register_count += 1
+            elif node.parent.return_type == "char":
+                self.buffer["functs"] += "\tstore i8 0, i8* %retval, align 4\n"
+                self.buffer["functs"] += "\t%"+str(self.register_count)+" = load i8, i8* %retval, align 4\n"
+                self.buffer["functs"] += "\tret i8 %"+str(self.register_count)+"\n"
+                self.register_count += 1
+            else:
+                raise Exception("Cannot generate default return for type: {}".format(node.parent.return_type))
+        
 
     def visitReturnStmtNode(self, node):
         self.buffer["functs"] += "\tstore i32 "+str(node.child.value)+", i32* %retval, align 4\n"
@@ -233,7 +255,7 @@ class LLVMASTVisitor(ASTVisitor):
             self.buffer["functs"] += label_end + ":\n"
             self.current_label = label_end
         else:
-            print("Something not implemented yet in ifstmtnode")
+            print("Something not implemented yet in ifstmtnode " + condition_node.type)
         
 
 
@@ -543,10 +565,61 @@ class LLVMASTVisitor(ASTVisitor):
             # self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
             # self.register_count += 1
         elif node.operation == "!=":
+            # Define fcomp here for readability, should always be set to True or False before use thanks to closure of if/else.
+            fcomp = None
+            # Extend lhs to i32 where needed
+            if node.lhs_child.type == "bool":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(lhs_register_count) + " to i32\n"
+                self.register_count += 1
+                lhs_register_count = self.register_count - 1
+            elif node.lhs_child.type == "char":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sext i8 %" + str(lhs_register_count) + " to i32\n"
+                self.register_count += 1
+                lhs_register_count = self.register_count - 1
+            # Extend rhs to i32 where needed
+            if node.rhs_child.type == "bool":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(rhs_register_count) + " to i32\n"
+                self.register_count += 1
+                rhs_register_count = self.register_count - 1
+            elif node.rhs_child.type == "char":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = sext i8 %" + str(rhs_register_count) + " to i32\n"
+                self.register_count += 1
+                rhs_register_count = self.register_count - 1
+            # When lhs and rhs of equal type we only need to determine fcomp thanks to previous extends
+            if node.lhs_child.type == node.rhs_child.type:
+                if node.lhs_child.type == "float":
+                    fcomp = True
+                else:
+                    fcomp = False
+            else:
+                if node.lhs_child.type == "float":
+                    # lhs.type != rhs.type, rhs must be i32 due to earlier extends
+                    fcomp = True
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(rhs_register_count) + " to float\n"
+                    self.register_count += 1
+                    rhs_register_count = self.register_count - 1
+                elif node.rhs_child.type == "float":
+                    # lhs.type != rhs.type, lhs must be i32 due to earlier extends
+                    fcomp = True
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(lhs_register_count) + " to float\n"
+                    self.register_count += 1
+                    lhs_register_count = self.register_count - 1
+                else:
+                    # no promotion needed since neither is float
+                    fcomp = False
+            # Write correct LLVM compare based on fcomp  
+            if fcomp:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+            else:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.register_count += 1
+        elif node.operation == "==":
             fcomp = False
             if node.lhs_child.type == "int" and node.rhs_child.type == "int":
-                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
-                self.register_count += 1
+                pass
+                # self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp eq i32 %" + str(lhs_register_count) + ", 0\n"
+                # self.register_count += 1
             elif node.lhs_child.type == "int" and node.rhs_child.type == "float":
                 # Implicit cast: sitofp
                 fcomp = True
@@ -572,10 +645,10 @@ class LLVMASTVisitor(ASTVisitor):
                 raise Exception("Bad BinExpr !=", node.rhs_child.type)
 
             if fcomp:
-                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp oeq float %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
                 self.register_count += 1
             else:
-                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp eq i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) +"\n"
                 self.register_count += 1
             
             # self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
@@ -585,22 +658,32 @@ class LLVMASTVisitor(ASTVisitor):
             label_false = "lor.rhs" + str(self.lor_count)
             label_prev = self.current_label
             self.lor_count += 1
-            if node.lhs_child.type == "int":
+            if node.lhs_child.type == "bool":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i8 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "int":
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
                 self.register_count += 1
             elif node.lhs_child.type == "float":
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(lhs_register_count) + ", 0.000000e+00\n"
                 self.register_count += 1
+            else:
+                raise Exception("Unsupported lhs_child.type for LLVM BinExpr ||")
             self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_true + ", label %" + label_false + "\n\n"
 
             self.buffer["functs"] += label_false + ":\n"
             self.current_label = label_false
-            if node.rhs_child.type == "int":
+            if node.rhs_child.type == "bool":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i1 %" + str(rhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.rhs_child.type == "int":
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(rhs_register_count) + ", 0\n"
                 self.register_count += 1
             elif node.rhs_child.type == "float":
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(rhs_register_count) + ", 0.000000e+00\n"
                 self.register_count += 1
+            else:
+                raise Exception("Unsupported rhs_child.type for LLVM BinExpr ||")
             self.buffer["functs"] += "\tbr label %" + label_true + "\n\n"
 
             self.buffer["functs"] += label_true + ":\n"
@@ -615,22 +698,32 @@ class LLVMASTVisitor(ASTVisitor):
             label_false = "land.end" + str(self.land_count)
             label_prev = self.current_label
             self.land_count += 1
-            if node.lhs_child.type == "int":
+            if node.lhs_child.type == "bool":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i1 %" + str(lhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.lhs_child.type == "int":
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(lhs_register_count) + ", 0\n"
                 self.register_count += 1
             elif node.lhs_child.type == "float":
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(lhs_register_count) + ", 0.000000e+00\n"
                 self.register_count += 1
+            else:
+                raise Exception("Unsupported lhs_child.type for LLVM BinExpr &&")
             self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_true + ", label %" + label_false + "\n\n"
 
             self.buffer["functs"] += label_true + ":\n"
             self.current_label = label_true
-            if node.rhs_child.type == "int":
+            if node.rhs_child.type == "bool":
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i1 %" + str(rhs_register_count) + ", 0\n"
+                self.register_count += 1
+            elif node.rhs_child.type == "int":
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(rhs_register_count) + ", 0\n"
                 self.register_count += 1
             elif node.rhs_child.type == "float":
                 self.buffer["functs"] += "\t%" + str(self.register_count) + " = fcmp une float %" + str(rhs_register_count) + ", 0.000000e+00\n"
                 self.register_count += 1
+            else:
+                raise Exception("Unsupported rhs_child.type for LLVM BinExpr &&")
             self.buffer["functs"] += "\tbr label %" + label_false + "\n\n"
 
             self.buffer["functs"] += label_false + ":\n"
@@ -700,15 +793,31 @@ class LLVMASTVisitor(ASTVisitor):
     def visitDeclRefExprNode(self, node):
         (Ok, Ref) = self.findST(node.ref.id, node.symboltable)
         if Ok:
-            if Ref[1].type == "int":
-                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* %"+str(Ref[1].id)+", align 4\n"
-                self.register_count += 1
-            elif Ref[1].type == "float":
-                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* %"+str(Ref[1].id)+", align 4\n"
-                self.register_count += 1
-            elif Ref[1].type == "char":
-                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* %"+str(Ref[1].id)+", align 4\n"
-                self.register_count += 1
+            print(node.symboltable.parent.parent, node.ref.symboltable)
+            if node.symboltable != node.ref.symboltable:
+                if node.ref.symboltable.parent is None:
+                    #global variable
+                    if Ref[1].type == "int":
+                        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* @"+str(Ref[1].id)+", align 4\n"
+                        self.register_count += 1
+                    elif Ref[1].type == "float":
+                        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* @"+str(Ref[1].id)+", align 4\n"
+                        self.register_count += 1
+                    elif Ref[1].type == "char":
+                        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* @"+str(Ref[1].id)+", align 4\n"
+                        self.register_count += 1
+                else:
+                    print("ID from other scope but not global not implemented yet")
+            else:
+                if Ref[1].type == "int":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* %"+str(Ref[1].id)+", align 4\n"
+                    self.register_count += 1
+                elif Ref[1].type == "float":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* %"+str(Ref[1].id)+", align 4\n"
+                    self.register_count += 1
+                elif Ref[1].type == "char":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* %"+str(Ref[1].id)+", align 4\n"
+                    self.register_count += 1
 
     def visitInitListExprNode(self, node):
         pass

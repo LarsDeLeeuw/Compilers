@@ -1,88 +1,82 @@
 digraph {n0 [label="File"];
-n1 [label="FuncDecl"];
-n2 [label="int ()"];
-n3 [label="main"];
-n4 [label="FuncScope"];
-n6 [label="Body"];
-n8 [label="DeclStmt"];
-n9 [label="VarDecl"];
-n10 [label="int"];
-n11 [label="x"];
-n12 [label="5"];
-n13 [label="IfStmt"];
-n15 [label="<"];
-n16 [label="x"];
-n17 [label="5"];
-n18 [label="Body"];
-n20 [label="ExprStmt"];
-n21 [label="CallExpr"];
-n22 [label="printf()"];
-n24 [label="IfStmt"];
-n26 [label=">="];
+n1 [label="VarDecl"];
+n2 [label="int"];
+n3 [label="x"];
+n4 [label="10"];
+n5 [label="FuncDecl"];
+n6 [label="int ()"];
+n7 [label="main"];
+n8 [label="FuncScope"];
+n10 [label="Body"];
+n12 [label="ExprStmt"];
+n13 [label="CallExpr"];
+n14 [label="printf()"];
+n16 [label="DeclStmt"];
+n17 [label="VarDecl"];
+n18 [label="int"];
+n19 [label="x"];
+n20 [label="20"];
+n21 [label="ExprStmt"];
+n22 [label="CallExpr"];
+n23 [label="printf()"];
+n25 [label="ExprStmt"];
+n26 [label="="];
 n27 [label="x"];
-n28 [label="5"];
-n29 [label="Body"];
-n31 [label="ExprStmt"];
-n32 [label="CallExpr"];
-n33 [label="printf()"];
-n35 [label="IfStmt"];
-n37 [label="&&"];
-n38 [label="=="];
-n39 [label="x"];
-n40 [label="5"];
-n41 [label="1"];
-n42 [label="Body"];
-n44 [label="IfStmt"];
-n46 [label="!="];
-n47 [label="x"];
-n48 [label="4"];
-n49 [label="Body"];
-n51 [label="ExprStmt"];
-n52 [label="CallExpr"];
-n53 [label="printf()"];
-n55 [label="ReturnStmt"];
-n56 [label="0"];
+n28 [label="30"];
+n29 [label="IfStmt"];
+n31 [label="1"];
+n32 [label="Body"];
+n34 [label="ExprStmt"];
+n35 [label="CallExpr"];
+n36 [label="printf()"];
+n38 [label="DeclStmt"];
+n39 [label="VarDecl"];
+n40 [label="int"];
+n41 [label="x"];
+n42 [label="40"];
+n43 [label="ExprStmt"];
+n44 [label="CallExpr"];
+n45 [label="printf()"];
+n47 [label="ReturnStmt"];
+n48 [label="1"];
 n0 -> n1
 n1 -> n2
 n1 -> n3
 n1 -> n4
-n4 -> n6
-n6 -> n8
-n8 -> n9
-n9 -> n10
-n9 -> n11
-n9 -> n12
-n6 -> n13
-n13 -> n15
-n15 -> n16
-n15 -> n17
-n13 -> n18
-n18 -> n20
-n20 -> n21
+n0 -> n5
+n5 -> n6
+n5 -> n7
+n5 -> n8
+n8 -> n10
+n10 -> n12
+n12 -> n13
+n13 -> n14
+n10 -> n16
+n16 -> n17
+n17 -> n18
+n17 -> n19
+n17 -> n20
+n10 -> n21
 n21 -> n22
-n6 -> n24
-n24 -> n26
+n22 -> n23
+n10 -> n25
+n25 -> n26
 n26 -> n27
 n26 -> n28
-n24 -> n29
+n10 -> n29
 n29 -> n31
-n31 -> n32
-n32 -> n33
-n6 -> n35
-n35 -> n37
-n37 -> n38
+n29 -> n32
+n32 -> n34
+n34 -> n35
+n35 -> n36
+n32 -> n38
 n38 -> n39
-n38 -> n40
-n37 -> n41
-n35 -> n42
-n42 -> n44
-n44 -> n46
-n46 -> n47
-n46 -> n48
-n44 -> n49
-n49 -> n51
-n51 -> n52
-n52 -> n53
-n6 -> n55
-n55 -> n56
+n39 -> n40
+n39 -> n41
+n39 -> n42
+n32 -> n43
+n43 -> n44
+n44 -> n45
+n10 -> n47
+n47 -> n48
 }
