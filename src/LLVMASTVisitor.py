@@ -782,7 +782,7 @@ class LLVMASTVisitor(ASTVisitor):
             else:
                 print("not implemented yet")
         else:
-            print("ohoh")
+            print("I dont know this bin op yet kind regards ~compiler")
 
     def visitUnaryExprNode(self, node):
         
@@ -858,7 +858,7 @@ class LLVMASTVisitor(ASTVisitor):
                     self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* @"+str(temp_node.id)+", align 4\n"
                     self.register_count += 1
                 else:
-                    print("BIG PANIc")
+                    print("this global ref id's type is a mystery to me \n~compiler")
             else:
                 serial = node.ref["serial"]
                 if temp_node.type == "int":
@@ -870,6 +870,8 @@ class LLVMASTVisitor(ASTVisitor):
                 elif temp_node.type == "char":
                     self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* %"+str(self.idshadowing[serial])+", align 4\n"
                     self.register_count += 1
+                else:
+                    print("this local ref id's type is a mystery to me \n~compiler")
 
     def visitInitListExprNode(self, node):
         pass
