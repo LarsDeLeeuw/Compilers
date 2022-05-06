@@ -180,6 +180,25 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         LLVMINPUT.close()
         CLANGLLVM.close()
 
+    def test_scoping(self):
+        inputfile = "../CompilersBenchmark/CorrectCode/scoping.c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists("scoping.ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', 'scoping.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
     
 
 def suite():

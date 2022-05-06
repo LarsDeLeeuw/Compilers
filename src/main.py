@@ -31,6 +31,7 @@ def main(argv):
     builder = BuildASTVisitor()
     builder.visit(cst)
     ASTree= builder.getAST()
+    STTree = builder.getSTT()
 
     if args.optimizations == 2:
         ASTConstFolding = ConstFoldingASTVisitor()
@@ -46,9 +47,10 @@ def main(argv):
         # Convert to darkmode
         check_call(['magick','OutputFile.jpg','-negate','OutputFile.jpg'])
     if args.visual == 2:
-        ASTree.stt.generateImage()
+        STTree.generateImage()
     
     ASTLLVM = LLVMASTVisitor()
+    ASTLLVM.loadSTT(STTree)
     ASTree.accept(ASTLLVM)
 
     if args.config == 2:

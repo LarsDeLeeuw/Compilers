@@ -18,7 +18,7 @@ class ProgNode(AbstractNode):
     def __init__(self):
         self.children = []
         self.includes = {}
-        self.symboltable = None
+
         
 class DeclNode(AbstractNode):
     """Superclass for DeclNodes"""
@@ -58,7 +58,6 @@ class FunctionDeclNode(DeclNode):
         self.used = False
         self.id = None
         self.included = False   # true if included from outer lib
-        self.symboltable = None
         self.return_type = None # string, if no return_type -> 'void'
         self.arg_types = []     # [string, ...)
         self.children = []      # first signature.len are ParmVar, last is ScopeStmt

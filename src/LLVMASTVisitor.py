@@ -1,5 +1,6 @@
 from ASTVisitor import ASTVisitor
 from ASTNodes import *
+import copy
 
 class LLVMASTVisitor(ASTVisitor):
 
@@ -14,24 +15,13 @@ class LLVMASTVisitor(ASTVisitor):
         self.land_count = 0
         self.if_count = 0
         self.current_label = None
-        self.currentST = None
+        self.STT = None
+        self.idshadowing = {}
+        self.idcount = {}
+        self.memory = {} # serial -> value
 
-    def checkST(self, id, st_node):
-        if id in st_node.symbols:
-            return (False, 0)
-        index = st_node.index
-        st_node.index += 1
-        return (True, index)
-
-    def findST(self, id, st_node):
-        lookST = st_node
-
-        while not (lookST is None):
-            if id in lookST.symbols:
-                return (True, lookST.symbols[id])
-            lookST = lookST.parent
-        
-        return (False, None)
+    def loadSTT(self, STT):
+        self.STT = copy.deepcopy(STT)
 
     def getRegister(self):
         self.register += 1
@@ -134,7 +124,10 @@ class LLVMASTVisitor(ASTVisitor):
             
             self.buffer["functs"] += ") {\nentry:\n"
             self.current_label = "entry"
-            self.currentST = node.symboltable
+
+            # Move to symboltable 
+            self.STT.child_scope()
+
             if node.id == "main":
                 self.buffer["functs"] += "\t" + "%retval = alloca i32, align 4\n"
 
@@ -142,51 +135,64 @@ class LLVMASTVisitor(ASTVisitor):
             
             self.buffer["functs"] += "}\n\n"
 
+            self.STT.prev_scope()
+
     def visitScopeStmtNode(self, node):
         # Declare and initialise where needed
-        for Symbol in node.symboltable.symbols:
-            if type(node.symboltable.symbols[Symbol][1]) is ParmVarDeclNode:
-                arg = node.symboltable.symbols[Symbol][1]
-                # Allocate
+        for symbol_id in self.STT.current_symboltablenode.hashtable.keys():
+            result = self.STT.lookup(symbol_id)
+            serial = result["serial"]
+            if type(result["ast_node"]) is ParmVarDeclNode:
+                arg = result["ast_node"]
+                if arg.id in self.idcount.keys():
+                    self.idcount[arg.id] += 1
+                else:
+                    self.idcount[arg.id] = 0
+                self.idshadowing[serial] = arg.id + str(self.idcount[arg.id])
+              # Allocate
                 if arg.type == 'int':
-                    self.buffer["functs"] += "\t" + "%" + arg.id
+                    self.buffer["functs"] += "\t" + "%" + self.idshadowing[serial]
                     self.buffer["functs"] += ".addr = alloca i32, align 4\n"
                 elif arg.type == 'float':
-                    self.buffer["functs"] += "\t" + "%" + arg.id
+                    self.buffer["functs"] += "\t" + "%" + self.idshadowing[serial]
                     self.buffer["functs"] += ".addr = alloca float, align 4\n"
                 # Init
                 if arg.type == 'int':
-                    self.buffer["functs"] += "\t" + "store i32 %" + arg.id
-                    self.buffer["functs"] += ", i32* %" + arg.id + ".addr, align 4\n"
+                    self.buffer["functs"] += "\t" + "store i32 %" + self.idshadowing[serial]
+                    self.buffer["functs"] += ", i32* %" + self.idshadowing[serial] + ".addr, align 4\n"
                 elif arg.type == 'float':
-                    self.buffer["functs"] += "\t" + "store float %" + arg.id
-                    self.buffer["functs"] += ", float* %" + arg.id + ".addr, align 4\n"
+                    self.buffer["functs"] += "\t" + "store float %" + self.idshadowing[serial]
+                    self.buffer["functs"] += ", float* %" + self.idshadowing[serial] + ".addr, align 4\n"
             else:
-                var = node.symboltable.symbols[Symbol][1]
+                var = result["ast_node"]
+                if var.id in self.idcount.keys():
+                    self.idcount[var.id] += 1
+                else:
+                    self.idcount[var.id] = 0
+                self.idshadowing[serial] = var.id + str(self.idcount[var.id])
                 # Allocate
                 if var.type == 'int':
-                    self.buffer["functs"] += "\t" + "%" + str(var.id)
+                    self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
                     self.buffer["functs"] += " = alloca i32, align 4\n"
                 elif var.type == 'float':
-                    self.buffer["functs"] += "\t" + "%" + str(var.id)
+                    self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
                     self.buffer["functs"] += " = alloca float, align 4\n"
                 elif var.type == 'char':
-                    self.buffer["functs"] += "\t" + "%" + str(var.id)
+                    self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
                     self.buffer["functs"] += " = alloca i8, align 4\n"
                 if var.init:
                     if not var.init_expr is None and issubclass(type(var.init_expr), LiteralNode):
                         # Init
+                        self.memory[serial] = var.init_expr.value
                         if var.type == 'int':
                             self.buffer["functs"] += "\t" + "store i32 " + str(var.init_expr.value)
-                            self.buffer["functs"] += ", i32* %" + str(var.id) + ", align 4\n"
+                            self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
                         elif var.type == 'float':
                             self.buffer["functs"] += "\t" + "store float " + str(var.init_expr.value)
-                            self.buffer["functs"] += ", float* %" + str(var.id) + ", align 4\n"
+                            self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
                         elif var.type == 'char':
                             self.buffer["functs"] += "\t" + "store i8 " + str(var.init_expr.value)
-                            self.buffer["functs"] += ", i8* %" + str(var.id) + ", align 4\n"
-
-      
+                            self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"  
 
         returnFlag = False
 
@@ -221,7 +227,6 @@ class LLVMASTVisitor(ASTVisitor):
             else:
                 raise Exception("Cannot generate default return for type: {}".format(node.parent.return_type))
         
-
     def visitReturnStmtNode(self, node):
         self.buffer["functs"] += "\tstore i32 "+str(node.child.value)+", i32* %retval, align 4\n"
         self.buffer["functs"] += "\t%"+str(self.register_count)+" = load i32, i32* %retval, align 4\n"
@@ -232,7 +237,6 @@ class LLVMASTVisitor(ASTVisitor):
         # load and eval cond node.children[0]
         condition_node = node.children[0]
         self.visit(condition_node)
-
         if condition_node.type == 'bool':
             label_true = "if.then" + str(self.if_count)
             label_end = "if.end" + str(self.if_count)
@@ -243,26 +247,58 @@ class LLVMASTVisitor(ASTVisitor):
 
             self.buffer["functs"] += label_true + ":\n"
             self.current_label = label_true
+            self.STT.child_scope()
             self.visit(node.children[1])
+            self.STT.prev_scope()
             self.buffer["functs"] += "\tbr label %" + label_end + "\n\n"
 
             if node.has_else:
                 self.buffer["functs"] += label_false + ":\n"
                 self.current_label = label_false
+                self.STT.child_scope()
                 self.visit(node.children[2])
+                self.STT.prev_scope()
                 self.buffer["functs"] += "\tbr label %" + label_end + "\n\n"
 
             self.buffer["functs"] += label_end + ":\n"
             self.current_label = label_end
         else:
-            print("Something not implemented yet in ifstmtnode " + condition_node.type)
-        
+            if condition_node.type == 'int':
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(self.register_count-1) + ", 0\n"
+                self.register_count += 1
+            else:
+                print("Something not implemented yet in ifstmtnode " + condition_node.type)
+                return
+            label_true = "if.then" + str(self.if_count)
+            label_end = "if.end" + str(self.if_count)
+            label_false = str("if.else" + str(self.if_count)) if node.has_else else label_end
+            self.if_count += 1
+
+            self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_true + ", label %" + label_false + "\n\n"
+
+            self.buffer["functs"] += label_true + ":\n"
+            self.current_label = label_true
+            self.STT.child_scope()
+            self.visit(node.children[1])
+            self.STT.prev_scope()
+            self.buffer["functs"] += "\tbr label %" + label_end + "\n\n"
+
+            if node.has_else:
+                self.buffer["functs"] += label_false + ":\n"
+                self.current_label = label_false
+                self.STT.child_scope()
+                self.visit(node.children[2])
+                self.STT.prev_scope()
+                self.buffer["functs"] += "\tbr label %" + label_end + "\n\n"
+
+            self.buffer["functs"] += label_end + ":\n"
+            self.current_label = label_end
 
 
     def visitExprStmtNode(self, node):
         if type(node.child) is BinExprNode:
             if node.child.operation == "=":
-                pass
+                self.visit(node.child)
             else:
                 self.visit(node.child)
         else:
@@ -270,10 +306,12 @@ class LLVMASTVisitor(ASTVisitor):
             
 
     def visitCallExprNode(self, node):
-        funct_node = node.children[0]
-        (idIsOk, Ref) = self.findST(funct_node.id, funct_node.symboltable)
-        if idIsOk:
-            if Ref[1].included:
+        funct_node = node.children[0].ref["ast_node"]
+        result = self.STT.lookup(funct_node.id)
+        if result is None:
+            print("gotta fix this")
+        else:
+            if funct_node.included:
                 if funct_node.id == "printf":
                     # Amount of i8 string contains
                     byte_len = str(len(node.children[1].value)+node.children[1].offset+1)
@@ -319,8 +357,9 @@ class LLVMASTVisitor(ASTVisitor):
                             else:
                                 self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
                     self.call_count += 1
-        else:
-            raise Exception("Cannot generate LLVM for call at line: {}, ID not found in symboltables", node.line)
+            else:
+                print("cant call own functions yet sorry bro")
+        
 
     def visitBinExprNode(self, node):
         
@@ -349,8 +388,11 @@ class LLVMASTVisitor(ASTVisitor):
                 self.visitUnaryExprNode(node.lhs_child)
                 lhs_register_count = self.register_count - 1
             elif type(node.lhs_child) is DeclRefExprNode:
-                self.visitDeclRefExprNode(node.lhs_child)
-                lhs_register_count = self.register_count - 1
+                if node.operation == "=":
+                    pass
+                else:
+                    self.visitDeclRefExprNode(node.lhs_child)
+                    lhs_register_count = self.register_count - 1
             else:
                 raise Exception("Bad BinExpr")
         
@@ -732,6 +774,15 @@ class LLVMASTVisitor(ASTVisitor):
             self.register_count += 1
             # self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
             # self.register_count += 1
+        elif node.operation == "=":
+            serial = node.lhs_child.ref["serial"]
+            if node.lhs_child.type == 'int':
+                self.buffer["functs"] += "\t" + "store i32 " + "%"+str(rhs_register_count)
+                self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
+            else:
+                print("not implemented yet")
+        else:
+            print("ohoh")
 
     def visitUnaryExprNode(self, node):
         
@@ -791,32 +842,33 @@ class LLVMASTVisitor(ASTVisitor):
         #         self.register_count += 1
 
     def visitDeclRefExprNode(self, node):
-        (Ok, Ref) = self.findST(node.ref.id, node.symboltable)
-        if Ok:
-            print(node.symboltable.parent.parent, node.ref.symboltable)
-            if node.symboltable != node.ref.symboltable:
-                if node.ref.symboltable.parent is None:
-                    #global variable
-                    if Ref[1].type == "int":
-                        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* @"+str(Ref[1].id)+", align 4\n"
-                        self.register_count += 1
-                    elif Ref[1].type == "float":
-                        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* @"+str(Ref[1].id)+", align 4\n"
-                        self.register_count += 1
-                    elif Ref[1].type == "char":
-                        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* @"+str(Ref[1].id)+", align 4\n"
-                        self.register_count += 1
+        result = self.STT.lookup(node.ref["ast_node"].id)
+        if result is None:
+            print("gotta fix this")
+        else:
+            temp_node = node.ref["ast_node"]
+            if node.ref["global"]:
+                if temp_node.type == "int":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* @"+str(temp_node.id)+", align 4\n"
+                    self.register_count += 1
+                elif temp_node.type == "float":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* @"+str(temp_node.id)+", align 4\n"
+                    self.register_count += 1
+                elif temp_node.type == "char":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* @"+str(temp_node.id)+", align 4\n"
+                    self.register_count += 1
                 else:
-                    print("ID from other scope but not global not implemented yet")
+                    print("BIG PANIc")
             else:
-                if Ref[1].type == "int":
-                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* %"+str(Ref[1].id)+", align 4\n"
+                serial = node.ref["serial"]
+                if temp_node.type == "int":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32, i32* %"+str(self.idshadowing[serial])+", align 4\n"
                     self.register_count += 1
-                elif Ref[1].type == "float":
-                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* %"+str(Ref[1].id)+", align 4\n"
+                elif temp_node.type == "float":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load float, float* %"+str(self.idshadowing[serial])+", align 4\n"
                     self.register_count += 1
-                elif Ref[1].type == "char":
-                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* %"+str(Ref[1].id)+", align 4\n"
+                elif temp_node.type == "char":
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* %"+str(self.idshadowing[serial])+", align 4\n"
                     self.register_count += 1
 
     def visitInitListExprNode(self, node):

@@ -188,7 +188,7 @@ class VisualASTVisitor(ASTVisitor):
         self.nodecount += 1
 
         call_node = "n"+str((self.nodecount))
-        call_node_label = node.children[0].id + "()"
+        call_node_label = node.children[0].ref["ast_node"].id + "()"
 
         self.labelbuffer += call_node+' [label="'+ call_node_label +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ call_node +"\n"
