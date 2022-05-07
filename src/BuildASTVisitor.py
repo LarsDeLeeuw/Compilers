@@ -260,8 +260,26 @@ class BuildASTVisitor(GrammarVisitor):
 
     # Visit a parse tree produced by GrammarParser#whileStat.
     def visitWhileStat(self, ctx:GrammarParser.WhileStatContext):
-        # TODO
         node = WhileStmtNode()
+        node.line = ctx.start.line
+        cond_node = self.visit(ctx.expr())
+        cond_node.parent = node
+        node.children.append(cond_node)
+
+        # Create SymbolTable for WhileBlock
+        self.STT.new_scope()
+
+        while_scope = ScopeStmtNode()
+        while_scope.parent = node
+        for stat in ctx.stat():
+            stat_node = self.visit(stat)
+            stat_node.parent = while_scope
+            while_scope.children.append(stat_node)
+        node.children.append(while_scope)
+
+        # Return to SymbolTable where WhileBlock declared
+        self.STT.prev_scope()
+
         return node
 
     # Visit a parse tree produced by GrammarParser#ifStat.
@@ -289,7 +307,7 @@ class BuildASTVisitor(GrammarVisitor):
         if ctx.KEY_ELSE() is None:
             pass
         else:
-             # Create SymbolTable for fblock
+            # Create SymbolTable for fblock
             self.STT.new_scope()
 
             node.has_else = True
@@ -327,7 +345,7 @@ class BuildASTVisitor(GrammarVisitor):
         node = ContinueStmtNode()
         node.line = ctx.start.line
         return node
-        
+
     # Visit a parse tree produced by GrammarParser#binExpr.
     def visitBinExpr(self, ctx:GrammarParser.BinExprContext):
         node = BinExprNode()
@@ -423,20 +441,39 @@ class BuildASTVisitor(GrammarVisitor):
                 node.type = node.lhs_child.type
             return node
 
+    # Visit a parse tree produced by GrammarParser#postUnaryExpr.
+    def visitPostUnaryExpr(self, ctx:GrammarParser.PostUnaryExprContext):
+        node = UnaryExprNode()
+        switcher = {
+            GrammarLexer.PPP : "++",
+            GrammarLexer.MPP : "--"
+        }
+        expr_node = self.visit(ctx.expr())
+        expr_node.parent = node
+        node.child = expr_node
+        node.prefix = False
+        node.operation = switcher.get(ctx.op.type, None)
+        node.type = node.child.type
+        node.child = expr_node
+        return node
 
-    # Visit a parse tree produced by GrammarParser#unaryExpr.
-    def visitUnaryExpr(self, ctx:GrammarParser.UnaryExprContext):
+
+    # Visit a parse tree produced by GrammarParser#preUnaryExpr.
+    def visitPreUnaryExpr(self, ctx:GrammarParser.PreUnaryExprContext):
         node = UnaryExprNode()
         switcher = {
             GrammarLexer.ADD : "+",
             GrammarLexer.SUB : "-",
             GrammarLexer.NOT : "!",
             GrammarLexer.DRF : "&",
-            GrammarLexer.MUL : "*"
+            GrammarLexer.MUL : "*",
+            GrammarLexer.PPP : "++",
+            GrammarLexer.MPP : "--"
         }
         expr_node = self.visit(ctx.expr())
         expr_node.parent = node
         node.child = expr_node
+        node.prefix = True
         node.operation = switcher.get(ctx.op.type, None)
         if node.operation == "!":
                 node.type = 'int'

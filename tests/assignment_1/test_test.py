@@ -59,8 +59,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
 
     def test_breakAndContinue(self):
-        if not exists("input/dummy"):
-            self.skipTest("not developed yet")
         inputfile = "../CompilersBenchmark/CorrectCode/breakAndContinue.c"
         call(['python', '../../src/main.py', "-f"+inputfile])
         LLVMOutput = open("LLVMOutput", "w")
@@ -314,6 +312,26 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         
         CLANGLLVM = open("CLANGLLVM", 'w')
         CLANGLLVM.write(str(run(['lli', 'variables3.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_while(self):
+        inputfile = "../CompilersBenchmark/CorrectCode/while.c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists("while.ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', 'while.ll'], capture_output=True).stdout))
         CLANGLLVM.close()
 
         LLVMINPUT = open("LLVMOutput", "r")

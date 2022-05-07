@@ -125,12 +125,21 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by GrammarParser#unaryExpr.
-    def enterUnaryExpr(self, ctx:GrammarParser.UnaryExprContext):
+    # Enter a parse tree produced by GrammarParser#postUnaryExpr.
+    def enterPostUnaryExpr(self, ctx:GrammarParser.PostUnaryExprContext):
         pass
 
-    # Exit a parse tree produced by GrammarParser#unaryExpr.
-    def exitUnaryExpr(self, ctx:GrammarParser.UnaryExprContext):
+    # Exit a parse tree produced by GrammarParser#postUnaryExpr.
+    def exitPostUnaryExpr(self, ctx:GrammarParser.PostUnaryExprContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#preUnaryExpr.
+    def enterPreUnaryExpr(self, ctx:GrammarParser.PreUnaryExprContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#preUnaryExpr.
+    def exitPreUnaryExpr(self, ctx:GrammarParser.PreUnaryExprContext):
         pass
 
 

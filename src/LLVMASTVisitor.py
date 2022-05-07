@@ -13,12 +13,16 @@ class LLVMASTVisitor(ASTVisitor):
         self.register_count = 0
         self.lor_count = 0
         self.land_count = 0
+        self.inc_count = 0
         self.if_count = 0
+        self.while_count = 0
         self.current_label = None
         self.STT = None
         self.idshadowing = {}
         self.idcount = {}
         self.arrayidx_count = 0
+        self.loop_stack = []
+        self.absolute_br = []
 
     def loadSTT(self, STT):
         self.STT = copy.deepcopy(STT)
@@ -269,6 +273,47 @@ class LLVMASTVisitor(ASTVisitor):
         self.buffer["functs"] += "\tret i32 %"+str(self.register_count)+"\n"
         self.register_count += 1
 
+    def visitBreakStmtNode(self, node):
+        self.absolute_br.append(self.loop_stack[-1][1])
+        # self.buffer["functs"] += "\tbr label %" + self.loop_stack[-1][1] + "\n\n"
+
+    def visitContinueStmtNode(self, node):
+        self.absolute_br.append(self.loop_stack[-1][0])
+        # self.buffer["functs"] += "\tbr label %" + self.loop_stack[-1][0] + "\n\n"
+
+    def visitWhileStmtNode(self, node):
+        label_cond = "while.cond" + str(self.while_count)
+        label_body = "while.body" + str(self.while_count)
+        label_end = "while.end" + str(self.while_count)
+        self.while_count += 1
+        self.loop_stack.append((label_cond, label_end))
+
+        self.buffer["functs"] += "\tbr label %" + label_cond + "\n\n"
+        self.current_label = label_cond
+        self.buffer["functs"] += label_cond + ":\n"
+        condition_node = node.children[0]
+        self.visit(condition_node)
+
+        if condition_node.type == 'bool':
+            pass
+        else:
+            print("somying whilestmt type")
+        self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_body + ", label %" + label_end + "\n\n"
+
+        self.buffer["functs"] += label_body + ":\n"
+        self.current_label = label_body
+        self.STT.child_scope()
+        self.visit(node.children[1])
+        self.buffer["functs"] += "\tbr label %" + label_cond + "\n\n"
+        self.STT.prev_scope()
+        if len(self.loop_stack) != 0:
+            if self.loop_stack[-1] == (label_cond, label_end):
+                self.loop_stack.pop()
+        
+        self.buffer["functs"] += label_end + ":\n"
+        self.current_label = label_end
+
+
     def visitIfStmtNode(self, node):
         # load and eval cond node.children[0]
         condition_node = node.children[0]
@@ -283,18 +328,26 @@ class LLVMASTVisitor(ASTVisitor):
 
             self.buffer["functs"] += label_true + ":\n"
             self.current_label = label_true
+            self.absolute_br.append(label_end)
             self.STT.child_scope()
             self.visit(node.children[1])
             self.STT.prev_scope()
-            self.buffer["functs"] += "\tbr label %" + label_end + "\n\n"
+            br_to = self.absolute_br.pop()
+            if br_to != label_end:
+                self.absolute_br.remove(label_end)
+            self.buffer["functs"] += "\tbr label %" + br_to + "\n\n"
 
             if node.has_else:
                 self.buffer["functs"] += label_false + ":\n"
                 self.current_label = label_false
+                self.absolute_br.append(label_end)
                 self.STT.child_scope()
                 self.visit(node.children[2])
                 self.STT.prev_scope()
-                self.buffer["functs"] += "\tbr label %" + label_end + "\n\n"
+                br_to = self.absolute_br.pop()
+                if br_to != label_end:
+                    self.absolute_br.remove(label_end)
+                self.buffer["functs"] += "\tbr label %" + br_to + "\n\n"
 
             self.buffer["functs"] += label_end + ":\n"
             self.current_label = label_end
@@ -314,19 +367,27 @@ class LLVMASTVisitor(ASTVisitor):
 
             self.buffer["functs"] += label_true + ":\n"
             self.current_label = label_true
+            self.absolute_br.append(label_end)
             self.STT.child_scope()
             self.visit(node.children[1])
             self.STT.prev_scope()
-            self.buffer["functs"] += "\tbr label %" + label_end + "\n\n"
+            br_to = self.absolute_br.pop()
+            if br_to != label_end:
+                self.absolute_br.remove(label_end)
+            self.buffer["functs"] += "\tbr label %" + br_to + "\n\n"
 
             if node.has_else:
                 self.buffer["functs"] += label_false + ":\n"
                 self.current_label = label_false
+                self.absolute_branch.append(label_end)
                 self.STT.child_scope()
                 self.visit(node.children[2])
                 self.STT.prev_scope()
-                self.buffer["functs"] += "\tbr label %" + label_end + "\n\n"
-
+                self.buffer["functs"] += "\tbr label %" + self.absolute_br + "\n\n"
+                br_to = self.absolute_br.pop()
+                if br_to != label_end:
+                    self.absolute_br.remove(label_end)
+                self.buffer["functs"] += "\tbr label %" + br_to + "\n\n"
             self.buffer["functs"] += label_end + ":\n"
             self.current_label = label_end
 
@@ -898,10 +959,20 @@ class LLVMASTVisitor(ASTVisitor):
         if node.operation == "!":
             # self.buffer["functs"] += "\t%" + str(self.register_count) + " = icmp ne i32 %" + str(child_register_count) + ", 0\n"
             # self.register_count += 1
-            self.buffer["functs"] += "\t%" + str(self.register_count) + " = xor i1 %" +str(self.register_count-1)+", true\n"
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = xor i1 %" +str(child_register_count)+", true\n"
             self.register_count += 1
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
             self.register_count += 1
+        elif node.operation == "++" and not node.prefix:
+            if not (type(node.child) is DeclRefExprNode):
+                print("I can only perform this on IdRef")
+            serial = node.child.ref["serial"]
+            if node.child.type == 'int':
+                self.buffer["functs"] += "\t%" + "inc"+str(self.inc_count) + " = add nsw i32 %" +str(child_register_count)+", 1\n"
+                self.inc_count += 1
+                self.buffer["functs"] += "\tstore i32 %" + "inc"+str(self.inc_count-1) + ", i32* %"+ self.idshadowing[serial] + ", align 4\n"
+            else:
+                raise Exception("LLVM Panic")
 
     def visitDeclStmtNode(self, node):
         pass

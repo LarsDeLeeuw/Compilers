@@ -160,6 +160,18 @@ class VisualASTVisitor(ASTVisitor):
 
         self.visit(node.child)
 
+    def visitBreakStmtNode(self, node):
+        thisnode = "n"+str((self.nodecount))
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
+        self.nodecount += 1
+        self.labelbuffer += thisnode+' [label="'+ str("BreakStmt") +'"];\n'
+
+    def visitContinueStmtNode(self, node):
+        thisnode = "n"+str((self.nodecount))
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
+        self.nodecount += 1
+        self.labelbuffer += thisnode+' [label="'+ str("ContinueStmt") +'"];\n'
+
 
     def visitBinExprNode(self, node):
         thisnode = "n"+str((self.nodecount))

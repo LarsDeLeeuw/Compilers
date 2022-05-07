@@ -4,6 +4,9 @@ My grammar is in src/Grammar.g4,
     
 To run python main.py input.c
 
+TODO: Throw syntax error when break or continue statement not in loop/switch
+      Implement DeadCode/Unreachable Code, my break and continue depend on it, break/return/continueStmt node should be last stmtnode of a scope
+
 
 # About
 This compiler is written in python and attempts to succesfully compile a subset of the C language to MIPS instructions using ANTLR.

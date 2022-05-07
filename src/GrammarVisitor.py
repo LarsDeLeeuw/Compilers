@@ -74,8 +74,13 @@ class GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GrammarParser#unaryExpr.
-    def visitUnaryExpr(self, ctx:GrammarParser.UnaryExprContext):
+    # Visit a parse tree produced by GrammarParser#postUnaryExpr.
+    def visitPostUnaryExpr(self, ctx:GrammarParser.PostUnaryExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#preUnaryExpr.
+    def visitPreUnaryExpr(self, ctx:GrammarParser.PreUnaryExprContext):
         return self.visitChildren(ctx)
 
 

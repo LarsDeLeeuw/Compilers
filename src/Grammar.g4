@@ -20,7 +20,8 @@ alias: stat* ;
 
 expr
     : '(' expr ')'                                          # parensExpr
-    | op=('+'|'-'|'!'|'*'|'&') expr                         # unaryExpr
+    | op=('+'|'-'|'!'|'*'|'&'|'--'|'++') expr               # preUnaryExpr
+    | expr op=('++'|'--')                                   # postUnaryExpr
     | left=expr op=('*'|'/') right=expr                     # binExpr
     | left=expr op=('+'|'-'|'%') right=expr                 # binExpr
     | left=expr op=('>'|'<') right=expr                     # binExpr
@@ -62,6 +63,8 @@ AND : '&&';
 OR  : '||';
 MOD : '%' ;
 DRF : '&' ;
+PPP : '++';
+MPP : '--';
 
 KEY_CHARPTR : 'char' '*' ;
 KEY_FLOATPTR    : 'float' '*' ;

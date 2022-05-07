@@ -124,7 +124,7 @@ class IfStmtNode(StmtNode):
 class WhileStmtNode(StmtNode):
     
     def __init__(self):
-        self.children = []
+        self.children = []      # first child is cond, next scope
 
 class ReturnStmtNode(StmtNode):
     
