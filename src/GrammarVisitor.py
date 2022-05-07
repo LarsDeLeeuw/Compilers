@@ -54,6 +54,16 @@ class GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by GrammarParser#breakStat.
+    def visitBreakStat(self, ctx:GrammarParser.BreakStatContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#continueStat.
+    def visitContinueStat(self, ctx:GrammarParser.ContinueStatContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by GrammarParser#alias.
     def visitAlias(self, ctx:GrammarParser.AliasContext):
         return self.visitChildren(ctx)

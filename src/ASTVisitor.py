@@ -32,6 +32,12 @@ class ASTVisitor:
     def visitReturnStmtNode(self, node):
         pass
 
+    def visitBreakStmtNode(self, node):
+        pass
+
+    def visitContinueStmtNode(self, node):
+        pass
+
     def visitBinExprNode(self, node):
         pass
 
@@ -89,6 +95,10 @@ class ASTVisitor:
             return self.visitWhileStmtNode(node)
         elif node_type is ReturnStmtNode:
             return self.visitReturnStmtNode(node)
+        elif node_type is BreakStmtNode:
+            return self.visitBreakStmtNode(node)
+        elif node_type is ContinueStmtNode:
+            return self.visitContinueStmtNode(node)
         elif node_type is ExprStmtNode:
             return self.visitExprStmtNode(node)
         elif node_type is BinExprNode:

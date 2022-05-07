@@ -22,13 +22,14 @@ class ProgNode(AbstractNode):
         
 class DeclNode(AbstractNode):
     """Superclass for DeclNodes"""
-    pass
+    
+    def __init__(self):
+        self.line = None    # int
+        self.column = None  # int
 
 class VarDeclNode(DeclNode):
     
     def __init__(self):
-        self.line = None        # int row
-        self.column = None
         self.used = False
         self.id = None          # string
         self.type = None        # string
@@ -53,7 +54,6 @@ class VarDeclNode(DeclNode):
 class FunctionDeclNode(DeclNode):
     
     def __init__(self):
-        self.line = None
         self.init = False
         self.used = False
         self.id = None
@@ -96,6 +96,7 @@ class StmtNode(AbstractNode):
     
     def __init__(self):
         self.line = None
+        self.column = None
 
 class ScopeStmtNode(StmtNode):
     '''Node containing statements in same scope'''
@@ -130,12 +131,22 @@ class ReturnStmtNode(StmtNode):
     def __init__(self):
         self.child = None
 
+class BreakStmtNode(StmtNode):
+
+    def __init__(self):
+        pass
+
+class ContinueStmtNode(StmtNode):
+
+    def __init__(self):
+        pass
 
 class ExprNode(AbstractNode):
     '''Superclass for ExprNodes'''
     
     def __init__(self):
         self.line = None
+        self.column = None
 
 class BinExprNode(ExprNode):
     
@@ -196,6 +207,8 @@ class LiteralNode(ExprNode):
     '''Superclass for LiteralNodes'''
     
     def __init__(self):
+        self.line = None
+        self.column = None
         self.type = None
         self.value = None
         self.offset = 0

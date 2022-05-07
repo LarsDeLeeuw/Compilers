@@ -12,6 +12,8 @@ stat: expr ';'                                                                  
     | KEY_WHILE '(' expr ')' '{' stat* '}'                                                          # whileStat
     | KEY_IF '(' expr ')' '{' stat* '}' (KEY_ELSE '{' alias '}')?                                   # ifStat
     | KEY_RETURN expr ';'                                                                           # returnStat
+    | KEY_BREAK ';'                                                                                 # breakStat
+    | KEY_CONTINUE ';'                                                                              # continueStat
     ;
 
 alias: stat* ;
