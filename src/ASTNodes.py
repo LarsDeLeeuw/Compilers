@@ -63,7 +63,10 @@ class FunctionDeclNode(DeclNode):
         self.children = []      # first signature.len are ParmVar, last is ScopeStmt
 
     def getSignature(self):
-        output = self.return_type + " ("
+        if self.return_type is None:
+            output = "void ("
+        else:
+            output = self.return_type + " ("
         index = 0
         lensign = len(self.arg_types)
         for sign in self.arg_types:

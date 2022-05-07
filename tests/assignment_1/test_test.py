@@ -118,18 +118,111 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         LLVMINPUT.close()
         CLANGLLVM.close()
 
-    def test_variables1(self):
-        inputfile = "../CompilersBenchmark/CorrectCode/variables1.c"
+    def test_dereferenceAssignment(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "dereferenceAssignment"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
         LLVMOutput = open("LLVMOutput", "w")
         LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
         LLVMOutput.close()
         
-        if not exists("variables1.ll"):
+        if not exists(name+".ll"):
             run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
-
+        
         CLANGLLVM = open("CLANGLLVM", 'w')
-        CLANGLLVM.write(str(run(['lli', 'variables1.ll'], capture_output=True).stdout))
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_fibonacciRecursive(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "fibonacciRecursive"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_floatToIntConversion(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "floatToIntConversion"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_for(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "for"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_forwardDeclaration(self):
+        name = "forwardDeclaration"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
         CLANGLLVM.close()
 
         LLVMINPUT = open("LLVMOutput", "r")
@@ -170,6 +263,98 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
 
         CLANGLLVM = open("CLANGLLVM", 'w')
         CLANGLLVM.write(str(run(['lli', 'ifElse.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_intToFloatConversion(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "intToFloatConversion"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+    
+    def test_modulo(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "modulo"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+    
+    def test_pointerArgument(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "pointerArgument"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+    
+    def test_prime(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "prime"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
         CLANGLLVM.close()
 
         LLVMINPUT = open("LLVMOutput", "r")
@@ -259,6 +444,75 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
         LLVMINPUT.close()
         CLANGLLVM.close()
+    
+    def test_scanf1(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "scanf1"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_scanf2(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "scanf2"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_unaryOperations(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "unaryOperations"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
 
     def test_variables1(self):
         inputfile = "../CompilersBenchmark/CorrectCode/variables1.c"
@@ -312,6 +566,117 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         
         CLANGLLVM = open("CLANGLLVM", 'w')
         CLANGLLVM.write(str(run(['lli', 'variables3.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_variables4(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "variables4"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_variables5(self):
+        name = "variables5"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_variables6(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "variables6"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+    
+    def test_variables7(self):
+        name = "variables7"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
+
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
+
+    def test_variables8(self):
+        if not exists("input/dummy"):
+            self.skipTest("not implemented yet")
+        name = "variables8"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
+        
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
         CLANGLLVM.close()
 
         LLVMINPUT = open("LLVMOutput", "r")

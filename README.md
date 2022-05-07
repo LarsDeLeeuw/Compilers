@@ -6,6 +6,7 @@ To run python main.py input.c
 
 TODO: Throw syntax error when break or continue statement not in loop/switch
       Implement DeadCode/Unreachable Code, my break and continue depend on it, break/return/continueStmt node should be last stmtnode of a scope
+      forwardDeclaration.c works but is not fully implemented yet for example arguments arent checked yet when init an decl function
 
 
 # About

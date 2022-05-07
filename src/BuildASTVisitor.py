@@ -112,12 +112,13 @@ class BuildASTVisitor(GrammarVisitor):
 
     # Visit a parse tree produced by GrammarParser#funcheadsupDecl.
     def visitFuncheadsupDecl(self, ctx:GrammarParser.FuncheadsupDeclContext):
-        # TODO
         node = FunctionDeclNode()
         node.line = ctx.start.line
-
+        node.init = False
         if(ctx.KEY_VOID() is None):
             node.return_type = ctx.prim()[0].getText()
+        else:
+            node.return_type = "void"
         node.id = ctx.ID()[0].getText()
         if(len(ctx.prim()) > 1):
             for i in range(len(ctx.prim())-1):
@@ -128,6 +129,13 @@ class BuildASTVisitor(GrammarVisitor):
                 parm_var.type = parm_type
                 parm_var.id = parm_id
                 node.children.append(parm_var)
+        
+        result = self.STT.insert(node.id)
+        if result is None:
+            raise Exception("Failed to insert Function '{}' in symboltable".format(node.id))
+        else:
+            self.STT.set_attribute(node.id, "ast_node", node)
+            self.STT.set_attribute(node.id, "object", "Function")
 
         return node
 
@@ -144,16 +152,28 @@ class BuildASTVisitor(GrammarVisitor):
 
         if(ctx.KEY_VOID() is None):
             node.return_type = ctx.prim()[0].getText()
-        if(len(ctx.prim()) > 1):
-            for i in range(len(ctx.prim())-1):
-                parm_type = ctx.prim()[i+1].getText()
-                parm_id = ctx.ID()[i+1].getText()
-                node.arg_types.append(parm_type)
-                parm_var = ParmVarDeclNode()
-                parm_var.type = parm_type
-                parm_var.id = parm_id
-                parm_var.parent = node
-                node.children.append(parm_var)
+            if(len(ctx.prim()) > 1):
+                for i in range(len(ctx.prim())-1):
+                    parm_type = ctx.prim()[i+1].getText()
+                    parm_id = ctx.ID()[i+1].getText()
+                    node.arg_types.append(parm_type)
+                    parm_var = ParmVarDeclNode()
+                    parm_var.type = parm_type
+                    parm_var.id = parm_id
+                    parm_var.parent = node
+                    node.children.append(parm_var)
+        else:
+            node.return_type = "void"
+            if(len(ctx.prim()) > 0):
+                for i in range(len(ctx.prim())):
+                    parm_type = ctx.prim()[i].getText()
+                    parm_id = ctx.ID()[i+1].getText()
+                    node.arg_types.append(parm_type)
+                    parm_var = ParmVarDeclNode()
+                    parm_var.type = parm_type
+                    parm_var.id = parm_id
+                    parm_var.parent = node
+                    node.children.append(parm_var)
         
         for parmvar_node in node.children:
             result = self.STT.insert(parmvar_node.id)
@@ -179,7 +199,12 @@ class BuildASTVisitor(GrammarVisitor):
 
         result = self.STT.insert(node.id)
         if result is None:
-            raise Exception("Failed to insert Function '{}' in symboltable".format(node.id))
+            check_declared = self.STT.lookup(node.id)
+            if check_declared is None:
+                raise Exception("Failed to insert Function '{}' in symboltable".format(node.id))
+            else:
+                self.STT.set_attribute(node.id, "ast_node", node)
+                self.STT.set_attribute(node.id, "object", "Function")
         else:
             self.STT.set_attribute(node.id, "ast_node", node)
             self.STT.set_attribute(node.id, "object", "Function")
@@ -328,10 +353,11 @@ class BuildASTVisitor(GrammarVisitor):
     def visitReturnStat(self, ctx:GrammarParser.ReturnStatContext):
         node = ReturnStmtNode()
         if ctx.expr() is None:
-            raise Exception("Return of empty expr not supported")
-        return_expr = self.visit(ctx.expr())
-        return_expr.parent = node
-        node.child = return_expr
+            pass
+        else:
+            return_expr = self.visit(ctx.expr())
+            return_expr.parent = node
+            node.child = return_expr
         return node
 
     # Visit a parse tree produced by GrammarParser#breakStat.

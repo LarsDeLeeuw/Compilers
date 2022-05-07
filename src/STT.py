@@ -95,9 +95,9 @@ class STT:
         index = 0
         for symbol_id in self.current_symboltablenode.hashtable.keys():
             if index == self.current_symboltablenode.size -1:
-                symbolsstr += "|{ " + str(self.current_symboltablenode.hashtable[symbol_id]) + "| " + symbol_id + "|" +  str(self.lookup(symbol_id)["ast_node"].used) + "}"
+                symbolsstr += "|{ " + str(self.current_symboltablenode.hashtable[symbol_id]) + "| " + symbol_id + "|" +  str(self.lookup(symbol_id)["ast_node"]) + "}"
             else:
-                symbolsstr += "|{ " + str(self.current_symboltablenode.hashtable[symbol_id]) + "| " + symbol_id + "|" +  str(self.lookup(symbol_id)["ast_node"].used) + "}"
+                symbolsstr += "|{ " + str(self.current_symboltablenode.hashtable[symbol_id]) + "| " + symbol_id + "|" +  str(self.lookup(symbol_id)["ast_node"]) + "}"
             index += 1
         self.labelbuffer += "n"+str(self.nodecount)+' [label="{SymbolTable '+ symbolsstr +'}"];\n'
 
@@ -124,7 +124,7 @@ class SymbolTableNode:
     def insert(self, symbol_id):
         # Check if symbol_id already in symboltable
         if symbol_id in self.hashtable.keys():
-            sys.stderr.write("Tried inserting symbol_id that was already present in symboltable")
+            # sys.stderr.write("Tried inserting symbol_id that was already present in symboltable")
             return None
         else:
             self.hashtable[symbol_id] = self.size

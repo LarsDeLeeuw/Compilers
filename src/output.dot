@@ -1,44 +1,90 @@
 digraph {n0 [label="File"];
 n1 [label="FuncDecl"];
-n2 [label="int ()"];
-n3 [label="main"];
+n2 [label="void ()"];
+n3 [label="f"];
 n4 [label="FuncScope"];
-n6 [label="Body"];
-n8 [label="DeclStmt"];
-n9 [label="VarDecl"];
-n10 [label="int"];
-n11 [label="i"];
-n12 [label="0"];
-n13 [label="WhileStmt"];
-n15 [label="<"];
-n16 [label="i"];
-n17 [label="5"];
-n18 [label="Body"];
-n20 [label="ExprStmt"];
-n22 [label="ExprStmt"];
-n23 [label="CallExpr"];
-n24 [label="printf()"];
-n26 [label="ReturnStmt"];
-n27 [label="1"];
+n6 [label="FuncDecl"];
+n7 [label="void ()"];
+n8 [label="g"];
+n9 [label="FuncScope"];
+n11 [label="FuncDecl"];
+n12 [label="void ()"];
+n13 [label="f"];
+n14 [label="FuncScope"];
+n16 [label="Body"];
+n18 [label="ExprStmt"];
+n19 [label="CallExpr"];
+n20 [label="printf()"];
+n22 [label="ReturnStmt"];
+n24 [label="FuncDecl"];
+n25 [label="void ()"];
+n26 [label="g"];
+n27 [label="FuncScope"];
+n29 [label="Body"];
+n31 [label="ExprStmt"];
+n32 [label="CallExpr"];
+n33 [label="printf()"];
+n35 [label="ExprStmt"];
+n36 [label="CallExpr"];
+n37 [label="f()"];
+n39 [label="ExprStmt"];
+n40 [label="CallExpr"];
+n41 [label="printf()"];
+n43 [label="FuncDecl"];
+n44 [label="int ()"];
+n45 [label="main"];
+n46 [label="FuncScope"];
+n48 [label="Body"];
+n50 [label="ExprStmt"];
+n51 [label="CallExpr"];
+n52 [label="f()"];
+n54 [label="ExprStmt"];
+n55 [label="CallExpr"];
+n56 [label="g()"];
+n58 [label="ReturnStmt"];
+n59 [label="1"];
 n0 -> n1
 n1 -> n2
 n1 -> n3
 n1 -> n4
-n4 -> n6
+n0 -> n6
+n6 -> n7
 n6 -> n8
-n8 -> n9
-n9 -> n10
-n9 -> n11
-n9 -> n12
-n6 -> n13
-n13 -> n15
-n15 -> n16
-n15 -> n17
-n13 -> n18
-n18 -> n20
-n18 -> n22
-n22 -> n23
-n23 -> n24
-n6 -> n26
-n26 -> n27
+n6 -> n9
+n0 -> n11
+n11 -> n12
+n11 -> n13
+n11 -> n14
+n14 -> n16
+n16 -> n18
+n18 -> n19
+n19 -> n20
+n16 -> n22
+n0 -> n24
+n24 -> n25
+n24 -> n26
+n24 -> n27
+n27 -> n29
+n29 -> n31
+n31 -> n32
+n32 -> n33
+n29 -> n35
+n35 -> n36
+n36 -> n37
+n29 -> n39
+n39 -> n40
+n40 -> n41
+n0 -> n43
+n43 -> n44
+n43 -> n45
+n43 -> n46
+n46 -> n48
+n48 -> n50
+n50 -> n51
+n51 -> n52
+n48 -> n54
+n54 -> n55
+n55 -> n56
+n48 -> n58
+n58 -> n59
 }

@@ -158,7 +158,8 @@ class VisualASTVisitor(ASTVisitor):
         self.nodecount += 1
         self.labelbuffer += thisnode+' [label="'+ str("ReturnStmt") +'"];\n'
 
-        self.visit(node.child)
+        if not (node.child is None):
+            self.visit(node.child)
 
     def visitBreakStmtNode(self, node):
         thisnode = "n"+str((self.nodecount))
