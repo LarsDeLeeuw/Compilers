@@ -43,6 +43,9 @@ class ASTVisitor:
 
     def visitDeclRefExprNode(self, node):
         pass
+    
+    def visitArraySubscriptExprNode(self, node):
+        pass
 
     def visitImplicitCastExprNode(self, node):
         pass
@@ -96,6 +99,8 @@ class ASTVisitor:
             return self.visitCallExprNode(node)  
         elif node_type is DeclRefExprNode:
             return self.visitDeclRefExprNode(node)
+        elif node_type is ArraySubscriptExprNode:
+            return self.visitArraySubscriptExprNode(node)
         elif node_type is ImplicitCastExprNode:
             return self.visitImplicitCastExprNode(node)
         elif node_type is InitListExprNode:

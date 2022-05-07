@@ -17,18 +17,18 @@ stat: expr ';'                                                                  
 alias: stat* ;
 
 expr
-    : '(' expr ')'                          # parensExpr
-    | op=('+'|'-'|'!'|'*'|'&') expr         # unaryExpr
-    | left=expr op=('*'|'/') right=expr     # binExpr
-    | left=expr op=('+'|'-'|'%') right=expr # binExpr
-    | left=expr op=('>'|'<') right=expr     # binExpr
-    | left=expr op=('=='|'>=') right=expr   # binExpr
-    | left=expr op=('<='|'!=') right=expr   # binExpr
-    | left=expr op=('||'|'&&') right=expr   # binExpr
-    | left=expr op='=' right=expr           # binExpr
-    | ID '(' ( ( ((expr))(','(expr))* ) | (expr) )? ')'   # callExpr
-    | ID                                    # idExpr
-    | value=lit                             # litExpr
+    : '(' expr ')'                                          # parensExpr
+    | op=('+'|'-'|'!'|'*'|'&') expr                         # unaryExpr
+    | left=expr op=('*'|'/') right=expr                     # binExpr
+    | left=expr op=('+'|'-'|'%') right=expr                 # binExpr
+    | left=expr op=('>'|'<') right=expr                     # binExpr
+    | left=expr op=('=='|'>=') right=expr                   # binExpr
+    | left=expr op=('<='|'!=') right=expr                   # binExpr
+    | left=expr op=('||'|'&&') right=expr                   # binExpr
+    | left=expr op='=' right=expr                           # binExpr
+    | ID '(' ( ( ((expr))(','(expr))* ) | (expr) )? ')'     # callExpr
+    | ID ('['(ID|INT)']')?                                  # idExpr
+    | value=lit                                             # litExpr
     ;
 
 lit

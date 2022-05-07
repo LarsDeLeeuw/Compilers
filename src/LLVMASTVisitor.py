@@ -18,7 +18,7 @@ class LLVMASTVisitor(ASTVisitor):
         self.STT = None
         self.idshadowing = {}
         self.idcount = {}
-        self.memory = {} # serial -> value
+        self.arrayidx_count = 0
 
     def loadSTT(self, STT):
         self.STT = copy.deepcopy(STT)
@@ -156,6 +156,8 @@ class LLVMASTVisitor(ASTVisitor):
                 elif arg.type == 'float':
                     self.buffer["functs"] += "\t" + "%" + self.idshadowing[serial]
                     self.buffer["functs"] += ".addr = alloca float, align 4\n"
+                else:
+                    raise Exception("LLVM Panic")
                 # Init
                 if arg.type == 'int':
                     self.buffer["functs"] += "\t" + "store i32 %" + self.idshadowing[serial]
@@ -163,36 +165,70 @@ class LLVMASTVisitor(ASTVisitor):
                 elif arg.type == 'float':
                     self.buffer["functs"] += "\t" + "store float %" + self.idshadowing[serial]
                     self.buffer["functs"] += ", float* %" + self.idshadowing[serial] + ".addr, align 4\n"
+                else:
+                    raise Exception("LLVM Panic")
             else:
                 var = result["ast_node"]
-                if var.id in self.idcount.keys():
-                    self.idcount[var.id] += 1
+                if var.array:
+                    if var.id in self.idcount.keys():
+                        self.idcount[var.id] += 1
+                    else:
+                        self.idcount[var.id] = 0
+                    self.idshadowing[serial] = var.id + str(self.idcount[var.id])
+                    # Allocate
+                    if var.type == 'int':
+                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+                        self.buffer["functs"] += " = alloca ["+str(var.len)+" x i32], align 4\n"
+                    elif var.type == 'float':
+                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+                        self.buffer["functs"] += " = alloca ["+str(var.len)+" x float], align 4\n"
+                    elif var.type == 'char':
+                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+                        self.buffer["functs"] += " = alloca ["+str(var.len)+" x i8], align 4\n"
+                    else:
+                        raise Exception("LLVM Panic")
+                    if var.init:
+                        raise Exception("LLVM NOT IMPLEMENTED YET")
+                        if not var.init_expr is None and issubclass(type(var.init_expr), LiteralNode):
+                            # Init
+                            self.memory[serial] = var.init_expr.value
+                            if var.type == 'int':
+                                self.buffer["functs"] += "\t" + "store i32 " + str(var.init_expr.value)
+                                self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                            elif var.type == 'float':
+                                self.buffer["functs"] += "\t" + "store float " + str(var.init_expr.value)
+                                self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                            elif var.type == 'char':
+                                self.buffer["functs"] += "\t" + "store i8 " + str(var.init_expr.value)
+                                self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"
                 else:
-                    self.idcount[var.id] = 0
-                self.idshadowing[serial] = var.id + str(self.idcount[var.id])
-                # Allocate
-                if var.type == 'int':
-                    self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                    self.buffer["functs"] += " = alloca i32, align 4\n"
-                elif var.type == 'float':
-                    self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                    self.buffer["functs"] += " = alloca float, align 4\n"
-                elif var.type == 'char':
-                    self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                    self.buffer["functs"] += " = alloca i8, align 4\n"
-                if var.init:
-                    if not var.init_expr is None and issubclass(type(var.init_expr), LiteralNode):
-                        # Init
-                        self.memory[serial] = var.init_expr.value
-                        if var.type == 'int':
-                            self.buffer["functs"] += "\t" + "store i32 " + str(var.init_expr.value)
-                            self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                        elif var.type == 'float':
-                            self.buffer["functs"] += "\t" + "store float " + str(var.init_expr.value)
-                            self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                        elif var.type == 'char':
-                            self.buffer["functs"] += "\t" + "store i8 " + str(var.init_expr.value)
-                            self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"  
+                    if var.id in self.idcount.keys():
+                        self.idcount[var.id] += 1
+                    else:
+                        self.idcount[var.id] = 0
+                    self.idshadowing[serial] = var.id + str(self.idcount[var.id])
+                    # Allocate
+                    if var.type == 'int':
+                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+                        self.buffer["functs"] += " = alloca i32, align 4\n"
+                    elif var.type == 'float':
+                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+                        self.buffer["functs"] += " = alloca float, align 4\n"
+                    elif var.type == 'char':
+                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+                        self.buffer["functs"] += " = alloca i8, align 4\n"
+                    if var.init:
+                        if not var.init_expr is None and issubclass(type(var.init_expr), LiteralNode):
+                            # Init
+                            if var.type == 'int':
+                                self.buffer["functs"] += "\t" + "store i32 " + str(var.init_expr.value)
+                                self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                            elif var.type == 'float':
+                                self.buffer["functs"] += "\t" + "store float " + str(var.init_expr.value)
+                                self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                            elif var.type == 'char':
+                                self.buffer["functs"] += "\t" + "store i8 " + str(var.init_expr.value)
+                                self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"  
 
         returnFlag = False
 
@@ -393,6 +429,13 @@ class LLVMASTVisitor(ASTVisitor):
                 else:
                     self.visitDeclRefExprNode(node.lhs_child)
                     lhs_register_count = self.register_count - 1
+            elif type(node.lhs_child) is ArraySubscriptExprNode:
+                if node.operation == "=":
+                    pass
+                else:
+                    raise Exception("Need to code ref to value araryrag ")
+                    self.visitDeclRefExprNode(node.lhs_child)
+                    lhs_register_count = self.register_count - 1
             else:
                 raise Exception("Bad BinExpr")
         
@@ -410,6 +453,12 @@ class LLVMASTVisitor(ASTVisitor):
                 self.buffer["functs"] += "\tstore float " + str(node.rhs_child.value) + ", float* %"+ str(rhs_register_count-1) +", align 4\n"
                 self.register_count += 1
                 self.buffer["functs"] += "\t%" + str(rhs_register_count) + " = load float, float* %"+str(self.register_count-1)+", align 4\n"
+                self.register_count += 1
+            elif node.rhs_child.type == 'char':
+                self.buffer["functs"] += "\t%" + str(rhs_register_count-1) + " = alloca i8, align 4\n"
+                self.buffer["functs"] += "\tstore i8 " + str(node.rhs_child.value) + ", i8* %"+ str(rhs_register_count-1) +", align 4\n"
+                self.register_count += 1
+                self.buffer["functs"] += "\t%" + str(rhs_register_count) + " = load i8, i8* %"+str(self.register_count-1)+", align 4\n"
                 self.register_count += 1
             else:
                 raise Exception("LLVM panic")
@@ -775,12 +824,42 @@ class LLVMASTVisitor(ASTVisitor):
             # self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
             # self.register_count += 1
         elif node.operation == "=":
-            serial = node.lhs_child.ref["serial"]
-            if node.lhs_child.type == 'int':
-                self.buffer["functs"] += "\t" + "store i32 " + "%"+str(rhs_register_count)
-                self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
+            if type(node.lhs_child) is ArraySubscriptExprNode:
+                serial = node.lhs_child.array_child["serial"]
+                if node.lhs_child.array_child["ast_node"].type == 'int':
+                    self.buffer["functs"] += "\t" + "%" + "arrayidx" + str(self.arrayidx_count)
+                    self.arrayidx_count += 1
+                    self.buffer["functs"] += " = getelementptr inbounds [" + str(node.lhs_child.array_child["ast_node"].getLen()) + " x i32], "
+                    self.buffer["functs"] += "[" + str(node.lhs_child.array_child["ast_node"].getLen()) + " x i32]* %"+str(self.idshadowing[serial])
+                    self.buffer["functs"] += ", i64 0, i64 "
+                    if type(node.lhs_child.index_child) is IntergerLiteralNode:
+                        self.buffer["functs"] += str(node.lhs_child.index_child.value) + "\n"
+                    else:
+                        raise Exception("LLVM panic")
+
+                    self.buffer["functs"] += "\t" + "store i32 " + "%"+str(rhs_register_count)
+                    self.buffer["functs"] += ", i32* %" + str("arrayidx" + str(self.arrayidx_count-1)) + ", align 4\n"
+                elif node.lhs_child.array_child["ast_node"].type == 'float':
+                    self.buffer["functs"] += "\t" + "store float " + "%"+str(rhs_register_count)
+                    self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                elif node.lhs_child.array_child["ast_node"].type == 'char':
+                    self.buffer["functs"] += "\t" + "store i8 " + "%"+str(rhs_register_count)
+                    self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                else:
+                    raise Exception("LLVM Panic")
             else:
-                print("not implemented yet")
+                serial = node.lhs_child.ref["serial"]
+                if node.lhs_child.type == 'int':
+                    self.buffer["functs"] += "\t" + "store i32 " + "%"+str(rhs_register_count)
+                    self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                elif node.lhs_child.type == 'float':
+                    self.buffer["functs"] += "\t" + "store float " + "%"+str(rhs_register_count)
+                    self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                elif node.lhs_child.type == 'char':
+                    self.buffer["functs"] += "\t" + "store i8 " + "%"+str(rhs_register_count)
+                    self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"
+                else:
+                    raise Exception("LLVM Panic")
         else:
             print("I dont know this bin op yet kind regards ~compiler")
 
@@ -841,6 +920,29 @@ class LLVMASTVisitor(ASTVisitor):
         #         self.buffer["functs"] += "\t%" + str(self.register_count) + " = alloca float, align 4\n"
         #         self.register_count += 1
 
+    def visitArraySubscriptExprNode(self, node):
+        result = self.STT.lookup(node.array_child["ast_node"].id)
+        if result is None:
+            print("gotta fix this")
+        else:
+            serial = node.array_child["serial"]
+
+            if node.array_child["ast_node"].type == "int":
+                self.buffer["functs"] += "\t" + "%" + "arrayidx" + str(self.arrayidx_count)
+                self.arrayidx_count += 1
+                self.buffer["functs"] += " = getelementptr inbounds [" + str(node.array_child["ast_node"].getLen()) + " x i32], "
+                self.buffer["functs"] += "[" + str(node.array_child["ast_node"].getLen()) + " x i32]* %"+str(self.idshadowing[serial])
+                self.buffer["functs"] += ", i64 0, i64 "
+                if type(node.index_child) is IntergerLiteralNode:
+                    self.buffer["functs"] += str(node.index_child.value) + "\n"
+                else:
+                    raise Exception("LLVM panic")
+                self.buffer["functs"] += "\t"+"%"+str(self.register_count) + "= load i32, " + "i32* "
+                self.buffer["functs"] += "%"+str("arrayidx" + str(self.arrayidx_count-1)) + ", align 4\n"
+                self.register_count += 1
+            else:
+                raise Exception("LLVM panic")
+
     def visitDeclRefExprNode(self, node):
         result = self.STT.lookup(node.ref["ast_node"].id)
         if result is None:
@@ -891,5 +993,10 @@ class LLVMASTVisitor(ASTVisitor):
         self.register_count += 1
 
     def visitCharacterLiteralNode(self, node):
-        pass
+        self.buffer["functs"] += "\t%" + str(self.register_count) + " = alloca i8, align 4\n"
+        self.buffer["functs"] += "\tstore i8 " + str(node.value) + ", i8* %"+ str(self.register_count) +", align 4\n"
+        self.register_count += 1
+        self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* %"+str(self.register_count-1)+", align 4\n"
+        self.register_count += 1
+
     

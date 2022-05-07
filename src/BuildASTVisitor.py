@@ -43,10 +43,6 @@ class BuildASTVisitor(GrammarVisitor):
                 dummy_node.id = "printf"
                 dummy_node.included = True
                 dummy_node.return_type = "void"
-                # dummy_node.symboltable = self.currentST
-                # (idIsOk, idIndex) = self.checkCurrentST("printf")
-                # if idIsOk:
-                #     self.currentST.symbols["printf"] = [idIndex, dummy_node, copy.deepcopy(dummy_node)]
                 result = self.STT.insert("printf")
                 if result is None:
                     raise Exception("Failed to insert library function in symboltable")
@@ -85,6 +81,7 @@ class BuildASTVisitor(GrammarVisitor):
         else:
             if node.array:
                 init_list_node = InitListExprNode()
+                init_list_node.type = node.type
                 init_list_node.parent = node
                 # Check if supplied init array is same len as array
                 if node.len != len(ctx.expr()):
@@ -143,11 +140,6 @@ class BuildASTVisitor(GrammarVisitor):
         node.id = ctx.ID()[0].getText()
 
         # Create SymbolTable for function
-        # newST = STNode()
-        # newST.parent = self.currentST
-        # self.currentST.children.append(newST)
-        # store_refST = self.currentST
-        # self.currentST = newST
         self.STT.new_scope()
 
         if(ctx.KEY_VOID() is None):
@@ -349,32 +341,59 @@ class BuildASTVisitor(GrammarVisitor):
         node.operation = switcher.get(ctx.op.type, None)
         node.line = ctx.start.line 
         if node.operation == "=":
-            lhs_id = ctx.left.ID().getText()
+            lhs_id = ctx.left.ID()[0].getText()
             result = self.STT.lookup(lhs_id)
             if result is None:
                 raise Exception("Referenced ID {} not found in symboltable".format(lhs_id))
             else:
                 if result["object"] != "Function":
                     result["ast_node"].used = True
-                    ref_node = DeclRefExprNode()
-                    ref_node.ref = result
-                    ref_node.id = lhs_id
-                    ref_node.type = result["ast_node"].type
-                    ref_node.parent = node
-                    node.lhs_child = ref_node
+                    if result["ast_node"].array:
+                        array_node = self.visit(ctx.left)
+                        array_node.parent = node
+                        # array_node = ArraySubscriptExprNode()
+                        # array_node.parent = node
+                        # array_node.type = result["ast_node"].type
+                        # array_node.array_child = result
+                        # if ctx.left.INT() is None:
+                        #     array_node.index_child = self.visit(ctx.left.ID()[1])
+                        # else:
+                        #     array_node.index_child = self.visit(ctx.left.INT())
+                        node.lhs_child = array_node
 
-                    expr_node = self.visit(ctx.right)
-                    if expr_node.type == ref_node.type:
-                        expr_node.parent = node
-                        node.rhs_child = expr_node
+                        expr_node = self.visit(ctx.right)
+                        if expr_node.type == array_node.type:
+                            expr_node.parent = node
+                            node.rhs_child = expr_node
+                        else:
+                            cast_node = ImplicitCastExprNode()
+                            cast_node.parent = node
+                            cast_node.type = ref_node.type
+                            cast_node.cast = expr_node
+                            expr_node.parent = cast_node
+                            node.rhs_child = cast_node
+
+                        return node
                     else:
-                        cast_node = ImplicitCastExprNode()
-                        cast_node.parent = node
-                        cast_node.type = ref_node.type
-                        cast_node.cast = expr_node
-                        expr_node.parent = cast_node
-                        node.rhs_child = cast_node
-                    return node
+                        ref_node = DeclRefExprNode()
+                        ref_node.ref = result
+                        ref_node.id = lhs_id
+                        ref_node.type = result["ast_node"].type
+                        ref_node.parent = node
+                        node.lhs_child = ref_node
+
+                        expr_node = self.visit(ctx.right)
+                        if expr_node.type == ref_node.type:
+                            expr_node.parent = node
+                            node.rhs_child = expr_node
+                        else:
+                            cast_node = ImplicitCastExprNode()
+                            cast_node.parent = node
+                            cast_node.type = ref_node.type
+                            cast_node.cast = expr_node
+                            expr_node.parent = cast_node
+                            node.rhs_child = cast_node
+                        return node
                 else:
                     raise Exception("Semantics blahblah 328 buildast")         
         else:    
@@ -455,22 +474,43 @@ class BuildASTVisitor(GrammarVisitor):
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
         node = DeclRefExprNode()
-        call_id = ctx.ID().getText()
-
-        result = self.STT.lookup(call_id)
-        if result is None:
-            raise Exception("Referenced ID {} not found in symboltable".format(call_id))
-        else:
-            node.id = result["ast_node"].id
-            node.ref = result
-            if result["object"] == "Function":
-                node.type = result["ast_node"].return_type
-                node.function = True
-                node.signature = result["ast_node"].getSignature()
+        call_id = ctx.ID()[0].getText()
+        if ctx.INT() is None and len(ctx.ID()) == 1:
+            result = self.STT.lookup(call_id)
+            if result is None:
+                raise Exception("Referenced ID {} not found in symboltable".format(call_id))
             else:
-                node.type = result["ast_node"].type
-            node.ref["ast_node"].used = True
-
+                node.id = result["ast_node"].id
+                node.ref = result
+                if result["object"] == "Function":
+                    node.type = result["ast_node"].return_type
+                    node.function = True
+                    node.signature = result["ast_node"].getSignature()
+                else:
+                    node.type = result["ast_node"].type
+                node.ref["ast_node"].used = True
+        else:
+            if ctx.INT() is None:
+                node = ArraySubscriptExprNode()
+                result = self.STT.lookup(call_id)
+                if result is None:
+                    raise Exception("Referenced ID {} not found in symboltable".format(call_id))
+                else:
+                    node.array_child = result
+                    node.type = result["ast_node"].type
+                    node.index_child = self.visit(ctx.ID()[1])
+                    node.index_child.parent = node
+            else:
+                node = ArraySubscriptExprNode()
+                result = self.STT.lookup(call_id)
+                if result is None:
+                    raise Exception("Referenced ID {} not found in symboltable".format(call_id))
+                else:
+                    node.array_child = result
+                    node.type = result["ast_node"].type
+                    node.index_child = IntergerLiteralNode()
+                    node.index_child.setValue(ctx.INT().getText())
+                    node.index_child.parent = node
         return node
 
     # Visit a parse tree produced by GrammarParser#primLit.

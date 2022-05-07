@@ -8,40 +8,23 @@ n8 [label="DeclStmt"];
 n9 [label="VarDecl"];
 n10 [label="int"];
 n11 [label="x"];
-n12 [label="5"];
-n13 [label="IfStmt"];
-n15 [label="<"];
-n16 [label="x"];
-n17 [label="5"];
-n18 [label="Body"];
-n20 [label="ExprStmt"];
-n21 [label="CallExpr"];
-n22 [label="printf()"];
-n24 [label="IfStmt"];
-n26 [label=">="];
-n27 [label="x"];
-n28 [label="5"];
-n29 [label="Body"];
-n31 [label="ExprStmt"];
-n32 [label="CallExpr"];
-n33 [label="printf()"];
-n35 [label="IfStmt"];
-n37 [label="&&"];
-n38 [label="=="];
-n39 [label="x"];
-n40 [label="5"];
-n41 [label="1"];
-n42 [label="Body"];
-n44 [label="IfStmt"];
-n46 [label="!="];
-n47 [label="x"];
-n48 [label="4"];
-n49 [label="Body"];
-n51 [label="ExprStmt"];
-n52 [label="CallExpr"];
-n53 [label="printf()"];
-n55 [label="ReturnStmt"];
-n56 [label="0"];
+n12 [label="10"];
+n13 [label="DeclStmt"];
+n14 [label="VarDecl"];
+n15 [label="int"];
+n16 [label="y"];
+n18 [label="ExprStmt"];
+n19 [label="="];
+n20 [label="y"];
+n21 [label="x"];
+n22 [label="DeclStmt"];
+n23 [label="VarDecl"];
+n24 [label="int"];
+n25 [label="z"];
+n26 [label="x"];
+n27 [label="ExprStmt"];
+n28 [label="CallExpr"];
+n29 [label="printf()"];
 n0 -> n1
 n1 -> n2
 n1 -> n3
@@ -53,36 +36,19 @@ n9 -> n10
 n9 -> n11
 n9 -> n12
 n6 -> n13
-n13 -> n15
-n15 -> n16
-n15 -> n17
-n13 -> n18
-n18 -> n20
-n20 -> n21
-n21 -> n22
-n6 -> n24
-n24 -> n26
-n26 -> n27
-n26 -> n28
-n24 -> n29
-n29 -> n31
-n31 -> n32
-n32 -> n33
-n6 -> n35
-n35 -> n37
-n37 -> n38
-n38 -> n39
-n38 -> n40
-n37 -> n41
-n35 -> n42
-n42 -> n44
-n44 -> n46
-n46 -> n47
-n46 -> n48
-n44 -> n49
-n49 -> n51
-n51 -> n52
-n52 -> n53
-n6 -> n55
-n55 -> n56
+n13 -> n14
+n14 -> n15
+n14 -> n16
+n6 -> n18
+n18 -> n19
+n19 -> n20
+n19 -> n21
+n6 -> n22
+n22 -> n23
+n23 -> n24
+n23 -> n25
+n23 -> n26
+n6 -> n27
+n27 -> n28
+n28 -> n29
 }

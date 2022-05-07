@@ -168,6 +168,14 @@ class DeclRefExprNode(ExprNode):
         self.ref = None
         self.id = None
 
+class ArraySubscriptExprNode(ExprNode):
+
+    def __init__(self):
+        self.type = None
+        self.lvalue = True
+        self.array_child = None
+        self.index_child = None
+
 class ImplicitCastExprNode(ExprNode):
     
     def __init__(self):

@@ -202,11 +202,51 @@ class VisualASTVisitor(ASTVisitor):
         self.labelbuffer += thisnode+' [label="'+ str(node.id) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
+    def visitArraySubscriptExprNode(self, node):
+        thisnode = "n"+str((self.nodecount))
+        label_array = str(node.array_child["ast_node"].id) + "["
+        index_node = node.index_child
+        while True:
+            if type(index_node) is DeclRefExprNode:
+                print("Array indexing not fully flushed out yet")
+                break
+            elif type(index_node) is ArraySubscriptExprNode:
+                print("Array indexing not fully flushed out yet")
+                break
+            elif type(index_node) is IntergerLiteralNode:
+                label_array += str(index_node.value) + "]"
+                break
+            else:
+                print("Array indexing not fully flushed out yet")
+                break
+
+        self.labelbuffer += thisnode+' [label="'+ label_array +'"];\n'
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
+        self.refcount = self.nodecount
+        storeref = self.refcount
+        self.nodecount += 1
+
     def visitImplicitCastExprNode(self, node):
-        pass
+        thisnode = "n"+str((self.nodecount))
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
+        self.refcount = self.nodecount
+        storeref = self.refcount
+        self.nodecount += 1
+        self.labelbuffer += thisnode+' [label="'+ str("ImplicitCastExpr") +'"];\n'
+        self.visit(node.cast)
 
     def visitInitListExprNode(self, node):
-        pass
+        thisnode = "n"+str((self.nodecount))
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
+        self.refcount = self.nodecount
+        storeref = self.refcount
+        self.nodecount += 1
+        self.labelbuffer += thisnode+' [label="'+ str("InitListExpr") +'"];\n'
+
+        for child in node.children:
+            self.refcount = storeref
+            self.nodecount += 1
+            self.visit(child)
 
     def visitIntegerLiteralNode(self, node):
         thisnode = "n"+str((self.nodecount))
