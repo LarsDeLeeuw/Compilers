@@ -195,6 +195,7 @@ class ImplicitCastExprNode(ExprNode):
     def __init__(self):
         self.type = None
         self.cast = None
+        self.child = None
         self.signature = None
 
 class InitListExprNode(ExprNode):

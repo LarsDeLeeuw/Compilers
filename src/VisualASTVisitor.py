@@ -176,7 +176,7 @@ class VisualASTVisitor(ASTVisitor):
 
     def visitBinExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ node.operation +'"];\n'
+        self.labelbuffer += thisnode+' [label="BinExpr\n'+ "'" + node.operation + "'" +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         storeref = self.refcount
@@ -190,54 +190,51 @@ class VisualASTVisitor(ASTVisitor):
 
 
     def visitUnaryExprNode(self, node):
-        pass
+        thisnode = "n"+str((self.nodecount))
+        label = "UnaryOperator\nlvalue "
+        if node.prefix:
+            label += "prefix '"
+        else:
+            label += "postfix '"
+        label += node.operation + "'"
+        self.labelbuffer += thisnode+' [label="'+ label +'"];\n'
+        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
+        self.refcount = self.nodecount
+        self.nodecount += 1
+
+        self.visit(node.child)
 
     def visitCallExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ str("CallExpr") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("CallExpr\n"+node.children[0].ref["ast_node"].return_type+" " + node.children[0].ref["ast_node"].id) +'()"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
 
-        call_node = "n"+str((self.nodecount))
-        call_node_label = node.children[0].ref["ast_node"].id + "()"
-
-        self.labelbuffer += call_node+' [label="'+ call_node_label +'"];\n'
-        self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ call_node +"\n"
-        self.refcount = self.nodecount
-        storeref = self.refcount
-        self.nodecount += 1
-        #self.visit(node.child)
+        for Child in node.children[1:]:
+            self.refcount = storeref
+            self.nodecount += 1
+            self.visit(Child)
 
     def visitDeclRefExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ str(node.id) +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ "DeclRefExpr\n"+str(node.ref["object"] + " '"+ node.id)+"'" +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitArraySubscriptExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        label_array = str(node.array_child["ast_node"].id) + "["
-        index_node = node.index_child
-        while True:
-            if type(index_node) is DeclRefExprNode:
-                print("Array indexing not fully flushed out yet")
-                break
-            elif type(index_node) is ArraySubscriptExprNode:
-                print("Array indexing not fully flushed out yet")
-                break
-            elif type(index_node) is IntergerLiteralNode:
-                label_array += str(index_node.value) + "]"
-                break
-            else:
-                print("Array indexing not fully flushed out yet")
-                break
-
-        self.labelbuffer += thisnode+' [label="'+ label_array +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ "ArraySubscriptExpr\n'"+node.type+ "' lvalue" +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
+
+        self.visit(node.array_child)
+        self.refcount = storeref
+        self.nodecount += 1
+
+        self.visit(node.index_child)
 
     def visitImplicitCastExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
@@ -245,8 +242,8 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("ImplicitCastExpr") +'"];\n'
-        self.visit(node.cast)
+        self.labelbuffer += thisnode+' [label="'+ str("ImplicitCastExpr\n" + node.cast) +'"];\n'
+        self.visit(node.child)
 
     def visitInitListExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
@@ -263,17 +260,23 @@ class VisualASTVisitor(ASTVisitor):
 
     def visitIntegerLiteralNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ str(node.value) +'"];\n'
+        label = "IntegerLiteral\nrvalue "
+        label += "'" + str(node.value) + "'"
+        self.labelbuffer += thisnode+' [label="'+ label +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitFloatingLiteralNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ str(node.value) +'"];\n'
+        label = "FloatingLiteral\nrvalue "
+        label += "'" + str(node.value) + "'"
+        self.labelbuffer += thisnode+' [label="'+ label +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitCharacterLiteralNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ "'"+ chr(node.value)+ "'" +'"];\n'
+        label = "CharacterLiteral\nrvalue "
+        label += "'" + chr(node.value) + "'"
+        self.labelbuffer += thisnode+' [label="'+ label +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitStringLiteralNode(self, node):

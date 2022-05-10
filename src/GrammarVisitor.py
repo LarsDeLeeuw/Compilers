@@ -124,20 +124,5 @@ class GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GrammarParser#charptrPrim.
-    def visitCharptrPrim(self, ctx:GrammarParser.CharptrPrimContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by GrammarParser#floatptrPrim.
-    def visitFloatptrPrim(self, ctx:GrammarParser.FloatptrPrimContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by GrammarParser#intptrPrim.
-    def visitIntptrPrim(self, ctx:GrammarParser.IntptrPrimContext):
-        return self.visitChildren(ctx)
-
-
 
 del GrammarParser

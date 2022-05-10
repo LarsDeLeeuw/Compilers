@@ -42,9 +42,6 @@ prim
     : KEY_CHAR                              # charPrim
     | KEY_FLOAT                             # floatPrim
     | KEY_INT                               # intPrim
-    | KEY_CHARPTR                           # charptrPrim
-    | KEY_FLOATPTR                          # floatptrPrim
-    | KEY_INTPTR                            # intptrPrim
     ;
 
 MUL : '*' ;
@@ -66,12 +63,9 @@ DRF : '&' ;
 PPP : '++';
 MPP : '--';
 
-KEY_CHARPTR : 'char' '*' ;
-KEY_FLOATPTR    : 'float' '*' ;
-KEY_INTPTR :'int' '*' ;
-KEY_CHAR : 'char' ;
-KEY_INT : 'int' ;
-KEY_FLOAT : 'float' ;
+KEY_CHAR : 'char' ((' '|MUL)* MUL)?;
+KEY_INT : 'int' ((' '|MUL)* MUL)?;
+KEY_FLOAT : 'float' ((' '|MUL)* MUL)?;
 KEY_VOID : 'void' ;
 
 KEY_CONST : 'const' ;

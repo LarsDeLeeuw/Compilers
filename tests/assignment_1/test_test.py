@@ -175,7 +175,7 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         LLVMOutput.close()
         
         if not exists(name+".ll"):
-            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+            run(["clang", "-w","-S", inputfile, "-emit-llvm"])
         
         CLANGLLVM = open("CLANGLLVM", 'w')
         CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))

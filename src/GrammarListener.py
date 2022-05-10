@@ -215,32 +215,5 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by GrammarParser#charptrPrim.
-    def enterCharptrPrim(self, ctx:GrammarParser.CharptrPrimContext):
-        pass
-
-    # Exit a parse tree produced by GrammarParser#charptrPrim.
-    def exitCharptrPrim(self, ctx:GrammarParser.CharptrPrimContext):
-        pass
-
-
-    # Enter a parse tree produced by GrammarParser#floatptrPrim.
-    def enterFloatptrPrim(self, ctx:GrammarParser.FloatptrPrimContext):
-        pass
-
-    # Exit a parse tree produced by GrammarParser#floatptrPrim.
-    def exitFloatptrPrim(self, ctx:GrammarParser.FloatptrPrimContext):
-        pass
-
-
-    # Enter a parse tree produced by GrammarParser#intptrPrim.
-    def enterIntptrPrim(self, ctx:GrammarParser.IntptrPrimContext):
-        pass
-
-    # Exit a parse tree produced by GrammarParser#intptrPrim.
-    def exitIntptrPrim(self, ctx:GrammarParser.IntptrPrimContext):
-        pass
-
-
 
 del GrammarParser

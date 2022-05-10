@@ -11,8 +11,8 @@ else:
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\66")
-        buf.write("\u0108\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\63")
+        buf.write("\u0105\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\3\2\3\2\7\2\23\n\2\f\2\16\2\26\13\2\3\2\6\2\31")
         buf.write("\n\2\r\2\16\2\32\3\3\5\3\36\n\3\3\3\3\3\3\3\3\3\3\3\5")
         buf.write("\3%\n\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\7\3.\n\3\f\3\16\3")
@@ -34,104 +34,101 @@ def serializedATN():
         buf.write("\5\6\u00dd\n\6\3\6\5\6\u00e0\n\6\3\6\3\6\3\6\3\6\3\6\3")
         buf.write("\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6")
         buf.write("\3\6\3\6\3\6\3\6\7\6\u00f9\n\6\f\6\16\6\u00fc\13\6\3\7")
-        buf.write("\3\7\3\b\3\b\3\b\3\b\3\b\3\b\5\b\u0106\n\b\3\b\2\3\n\t")
-        buf.write("\2\4\6\b\n\f\16\2\f\6\2\13\13\r\16\26\26\32\34\4\2\61")
-        buf.write("\61\64\64\3\2\13\f\4\2\r\16\31\31\3\2\17\20\3\2\21\22")
-        buf.write("\3\2\23\24\3\2\27\30\3\2\33\34\3\2/\62\2\u0137\2\24\3")
-        buf.write("\2\2\2\4q\3\2\2\2\6\u00bb\3\2\2\2\b\u00c0\3\2\2\2\n\u00df")
-        buf.write("\3\2\2\2\f\u00fd\3\2\2\2\16\u0105\3\2\2\2\20\21\7%\2\2")
-        buf.write("\21\23\7\65\2\2\22\20\3\2\2\2\23\26\3\2\2\2\24\22\3\2")
-        buf.write("\2\2\24\25\3\2\2\2\25\30\3\2\2\2\26\24\3\2\2\2\27\31\5")
-        buf.write("\4\3\2\30\27\3\2\2\2\31\32\3\2\2\2\32\30\3\2\2\2\32\33")
-        buf.write("\3\2\2\2\33\3\3\2\2\2\34\36\7$\2\2\35\34\3\2\2\2\35\36")
-        buf.write("\3\2\2\2\36\37\3\2\2\2\37 \5\16\b\2 $\7\64\2\2!\"\7\3")
-        buf.write("\2\2\"#\7\61\2\2#%\7\4\2\2$!\3\2\2\2$%\3\2\2\2%\64\3\2")
-        buf.write("\2\2&\'\7\25\2\2\'\65\5\n\6\2()\7\25\2\2)*\7\5\2\2*/\5")
-        buf.write("\n\6\2+,\7\6\2\2,.\5\n\6\2-+\3\2\2\2.\61\3\2\2\2/-\3\2")
-        buf.write("\2\2/\60\3\2\2\2\60\62\3\2\2\2\61/\3\2\2\2\62\63\7\7\2")
-        buf.write("\2\63\65\3\2\2\2\64&\3\2\2\2\64(\3\2\2\2\64\65\3\2\2\2")
-        buf.write("\65\66\3\2\2\2\66\67\7\b\2\2\67r\3\2\2\28;\5\16\b\29;")
-        buf.write("\7#\2\2:8\3\2\2\2:9\3\2\2\2;<\3\2\2\2<=\7\64\2\2=M\7\t")
-        buf.write("\2\2>?\5\16\b\2?@\7\64\2\2@G\3\2\2\2AB\7\6\2\2BC\5\16")
-        buf.write("\b\2CD\7\64\2\2DF\3\2\2\2EA\3\2\2\2FI\3\2\2\2GE\3\2\2")
-        buf.write("\2GH\3\2\2\2HN\3\2\2\2IG\3\2\2\2JK\5\16\b\2KL\7\64\2\2")
-        buf.write("LN\3\2\2\2M>\3\2\2\2MJ\3\2\2\2MN\3\2\2\2NO\3\2\2\2OP\7")
-        buf.write("\n\2\2Pr\7\b\2\2QT\5\16\b\2RT\7#\2\2SQ\3\2\2\2SR\3\2\2")
-        buf.write("\2TU\3\2\2\2UV\7\64\2\2Vf\7\t\2\2WX\5\16\b\2XY\7\64\2")
-        buf.write("\2Y`\3\2\2\2Z[\7\6\2\2[\\\5\16\b\2\\]\7\64\2\2]_\3\2\2")
-        buf.write("\2^Z\3\2\2\2_b\3\2\2\2`^\3\2\2\2`a\3\2\2\2ag\3\2\2\2b")
-        buf.write("`\3\2\2\2cd\5\16\b\2de\7\64\2\2eg\3\2\2\2fW\3\2\2\2fc")
-        buf.write("\3\2\2\2fg\3\2\2\2gh\3\2\2\2hi\7\n\2\2im\7\5\2\2jl\5\6")
-        buf.write("\4\2kj\3\2\2\2lo\3\2\2\2mk\3\2\2\2mn\3\2\2\2np\3\2\2\2")
-        buf.write("om\3\2\2\2pr\7\7\2\2q\35\3\2\2\2q:\3\2\2\2qS\3\2\2\2r")
-        buf.write("\5\3\2\2\2st\5\n\6\2tu\7\b\2\2u\u00bc\3\2\2\2vx\7$\2\2")
-        buf.write("wv\3\2\2\2wx\3\2\2\2xy\3\2\2\2yz\5\16\b\2z~\7\64\2\2{")
-        buf.write("|\7\3\2\2|}\7\61\2\2}\177\7\4\2\2~{\3\2\2\2~\177\3\2\2")
-        buf.write("\2\177\u008e\3\2\2\2\u0080\u0081\7\25\2\2\u0081\u008f")
-        buf.write("\5\n\6\2\u0082\u0083\7\25\2\2\u0083\u0084\7\5\2\2\u0084")
-        buf.write("\u0089\5\n\6\2\u0085\u0086\7\6\2\2\u0086\u0088\5\n\6\2")
-        buf.write("\u0087\u0085\3\2\2\2\u0088\u008b\3\2\2\2\u0089\u0087\3")
-        buf.write("\2\2\2\u0089\u008a\3\2\2\2\u008a\u008c\3\2\2\2\u008b\u0089")
-        buf.write("\3\2\2\2\u008c\u008d\7\7\2\2\u008d\u008f\3\2\2\2\u008e")
-        buf.write("\u0080\3\2\2\2\u008e\u0082\3\2\2\2\u008e\u008f\3\2\2\2")
-        buf.write("\u008f\u0090\3\2\2\2\u0090\u0091\7\b\2\2\u0091\u00bc\3")
-        buf.write("\2\2\2\u0092\u0093\7\'\2\2\u0093\u0094\7\t\2\2\u0094\u0095")
-        buf.write("\5\n\6\2\u0095\u0096\7\n\2\2\u0096\u009a\7\5\2\2\u0097")
-        buf.write("\u0099\5\6\4\2\u0098\u0097\3\2\2\2\u0099\u009c\3\2\2\2")
-        buf.write("\u009a\u0098\3\2\2\2\u009a\u009b\3\2\2\2\u009b\u009d\3")
-        buf.write("\2\2\2\u009c\u009a\3\2\2\2\u009d\u009e\7\7\2\2\u009e\u00bc")
-        buf.write("\3\2\2\2\u009f\u00a0\7(\2\2\u00a0\u00a1\7\t\2\2\u00a1")
-        buf.write("\u00a2\5\n\6\2\u00a2\u00a3\7\n\2\2\u00a3\u00a7\7\5\2\2")
-        buf.write("\u00a4\u00a6\5\6\4\2\u00a5\u00a4\3\2\2\2\u00a6\u00a9\3")
-        buf.write("\2\2\2\u00a7\u00a5\3\2\2\2\u00a7\u00a8\3\2\2\2\u00a8\u00aa")
-        buf.write("\3\2\2\2\u00a9\u00a7\3\2\2\2\u00aa\u00b0\7\7\2\2\u00ab")
-        buf.write("\u00ac\7)\2\2\u00ac\u00ad\7\5\2\2\u00ad\u00ae\5\b\5\2")
-        buf.write("\u00ae\u00af\7\7\2\2\u00af\u00b1\3\2\2\2\u00b0\u00ab\3")
-        buf.write("\2\2\2\u00b0\u00b1\3\2\2\2\u00b1\u00bc\3\2\2\2\u00b2\u00b4")
-        buf.write("\7*\2\2\u00b3\u00b5\5\n\6\2\u00b4\u00b3\3\2\2\2\u00b4")
-        buf.write("\u00b5\3\2\2\2\u00b5\u00b6\3\2\2\2\u00b6\u00bc\7\b\2\2")
-        buf.write("\u00b7\u00b8\7+\2\2\u00b8\u00bc\7\b\2\2\u00b9\u00ba\7")
-        buf.write(",\2\2\u00ba\u00bc\7\b\2\2\u00bbs\3\2\2\2\u00bbw\3\2\2")
-        buf.write("\2\u00bb\u0092\3\2\2\2\u00bb\u009f\3\2\2\2\u00bb\u00b2")
-        buf.write("\3\2\2\2\u00bb\u00b7\3\2\2\2\u00bb\u00b9\3\2\2\2\u00bc")
-        buf.write("\7\3\2\2\2\u00bd\u00bf\5\6\4\2\u00be\u00bd\3\2\2\2\u00bf")
-        buf.write("\u00c2\3\2\2\2\u00c0\u00be\3\2\2\2\u00c0\u00c1\3\2\2\2")
-        buf.write("\u00c1\t\3\2\2\2\u00c2\u00c0\3\2\2\2\u00c3\u00c4\b\6\1")
-        buf.write("\2\u00c4\u00c5\7\t\2\2\u00c5\u00c6\5\n\6\2\u00c6\u00c7")
-        buf.write("\7\n\2\2\u00c7\u00e0\3\2\2\2\u00c8\u00c9\t\2\2\2\u00c9")
-        buf.write("\u00e0\5\n\6\16\u00ca\u00cb\7\64\2\2\u00cb\u00d5\7\t\2")
-        buf.write("\2\u00cc\u00d1\5\n\6\2\u00cd\u00ce\7\6\2\2\u00ce\u00d0")
-        buf.write("\5\n\6\2\u00cf\u00cd\3\2\2\2\u00d0\u00d3\3\2\2\2\u00d1")
-        buf.write("\u00cf\3\2\2\2\u00d1\u00d2\3\2\2\2\u00d2\u00d6\3\2\2\2")
-        buf.write("\u00d3\u00d1\3\2\2\2\u00d4\u00d6\5\n\6\2\u00d5\u00cc\3")
-        buf.write("\2\2\2\u00d5\u00d4\3\2\2\2\u00d5\u00d6\3\2\2\2\u00d6\u00d7")
-        buf.write("\3\2\2\2\u00d7\u00e0\7\n\2\2\u00d8\u00dc\7\64\2\2\u00d9")
-        buf.write("\u00da\7\3\2\2\u00da\u00db\t\3\2\2\u00db\u00dd\7\4\2\2")
-        buf.write("\u00dc\u00d9\3\2\2\2\u00dc\u00dd\3\2\2\2\u00dd\u00e0\3")
-        buf.write("\2\2\2\u00de\u00e0\5\f\7\2\u00df\u00c3\3\2\2\2\u00df\u00c8")
-        buf.write("\3\2\2\2\u00df\u00ca\3\2\2\2\u00df\u00d8\3\2\2\2\u00df")
-        buf.write("\u00de\3\2\2\2\u00e0\u00fa\3\2\2\2\u00e1\u00e2\f\f\2\2")
-        buf.write("\u00e2\u00e3\t\4\2\2\u00e3\u00f9\5\n\6\r\u00e4\u00e5\f")
-        buf.write("\13\2\2\u00e5\u00e6\t\5\2\2\u00e6\u00f9\5\n\6\f\u00e7")
-        buf.write("\u00e8\f\n\2\2\u00e8\u00e9\t\6\2\2\u00e9\u00f9\5\n\6\13")
-        buf.write("\u00ea\u00eb\f\t\2\2\u00eb\u00ec\t\7\2\2\u00ec\u00f9\5")
-        buf.write("\n\6\n\u00ed\u00ee\f\b\2\2\u00ee\u00ef\t\b\2\2\u00ef\u00f9")
-        buf.write("\5\n\6\t\u00f0\u00f1\f\7\2\2\u00f1\u00f2\t\t\2\2\u00f2")
-        buf.write("\u00f9\5\n\6\b\u00f3\u00f4\f\6\2\2\u00f4\u00f5\7\25\2")
-        buf.write("\2\u00f5\u00f9\5\n\6\7\u00f6\u00f7\f\r\2\2\u00f7\u00f9")
-        buf.write("\t\n\2\2\u00f8\u00e1\3\2\2\2\u00f8\u00e4\3\2\2\2\u00f8")
-        buf.write("\u00e7\3\2\2\2\u00f8\u00ea\3\2\2\2\u00f8\u00ed\3\2\2\2")
-        buf.write("\u00f8\u00f0\3\2\2\2\u00f8\u00f3\3\2\2\2\u00f8\u00f6\3")
-        buf.write("\2\2\2\u00f9\u00fc\3\2\2\2\u00fa\u00f8\3\2\2\2\u00fa\u00fb")
-        buf.write("\3\2\2\2\u00fb\13\3\2\2\2\u00fc\u00fa\3\2\2\2\u00fd\u00fe")
-        buf.write("\t\13\2\2\u00fe\r\3\2\2\2\u00ff\u0106\7 \2\2\u0100\u0106")
-        buf.write("\7\"\2\2\u0101\u0106\7!\2\2\u0102\u0106\7\35\2\2\u0103")
-        buf.write("\u0106\7\36\2\2\u0104\u0106\7\37\2\2\u0105\u00ff\3\2\2")
-        buf.write("\2\u0105\u0100\3\2\2\2\u0105\u0101\3\2\2\2\u0105\u0102")
-        buf.write("\3\2\2\2\u0105\u0103\3\2\2\2\u0105\u0104\3\2\2\2\u0106")
-        buf.write("\17\3\2\2\2!\24\32\35$/\64:GMS`fmqw~\u0089\u008e\u009a")
-        buf.write("\u00a7\u00b0\u00b4\u00bb\u00c0\u00d1\u00d5\u00dc\u00df")
-        buf.write("\u00f8\u00fa\u0105")
+        buf.write("\3\7\3\b\3\b\3\b\5\b\u0103\n\b\3\b\2\3\n\t\2\4\6\b\n\f")
+        buf.write("\16\2\f\6\2\13\13\r\16\26\26\32\34\4\2..\61\61\3\2\13")
+        buf.write("\f\4\2\r\16\31\31\3\2\17\20\3\2\21\22\3\2\23\24\3\2\27")
+        buf.write("\30\3\2\33\34\3\2,/\2\u0131\2\24\3\2\2\2\4q\3\2\2\2\6")
+        buf.write("\u00bb\3\2\2\2\b\u00c0\3\2\2\2\n\u00df\3\2\2\2\f\u00fd")
+        buf.write("\3\2\2\2\16\u0102\3\2\2\2\20\21\7\"\2\2\21\23\7\62\2\2")
+        buf.write("\22\20\3\2\2\2\23\26\3\2\2\2\24\22\3\2\2\2\24\25\3\2\2")
+        buf.write("\2\25\30\3\2\2\2\26\24\3\2\2\2\27\31\5\4\3\2\30\27\3\2")
+        buf.write("\2\2\31\32\3\2\2\2\32\30\3\2\2\2\32\33\3\2\2\2\33\3\3")
+        buf.write("\2\2\2\34\36\7!\2\2\35\34\3\2\2\2\35\36\3\2\2\2\36\37")
+        buf.write("\3\2\2\2\37 \5\16\b\2 $\7\61\2\2!\"\7\3\2\2\"#\7.\2\2")
+        buf.write("#%\7\4\2\2$!\3\2\2\2$%\3\2\2\2%\64\3\2\2\2&\'\7\25\2\2")
+        buf.write("\'\65\5\n\6\2()\7\25\2\2)*\7\5\2\2*/\5\n\6\2+,\7\6\2\2")
+        buf.write(",.\5\n\6\2-+\3\2\2\2.\61\3\2\2\2/-\3\2\2\2/\60\3\2\2\2")
+        buf.write("\60\62\3\2\2\2\61/\3\2\2\2\62\63\7\7\2\2\63\65\3\2\2\2")
+        buf.write("\64&\3\2\2\2\64(\3\2\2\2\64\65\3\2\2\2\65\66\3\2\2\2\66")
+        buf.write("\67\7\b\2\2\67r\3\2\2\28;\5\16\b\29;\7 \2\2:8\3\2\2\2")
+        buf.write(":9\3\2\2\2;<\3\2\2\2<=\7\61\2\2=M\7\t\2\2>?\5\16\b\2?")
+        buf.write("@\7\61\2\2@G\3\2\2\2AB\7\6\2\2BC\5\16\b\2CD\7\61\2\2D")
+        buf.write("F\3\2\2\2EA\3\2\2\2FI\3\2\2\2GE\3\2\2\2GH\3\2\2\2HN\3")
+        buf.write("\2\2\2IG\3\2\2\2JK\5\16\b\2KL\7\61\2\2LN\3\2\2\2M>\3\2")
+        buf.write("\2\2MJ\3\2\2\2MN\3\2\2\2NO\3\2\2\2OP\7\n\2\2Pr\7\b\2\2")
+        buf.write("QT\5\16\b\2RT\7 \2\2SQ\3\2\2\2SR\3\2\2\2TU\3\2\2\2UV\7")
+        buf.write("\61\2\2Vf\7\t\2\2WX\5\16\b\2XY\7\61\2\2Y`\3\2\2\2Z[\7")
+        buf.write("\6\2\2[\\\5\16\b\2\\]\7\61\2\2]_\3\2\2\2^Z\3\2\2\2_b\3")
+        buf.write("\2\2\2`^\3\2\2\2`a\3\2\2\2ag\3\2\2\2b`\3\2\2\2cd\5\16")
+        buf.write("\b\2de\7\61\2\2eg\3\2\2\2fW\3\2\2\2fc\3\2\2\2fg\3\2\2")
+        buf.write("\2gh\3\2\2\2hi\7\n\2\2im\7\5\2\2jl\5\6\4\2kj\3\2\2\2l")
+        buf.write("o\3\2\2\2mk\3\2\2\2mn\3\2\2\2np\3\2\2\2om\3\2\2\2pr\7")
+        buf.write("\7\2\2q\35\3\2\2\2q:\3\2\2\2qS\3\2\2\2r\5\3\2\2\2st\5")
+        buf.write("\n\6\2tu\7\b\2\2u\u00bc\3\2\2\2vx\7!\2\2wv\3\2\2\2wx\3")
+        buf.write("\2\2\2xy\3\2\2\2yz\5\16\b\2z~\7\61\2\2{|\7\3\2\2|}\7.")
+        buf.write("\2\2}\177\7\4\2\2~{\3\2\2\2~\177\3\2\2\2\177\u008e\3\2")
+        buf.write("\2\2\u0080\u0081\7\25\2\2\u0081\u008f\5\n\6\2\u0082\u0083")
+        buf.write("\7\25\2\2\u0083\u0084\7\5\2\2\u0084\u0089\5\n\6\2\u0085")
+        buf.write("\u0086\7\6\2\2\u0086\u0088\5\n\6\2\u0087\u0085\3\2\2\2")
+        buf.write("\u0088\u008b\3\2\2\2\u0089\u0087\3\2\2\2\u0089\u008a\3")
+        buf.write("\2\2\2\u008a\u008c\3\2\2\2\u008b\u0089\3\2\2\2\u008c\u008d")
+        buf.write("\7\7\2\2\u008d\u008f\3\2\2\2\u008e\u0080\3\2\2\2\u008e")
+        buf.write("\u0082\3\2\2\2\u008e\u008f\3\2\2\2\u008f\u0090\3\2\2\2")
+        buf.write("\u0090\u0091\7\b\2\2\u0091\u00bc\3\2\2\2\u0092\u0093\7")
+        buf.write("$\2\2\u0093\u0094\7\t\2\2\u0094\u0095\5\n\6\2\u0095\u0096")
+        buf.write("\7\n\2\2\u0096\u009a\7\5\2\2\u0097\u0099\5\6\4\2\u0098")
+        buf.write("\u0097\3\2\2\2\u0099\u009c\3\2\2\2\u009a\u0098\3\2\2\2")
+        buf.write("\u009a\u009b\3\2\2\2\u009b\u009d\3\2\2\2\u009c\u009a\3")
+        buf.write("\2\2\2\u009d\u009e\7\7\2\2\u009e\u00bc\3\2\2\2\u009f\u00a0")
+        buf.write("\7%\2\2\u00a0\u00a1\7\t\2\2\u00a1\u00a2\5\n\6\2\u00a2")
+        buf.write("\u00a3\7\n\2\2\u00a3\u00a7\7\5\2\2\u00a4\u00a6\5\6\4\2")
+        buf.write("\u00a5\u00a4\3\2\2\2\u00a6\u00a9\3\2\2\2\u00a7\u00a5\3")
+        buf.write("\2\2\2\u00a7\u00a8\3\2\2\2\u00a8\u00aa\3\2\2\2\u00a9\u00a7")
+        buf.write("\3\2\2\2\u00aa\u00b0\7\7\2\2\u00ab\u00ac\7&\2\2\u00ac")
+        buf.write("\u00ad\7\5\2\2\u00ad\u00ae\5\b\5\2\u00ae\u00af\7\7\2\2")
+        buf.write("\u00af\u00b1\3\2\2\2\u00b0\u00ab\3\2\2\2\u00b0\u00b1\3")
+        buf.write("\2\2\2\u00b1\u00bc\3\2\2\2\u00b2\u00b4\7\'\2\2\u00b3\u00b5")
+        buf.write("\5\n\6\2\u00b4\u00b3\3\2\2\2\u00b4\u00b5\3\2\2\2\u00b5")
+        buf.write("\u00b6\3\2\2\2\u00b6\u00bc\7\b\2\2\u00b7\u00b8\7(\2\2")
+        buf.write("\u00b8\u00bc\7\b\2\2\u00b9\u00ba\7)\2\2\u00ba\u00bc\7")
+        buf.write("\b\2\2\u00bbs\3\2\2\2\u00bbw\3\2\2\2\u00bb\u0092\3\2\2")
+        buf.write("\2\u00bb\u009f\3\2\2\2\u00bb\u00b2\3\2\2\2\u00bb\u00b7")
+        buf.write("\3\2\2\2\u00bb\u00b9\3\2\2\2\u00bc\7\3\2\2\2\u00bd\u00bf")
+        buf.write("\5\6\4\2\u00be\u00bd\3\2\2\2\u00bf\u00c2\3\2\2\2\u00c0")
+        buf.write("\u00be\3\2\2\2\u00c0\u00c1\3\2\2\2\u00c1\t\3\2\2\2\u00c2")
+        buf.write("\u00c0\3\2\2\2\u00c3\u00c4\b\6\1\2\u00c4\u00c5\7\t\2\2")
+        buf.write("\u00c5\u00c6\5\n\6\2\u00c6\u00c7\7\n\2\2\u00c7\u00e0\3")
+        buf.write("\2\2\2\u00c8\u00c9\t\2\2\2\u00c9\u00e0\5\n\6\16\u00ca")
+        buf.write("\u00cb\7\61\2\2\u00cb\u00d5\7\t\2\2\u00cc\u00d1\5\n\6")
+        buf.write("\2\u00cd\u00ce\7\6\2\2\u00ce\u00d0\5\n\6\2\u00cf\u00cd")
+        buf.write("\3\2\2\2\u00d0\u00d3\3\2\2\2\u00d1\u00cf\3\2\2\2\u00d1")
+        buf.write("\u00d2\3\2\2\2\u00d2\u00d6\3\2\2\2\u00d3\u00d1\3\2\2\2")
+        buf.write("\u00d4\u00d6\5\n\6\2\u00d5\u00cc\3\2\2\2\u00d5\u00d4\3")
+        buf.write("\2\2\2\u00d5\u00d6\3\2\2\2\u00d6\u00d7\3\2\2\2\u00d7\u00e0")
+        buf.write("\7\n\2\2\u00d8\u00dc\7\61\2\2\u00d9\u00da\7\3\2\2\u00da")
+        buf.write("\u00db\t\3\2\2\u00db\u00dd\7\4\2\2\u00dc\u00d9\3\2\2\2")
+        buf.write("\u00dc\u00dd\3\2\2\2\u00dd\u00e0\3\2\2\2\u00de\u00e0\5")
+        buf.write("\f\7\2\u00df\u00c3\3\2\2\2\u00df\u00c8\3\2\2\2\u00df\u00ca")
+        buf.write("\3\2\2\2\u00df\u00d8\3\2\2\2\u00df\u00de\3\2\2\2\u00e0")
+        buf.write("\u00fa\3\2\2\2\u00e1\u00e2\f\f\2\2\u00e2\u00e3\t\4\2\2")
+        buf.write("\u00e3\u00f9\5\n\6\r\u00e4\u00e5\f\13\2\2\u00e5\u00e6")
+        buf.write("\t\5\2\2\u00e6\u00f9\5\n\6\f\u00e7\u00e8\f\n\2\2\u00e8")
+        buf.write("\u00e9\t\6\2\2\u00e9\u00f9\5\n\6\13\u00ea\u00eb\f\t\2")
+        buf.write("\2\u00eb\u00ec\t\7\2\2\u00ec\u00f9\5\n\6\n\u00ed\u00ee")
+        buf.write("\f\b\2\2\u00ee\u00ef\t\b\2\2\u00ef\u00f9\5\n\6\t\u00f0")
+        buf.write("\u00f1\f\7\2\2\u00f1\u00f2\t\t\2\2\u00f2\u00f9\5\n\6\b")
+        buf.write("\u00f3\u00f4\f\6\2\2\u00f4\u00f5\7\25\2\2\u00f5\u00f9")
+        buf.write("\5\n\6\7\u00f6\u00f7\f\r\2\2\u00f7\u00f9\t\n\2\2\u00f8")
+        buf.write("\u00e1\3\2\2\2\u00f8\u00e4\3\2\2\2\u00f8\u00e7\3\2\2\2")
+        buf.write("\u00f8\u00ea\3\2\2\2\u00f8\u00ed\3\2\2\2\u00f8\u00f0\3")
+        buf.write("\2\2\2\u00f8\u00f3\3\2\2\2\u00f8\u00f6\3\2\2\2\u00f9\u00fc")
+        buf.write("\3\2\2\2\u00fa\u00f8\3\2\2\2\u00fa\u00fb\3\2\2\2\u00fb")
+        buf.write("\13\3\2\2\2\u00fc\u00fa\3\2\2\2\u00fd\u00fe\t\13\2\2\u00fe")
+        buf.write("\r\3\2\2\2\u00ff\u0103\7\35\2\2\u0100\u0103\7\37\2\2\u0101")
+        buf.write("\u0103\7\36\2\2\u0102\u00ff\3\2\2\2\u0102\u0100\3\2\2")
+        buf.write("\2\u0102\u0101\3\2\2\2\u0103\17\3\2\2\2!\24\32\35$/\64")
+        buf.write(":GMS`fmqw~\u0089\u008e\u009a\u00a7\u00b0\u00b4\u00bb\u00c0")
+        buf.write("\u00d1\u00d5\u00dc\u00df\u00f8\u00fa\u0102")
         return buf.getvalue()
 
 
@@ -149,20 +146,20 @@ class GrammarParser ( Parser ):
                      "'('", "')'", "'*'", "'/'", "'+'", "'-'", "'>'", "'<'", 
                      "'=='", "'>='", "'<='", "'!='", "'='", "'!'", "'&&'", 
                      "'||'", "'%'", "'&'", "'++'", "'--'", "<INVALID>", 
-                     "<INVALID>", "<INVALID>", "'char'", "'int'", "'float'", 
-                     "'void'", "'const'", "'#include'", "'for'", "'while'", 
-                     "'if'", "'else'", "'return'", "'break'", "'continue'" ]
+                     "<INVALID>", "<INVALID>", "'void'", "'const'", "'#include'", 
+                     "'for'", "'while'", "'if'", "'else'", "'return'", "'break'", 
+                     "'continue'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "MUL", "DIV", "ADD", "SUB", "GRT", "LST", 
                       "EQ", "GEQ", "LEQ", "NEQ", "ASS", "NOT", "AND", "OR", 
-                      "MOD", "DRF", "PPP", "MPP", "KEY_CHARPTR", "KEY_FLOATPTR", 
-                      "KEY_INTPTR", "KEY_CHAR", "KEY_INT", "KEY_FLOAT", 
-                      "KEY_VOID", "KEY_CONST", "KEY_INCLUDE", "KEY_FOR", 
-                      "KEY_WHILE", "KEY_IF", "KEY_ELSE", "KEY_RETURN", "KEY_BREAK", 
-                      "KEY_CONTINUE", "MULTICOMMENT", "SINGLECOMMENT", "CHAR", 
-                      "STRING", "INT", "FLOAT", "BOOL", "ID", "LIB", "WS" ]
+                      "MOD", "DRF", "PPP", "MPP", "KEY_CHAR", "KEY_INT", 
+                      "KEY_FLOAT", "KEY_VOID", "KEY_CONST", "KEY_INCLUDE", 
+                      "KEY_FOR", "KEY_WHILE", "KEY_IF", "KEY_ELSE", "KEY_RETURN", 
+                      "KEY_BREAK", "KEY_CONTINUE", "MULTICOMMENT", "SINGLECOMMENT", 
+                      "CHAR", "STRING", "INT", "FLOAT", "BOOL", "ID", "LIB", 
+                      "WS" ]
 
     RULE_prog = 0
     RULE_decl = 1
@@ -201,32 +198,29 @@ class GrammarParser ( Parser ):
     DRF=24
     PPP=25
     MPP=26
-    KEY_CHARPTR=27
-    KEY_FLOATPTR=28
-    KEY_INTPTR=29
-    KEY_CHAR=30
-    KEY_INT=31
-    KEY_FLOAT=32
-    KEY_VOID=33
-    KEY_CONST=34
-    KEY_INCLUDE=35
-    KEY_FOR=36
-    KEY_WHILE=37
-    KEY_IF=38
-    KEY_ELSE=39
-    KEY_RETURN=40
-    KEY_BREAK=41
-    KEY_CONTINUE=42
-    MULTICOMMENT=43
-    SINGLECOMMENT=44
-    CHAR=45
-    STRING=46
-    INT=47
-    FLOAT=48
-    BOOL=49
-    ID=50
-    LIB=51
-    WS=52
+    KEY_CHAR=27
+    KEY_INT=28
+    KEY_FLOAT=29
+    KEY_VOID=30
+    KEY_CONST=31
+    KEY_INCLUDE=32
+    KEY_FOR=33
+    KEY_WHILE=34
+    KEY_IF=35
+    KEY_ELSE=36
+    KEY_RETURN=37
+    KEY_BREAK=38
+    KEY_CONTINUE=39
+    MULTICOMMENT=40
+    SINGLECOMMENT=41
+    CHAR=42
+    STRING=43
+    INT=44
+    FLOAT=45
+    BOOL=46
+    ID=47
+    LIB=48
+    WS=49
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -311,7 +305,7 @@ class GrammarParser ( Parser ):
                 self.state = 24 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.KEY_CHARPTR) | (1 << GrammarParser.KEY_FLOATPTR) | (1 << GrammarParser.KEY_INTPTR) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_VOID) | (1 << GrammarParser.KEY_CONST))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_VOID) | (1 << GrammarParser.KEY_CONST))) != 0)):
                     break
 
         except RecognitionException as re:
@@ -534,7 +528,7 @@ class GrammarParser ( Parser ):
                 self.state = 56
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [GrammarParser.KEY_CHARPTR, GrammarParser.KEY_FLOATPTR, GrammarParser.KEY_INTPTR, GrammarParser.KEY_CHAR, GrammarParser.KEY_INT, GrammarParser.KEY_FLOAT]:
+                if token in [GrammarParser.KEY_CHAR, GrammarParser.KEY_INT, GrammarParser.KEY_FLOAT]:
                     self.state = 54
                     self.prim()
                     pass
@@ -591,7 +585,7 @@ class GrammarParser ( Parser ):
                 self.state = 81
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [GrammarParser.KEY_CHARPTR, GrammarParser.KEY_FLOATPTR, GrammarParser.KEY_INTPTR, GrammarParser.KEY_CHAR, GrammarParser.KEY_INT, GrammarParser.KEY_FLOAT]:
+                if token in [GrammarParser.KEY_CHAR, GrammarParser.KEY_INT, GrammarParser.KEY_FLOAT]:
                     self.state = 79
                     self.prim()
                     pass
@@ -643,7 +637,7 @@ class GrammarParser ( Parser ):
                 self.state = 107
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.T__6) | (1 << GrammarParser.MUL) | (1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.NOT) | (1 << GrammarParser.DRF) | (1 << GrammarParser.PPP) | (1 << GrammarParser.MPP) | (1 << GrammarParser.KEY_CHARPTR) | (1 << GrammarParser.KEY_FLOATPTR) | (1 << GrammarParser.KEY_INTPTR) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_CONST) | (1 << GrammarParser.KEY_WHILE) | (1 << GrammarParser.KEY_IF) | (1 << GrammarParser.KEY_RETURN) | (1 << GrammarParser.KEY_BREAK) | (1 << GrammarParser.KEY_CONTINUE) | (1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT) | (1 << GrammarParser.ID))) != 0):
+                while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.T__6) | (1 << GrammarParser.MUL) | (1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.NOT) | (1 << GrammarParser.DRF) | (1 << GrammarParser.PPP) | (1 << GrammarParser.MPP) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_CONST) | (1 << GrammarParser.KEY_WHILE) | (1 << GrammarParser.KEY_IF) | (1 << GrammarParser.KEY_RETURN) | (1 << GrammarParser.KEY_BREAK) | (1 << GrammarParser.KEY_CONTINUE) | (1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT) | (1 << GrammarParser.ID))) != 0):
                     self.state = 104
                     self.stat()
                     self.state = 109
@@ -909,7 +903,7 @@ class GrammarParser ( Parser ):
                 self.state = 114
                 self.match(GrammarParser.T__5)
                 pass
-            elif token in [GrammarParser.KEY_CHARPTR, GrammarParser.KEY_FLOATPTR, GrammarParser.KEY_INTPTR, GrammarParser.KEY_CHAR, GrammarParser.KEY_INT, GrammarParser.KEY_FLOAT, GrammarParser.KEY_CONST]:
+            elif token in [GrammarParser.KEY_CHAR, GrammarParser.KEY_INT, GrammarParser.KEY_FLOAT, GrammarParser.KEY_CONST]:
                 localctx = GrammarParser.DeclStatContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 117
@@ -987,7 +981,7 @@ class GrammarParser ( Parser ):
                 self.state = 152
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.T__6) | (1 << GrammarParser.MUL) | (1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.NOT) | (1 << GrammarParser.DRF) | (1 << GrammarParser.PPP) | (1 << GrammarParser.MPP) | (1 << GrammarParser.KEY_CHARPTR) | (1 << GrammarParser.KEY_FLOATPTR) | (1 << GrammarParser.KEY_INTPTR) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_CONST) | (1 << GrammarParser.KEY_WHILE) | (1 << GrammarParser.KEY_IF) | (1 << GrammarParser.KEY_RETURN) | (1 << GrammarParser.KEY_BREAK) | (1 << GrammarParser.KEY_CONTINUE) | (1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT) | (1 << GrammarParser.ID))) != 0):
+                while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.T__6) | (1 << GrammarParser.MUL) | (1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.NOT) | (1 << GrammarParser.DRF) | (1 << GrammarParser.PPP) | (1 << GrammarParser.MPP) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_CONST) | (1 << GrammarParser.KEY_WHILE) | (1 << GrammarParser.KEY_IF) | (1 << GrammarParser.KEY_RETURN) | (1 << GrammarParser.KEY_BREAK) | (1 << GrammarParser.KEY_CONTINUE) | (1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT) | (1 << GrammarParser.ID))) != 0):
                     self.state = 149
                     self.stat()
                     self.state = 154
@@ -1013,7 +1007,7 @@ class GrammarParser ( Parser ):
                 self.state = 165
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.T__6) | (1 << GrammarParser.MUL) | (1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.NOT) | (1 << GrammarParser.DRF) | (1 << GrammarParser.PPP) | (1 << GrammarParser.MPP) | (1 << GrammarParser.KEY_CHARPTR) | (1 << GrammarParser.KEY_FLOATPTR) | (1 << GrammarParser.KEY_INTPTR) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_CONST) | (1 << GrammarParser.KEY_WHILE) | (1 << GrammarParser.KEY_IF) | (1 << GrammarParser.KEY_RETURN) | (1 << GrammarParser.KEY_BREAK) | (1 << GrammarParser.KEY_CONTINUE) | (1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT) | (1 << GrammarParser.ID))) != 0):
+                while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.T__6) | (1 << GrammarParser.MUL) | (1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.NOT) | (1 << GrammarParser.DRF) | (1 << GrammarParser.PPP) | (1 << GrammarParser.MPP) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_CONST) | (1 << GrammarParser.KEY_WHILE) | (1 << GrammarParser.KEY_IF) | (1 << GrammarParser.KEY_RETURN) | (1 << GrammarParser.KEY_BREAK) | (1 << GrammarParser.KEY_CONTINUE) | (1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT) | (1 << GrammarParser.ID))) != 0):
                     self.state = 162
                     self.stat()
                     self.state = 167
@@ -1125,7 +1119,7 @@ class GrammarParser ( Parser ):
             self.state = 190
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.T__6) | (1 << GrammarParser.MUL) | (1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.NOT) | (1 << GrammarParser.DRF) | (1 << GrammarParser.PPP) | (1 << GrammarParser.MPP) | (1 << GrammarParser.KEY_CHARPTR) | (1 << GrammarParser.KEY_FLOATPTR) | (1 << GrammarParser.KEY_INTPTR) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_CONST) | (1 << GrammarParser.KEY_WHILE) | (1 << GrammarParser.KEY_IF) | (1 << GrammarParser.KEY_RETURN) | (1 << GrammarParser.KEY_BREAK) | (1 << GrammarParser.KEY_CONTINUE) | (1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT) | (1 << GrammarParser.ID))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.T__6) | (1 << GrammarParser.MUL) | (1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.NOT) | (1 << GrammarParser.DRF) | (1 << GrammarParser.PPP) | (1 << GrammarParser.MPP) | (1 << GrammarParser.KEY_CHAR) | (1 << GrammarParser.KEY_INT) | (1 << GrammarParser.KEY_FLOAT) | (1 << GrammarParser.KEY_CONST) | (1 << GrammarParser.KEY_WHILE) | (1 << GrammarParser.KEY_IF) | (1 << GrammarParser.KEY_RETURN) | (1 << GrammarParser.KEY_BREAK) | (1 << GrammarParser.KEY_CONTINUE) | (1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT) | (1 << GrammarParser.ID))) != 0):
                 self.state = 187
                 self.stat()
                 self.state = 192
@@ -1778,30 +1772,6 @@ class GrammarParser ( Parser ):
 
 
 
-    class FloatptrPrimContext(PrimContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a GrammarParser.PrimContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def KEY_FLOATPTR(self):
-            return self.getToken(GrammarParser.KEY_FLOATPTR, 0)
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterFloatptrPrim" ):
-                listener.enterFloatptrPrim(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitFloatptrPrim" ):
-                listener.exitFloatptrPrim(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitFloatptrPrim" ):
-                return visitor.visitFloatptrPrim(self)
-            else:
-                return visitor.visitChildren(self)
-
-
     class CharPrimContext(PrimContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a GrammarParser.PrimContext
@@ -1874,61 +1844,13 @@ class GrammarParser ( Parser ):
                 return visitor.visitChildren(self)
 
 
-    class CharptrPrimContext(PrimContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a GrammarParser.PrimContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def KEY_CHARPTR(self):
-            return self.getToken(GrammarParser.KEY_CHARPTR, 0)
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterCharptrPrim" ):
-                listener.enterCharptrPrim(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitCharptrPrim" ):
-                listener.exitCharptrPrim(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitCharptrPrim" ):
-                return visitor.visitCharptrPrim(self)
-            else:
-                return visitor.visitChildren(self)
-
-
-    class IntptrPrimContext(PrimContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a GrammarParser.PrimContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def KEY_INTPTR(self):
-            return self.getToken(GrammarParser.KEY_INTPTR, 0)
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterIntptrPrim" ):
-                listener.enterIntptrPrim(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitIntptrPrim" ):
-                listener.exitIntptrPrim(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitIntptrPrim" ):
-                return visitor.visitIntptrPrim(self)
-            else:
-                return visitor.visitChildren(self)
-
-
 
     def prim(self):
 
         localctx = GrammarParser.PrimContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_prim)
         try:
-            self.state = 259
+            self.state = 256
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [GrammarParser.KEY_CHAR]:
@@ -1948,24 +1870,6 @@ class GrammarParser ( Parser ):
                 self.enterOuterAlt(localctx, 3)
                 self.state = 255
                 self.match(GrammarParser.KEY_INT)
-                pass
-            elif token in [GrammarParser.KEY_CHARPTR]:
-                localctx = GrammarParser.CharptrPrimContext(self, localctx)
-                self.enterOuterAlt(localctx, 4)
-                self.state = 256
-                self.match(GrammarParser.KEY_CHARPTR)
-                pass
-            elif token in [GrammarParser.KEY_FLOATPTR]:
-                localctx = GrammarParser.FloatptrPrimContext(self, localctx)
-                self.enterOuterAlt(localctx, 5)
-                self.state = 257
-                self.match(GrammarParser.KEY_FLOATPTR)
-                pass
-            elif token in [GrammarParser.KEY_INTPTR]:
-                localctx = GrammarParser.IntptrPrimContext(self, localctx)
-                self.enterOuterAlt(localctx, 6)
-                self.state = 258
-                self.match(GrammarParser.KEY_INTPTR)
                 pass
             else:
                 raise NoViableAltException(self)

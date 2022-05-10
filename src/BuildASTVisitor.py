@@ -94,8 +94,30 @@ class BuildASTVisitor(GrammarVisitor):
                 node.init_expr = init_list_node
             else:
                 node.init_expr = self.visit(ctx.expr()[0])
+                if type(node.init_expr) is DeclRefExprNode or type(node.init_expr) is ArraySubscriptExprNode:
+                    cast_node = ImplicitCastExprNode()
+                    cast_node.cast = "<LValueToRValue>"
+                    cast_node.child = node.init_expr
+                    cast_node.child.parent = cast_node
+                    cast_node.type = cast_node.child.type
+                    node.init_expr = cast_node
                 node.init_expr.parent = node
                 node.init = True
+                if node.type == node.init_expr.type:
+                    pass
+                else:
+                    cast_node = ImplicitCastExprNode()
+                    cast_node.parent = node
+                    if node.type == "int" and node.init_expr.type == "float":
+                        cast_node.cast = "<FloatingToIntegral>"
+                    elif node.type == "float" and node.init_expr.type == "int":
+                        cast_node.cast = "<IntegralToFloating>"
+                    else:
+                        print("Need to cast but dont know this cast yet")
+                    cast_node.type = node.type
+                    cast_node.child = node.init_expr
+                    cast_node.child.parent = cast_node
+                    node.init_expr = cast_node
 
         result = self.STT.insert(node.id)
         if result is None:
@@ -147,6 +169,22 @@ class BuildASTVisitor(GrammarVisitor):
         node.init = True
         node.id = ctx.ID()[0].getText()
 
+        result = self.STT.insert(node.id)
+        if result is None:
+            check_declared = self.STT.lookup(node.id)
+            if check_declared is None:
+                raise Exception("Failed to insert Function '{}' in symboltable".format(node.id))
+            else:
+                self.STT.set_attribute(node.id, "ast_node", node)
+                self.STT.set_attribute(node.id, "object", "Function")
+                self.STT.set_attribute(node.id, "global", True)
+
+        else:
+            self.STT.set_attribute(node.id, "ast_node", node)
+            self.STT.set_attribute(node.id, "object", "Function")
+            self.STT.set_attribute(node.id, "global", True)
+
+
         # Create SymbolTable for function
         self.STT.new_scope()
 
@@ -183,6 +221,8 @@ class BuildASTVisitor(GrammarVisitor):
                 self.STT.set_attribute(parmvar_node.id, "ast_node", parmvar_node)
                 self.STT.set_attribute(parmvar_node.id, "object", "lvalue ParmVar")
                 self.STT.set_attribute(parmvar_node.id, "serial", self.claimSerial())
+                self.STT.set_attribute(parmvar_node.id, "global", False)
+
   
 
         scope_node = ScopeStmtNode()
@@ -196,18 +236,6 @@ class BuildASTVisitor(GrammarVisitor):
         
         # Go back to scope where Function was declared
         self.STT.prev_scope()
-
-        result = self.STT.insert(node.id)
-        if result is None:
-            check_declared = self.STT.lookup(node.id)
-            if check_declared is None:
-                raise Exception("Failed to insert Function '{}' in symboltable".format(node.id))
-            else:
-                self.STT.set_attribute(node.id, "ast_node", node)
-                self.STT.set_attribute(node.id, "object", "Function")
-        else:
-            self.STT.set_attribute(node.id, "ast_node", node)
-            self.STT.set_attribute(node.id, "object", "Function")
 
         return node
 
@@ -233,7 +261,11 @@ class BuildASTVisitor(GrammarVisitor):
 
         var_decl.line = ctx.start.line
         node.line = var_decl.line
-        var_decl.type = ctx.prim().getText()
+        temp = ctx.prim().getText().split('*')
+        var_decl.type = temp[0]
+        if len(temp) >= 2:
+            var_decl.type += " "
+            var_decl.type += (len(temp)-1)*"*"
 
         if ctx.INT() is None:
             var_decl.array = False
@@ -258,6 +290,13 @@ class BuildASTVisitor(GrammarVisitor):
                 var_decl.init_expr = init_list_node
             else:
                 var_decl.init_expr = self.visit(ctx.expr()[0])
+                if type(var_decl.init_expr) is DeclRefExprNode or type(var_decl.init_expr) is ArraySubscriptExprNode:
+                    cast_node = ImplicitCastExprNode()
+                    cast_node.cast = "<LValueToRValue>"
+                    cast_node.child = var_decl.init_expr
+                    cast_node.child.parent = cast_node
+                    cast_node.type = cast_node.child.type
+                    var_decl.init_expr = cast_node
                 var_decl.init_expr.parent = var_decl
                 var_decl.init = True
                 if var_decl.type == var_decl.init_expr.type:
@@ -265,8 +304,15 @@ class BuildASTVisitor(GrammarVisitor):
                 else:
                     cast_node = ImplicitCastExprNode()
                     cast_node.parent = var_decl
+                    if var_decl.type == "int" and var_decl.init_expr.type == "float":
+                        cast_node.cast = "<FloatingToIntegral>"
+                    elif var_decl.type == "float" and var_decl.init_expr.type == "int":
+                        cast_node.cast = "<IntegralToFloating>"
+                    else:
+                        print("Need to cast but dont know this cast yet")
                     cast_node.type = var_decl.type
-                    cast_node.cast = var_decl.init_expr
+                    cast_node.child = var_decl.init_expr
+                    cast_node.child.parent = cast_node
                     var_decl.init_expr = cast_node
 
         node.child = var_decl
@@ -395,77 +441,56 @@ class BuildASTVisitor(GrammarVisitor):
         #       Expected type?
         node.operation = switcher.get(ctx.op.type, None)
         node.line = ctx.start.line 
-        if node.operation == "=":
-            lhs_id = ctx.left.ID()[0].getText()
-            result = self.STT.lookup(lhs_id)
-            if result is None:
-                raise Exception("Referenced ID {} not found in symboltable".format(lhs_id))
+        
+        lhs_node = self.visit(ctx.left)
+        if (not (node.operation == "=") ) and ((type(lhs_node) is DeclRefExprNode) or (type(lhs_node) is ArraySubscriptExprNode)):
+            cast_node = ImplicitCastExprNode()
+            cast_node.type = lhs_node.type
+            cast_node.cast = "<LValueToRValue>"
+            cast_node.child = lhs_node
+            lhs_node.parent = cast_node
+            lhs_node = cast_node
+        else:
+            pass
+        lhs_node.parent = node
+        rhs_node = self.visit(ctx.right)
+        if ((type(rhs_node) is DeclRefExprNode) or (type(rhs_node) is ArraySubscriptExprNode)):
+            cast_node = ImplicitCastExprNode()
+            cast_node.type = rhs_node.type
+            cast_node.cast = "<LValueToRValue>"
+            cast_node.child = rhs_node
+            rhs_node.parent = cast_node
+            rhs_node = cast_node
+        else:
+            pass
+        rhs_node.parent = node
+
+        node.lhs_child = lhs_node
+        node.rhs_child = rhs_node
+        if node.operation == "&&" or node.operation == "||" or node.operation == "!=" or node.operation == "==":
+            node.type = 'bool'
+        elif node.operation == ">" or node.operation == "<" or node.operation == ">=" or node.operation == "<=":
+            node.type = 'bool'
+        elif node.operation == "=":
+            if rhs_node.type == lhs_node.type:
+                pass
             else:
-                if result["object"] != "Function":
-                    result["ast_node"].used = True
-                    if result["ast_node"].array:
-                        array_node = self.visit(ctx.left)
-                        array_node.parent = node
-                        # array_node = ArraySubscriptExprNode()
-                        # array_node.parent = node
-                        # array_node.type = result["ast_node"].type
-                        # array_node.array_child = result
-                        # if ctx.left.INT() is None:
-                        #     array_node.index_child = self.visit(ctx.left.ID()[1])
-                        # else:
-                        #     array_node.index_child = self.visit(ctx.left.INT())
-                        node.lhs_child = array_node
-
-                        expr_node = self.visit(ctx.right)
-                        if expr_node.type == array_node.type:
-                            expr_node.parent = node
-                            node.rhs_child = expr_node
-                        else:
-                            cast_node = ImplicitCastExprNode()
-                            cast_node.parent = node
-                            cast_node.type = ref_node.type
-                            cast_node.cast = expr_node
-                            expr_node.parent = cast_node
-                            node.rhs_child = cast_node
-
-                        return node
-                    else:
-                        ref_node = DeclRefExprNode()
-                        ref_node.ref = result
-                        ref_node.id = lhs_id
-                        ref_node.type = result["ast_node"].type
-                        ref_node.parent = node
-                        node.lhs_child = ref_node
-
-                        expr_node = self.visit(ctx.right)
-                        if expr_node.type == ref_node.type:
-                            expr_node.parent = node
-                            node.rhs_child = expr_node
-                        else:
-                            cast_node = ImplicitCastExprNode()
-                            cast_node.parent = node
-                            cast_node.type = ref_node.type
-                            cast_node.cast = expr_node
-                            expr_node.parent = cast_node
-                            node.rhs_child = cast_node
-                        return node
+                cast_node = ImplicitCastExprNode()
+                cast_node.parent = node
+                cast_node.type = lhs_node.type
+                if lhs_node.type == "int" and rhs_node.type == "float":
+                    cast_node.cast = "<FloatingToIntegral>"
+                elif lhs_node.type == "float" and rhs_node.type == "int":
+                    cast_node.cast = "<IntegralToFloating>"
                 else:
-                    raise Exception("Semantics blahblah 328 buildast")         
-        else:    
-            lhs_node = self.visit(ctx.left)
-            lhs_node.parent = node
-            rhs_node = self.visit(ctx.right)
-            rhs_node.parent = node
+                    print("Need to cast but dont know this cast yet", lhs_node.type, rhs_node.type)
+                cast_node.child = rhs_node
+                rhs_node.parent = cast_node
+                node.rhs_child = cast_node
+        else:
+            node.type = node.lhs_child.type
 
-            node.lhs_child = lhs_node
-            node.rhs_child = rhs_node
-            if node.operation == "&&" or node.operation == "||" or node.operation == "!=" or node.operation == "==":
-                node.type = 'bool'
-            elif node.operation == ">" or node.operation == "<" or node.operation == ">=" or node.operation == "<=":
-                node.type = 'bool'
-            else:
-                node.type = node.lhs_child.type
-            return node
+        return node
 
     # Visit a parse tree produced by GrammarParser#postUnaryExpr.
     def visitPostUnaryExpr(self, ctx:GrammarParser.PostUnaryExprContext):
@@ -496,15 +521,38 @@ class BuildASTVisitor(GrammarVisitor):
             GrammarLexer.PPP : "++",
             GrammarLexer.MPP : "--"
         }
-        expr_node = self.visit(ctx.expr())
-        expr_node.parent = node
-        node.child = expr_node
         node.prefix = True
         node.operation = switcher.get(ctx.op.type, None)
+        expr_node = self.visit(ctx.expr())
+        if (not (node.operation == "&")) and ((type(expr_node) is DeclRefExprNode) or (type(expr_node) is ArraySubscriptExprNode)):
+            cast_node = ImplicitCastExprNode()
+            cast_node.type = expr_node.type
+            cast_node.cast = "<LValueToRValue>"
+            cast_node.child = expr_node
+            expr_node.parent = cast_node
+            expr_node = cast_node
+        else:
+            pass
+        expr_node.parent = node
+        node.child = expr_node
+        
         if node.operation == "!":
                 node.type = 'int'
+        elif node.operation == "&":
+            temp = node.child.type.split(" ")
+            if len(temp) == 1:
+                node.type = node.child.type + " *"
+            else:
+                node.type = temp[0] + "*"*(len(temp[1])+1)
+        elif node.operation == "*":
+            temp = node.child.type.split(" ")
+            if len(temp) == 1:
+                raise Exception("Syntax error: Cannot dereference lvalue")
+                node.type = node.child.type + " *"
+            else:
+                node.type = temp[0] + "*"*(len(temp[1])-1)
         else:
-                node.type = node.child.type
+            node.type = node.child.type
         node.child = expr_node
         return node
 
@@ -535,8 +583,18 @@ class BuildASTVisitor(GrammarVisitor):
    
         for arg in ctx.expr():
             arg_node = self.visit(arg)
-            arg_node.parent = node
-            node.children.append(arg_node)
+
+            if type(arg_node) is DeclRefExprNode or type(arg_node) is ArraySubscriptExprNode:
+                cast_node = ImplicitCastExprNode()
+                cast_node.type = arg_node.type
+                cast_node.cast = "<LValueToRValue>"
+                cast_node.child = arg_node
+                arg_node.parent = cast_node
+                cast_node.parent = node
+                node.children.append(cast_node)
+            else:
+                arg_node.parent = node
+                node.children.append(arg_node)
 
         return node
 
@@ -547,45 +605,46 @@ class BuildASTVisitor(GrammarVisitor):
 
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
-        node = DeclRefExprNode()
         call_id = ctx.ID()[0].getText()
-        if ctx.INT() is None and len(ctx.ID()) == 1:
-            result = self.STT.lookup(call_id)
-            if result is None:
-                raise Exception("Referenced ID {} not found in symboltable".format(call_id))
-            else:
-                node.id = result["ast_node"].id
-                node.ref = result
-                if result["object"] == "Function":
-                    node.type = result["ast_node"].return_type
-                    node.function = True
-                    node.signature = result["ast_node"].getSignature()
-                else:
-                    node.type = result["ast_node"].type
-                node.ref["ast_node"].used = True
+        ref_node = DeclRefExprNode()
+        result = self.STT.lookup(call_id)
+        if result is None:
+            raise Exception("Referenced ID {} not found in symboltable".format(call_id))
         else:
-            if ctx.INT() is None:
-                node = ArraySubscriptExprNode()
-                result = self.STT.lookup(call_id)
-                if result is None:
-                    raise Exception("Referenced ID {} not found in symboltable".format(call_id))
-                else:
-                    node.array_child = result
-                    node.type = result["ast_node"].type
-                    node.index_child = self.visit(ctx.ID()[1])
-                    node.index_child.parent = node
+            ref_node.id = result["ast_node"].id
+            ref_node.ref = result
+            if result["object"] == "Function":
+                ref_node.type = result["ast_node"].return_type
+                ref_node.function = True
+                ref_node.signature = result["ast_node"].getSignature()
             else:
-                node = ArraySubscriptExprNode()
-                result = self.STT.lookup(call_id)
-                if result is None:
-                    raise Exception("Referenced ID {} not found in symboltable".format(call_id))
-                else:
-                    node.array_child = result
-                    node.type = result["ast_node"].type
-                    node.index_child = IntergerLiteralNode()
-                    node.index_child.setValue(ctx.INT().getText())
-                    node.index_child.parent = node
-        return node
+                ref_node.type = result["ast_node"].type
+            ref_node.ref["ast_node"].used = True
+
+        if ctx.INT() is None and len(ctx.ID()) == 1:
+            return ref_node
+        else:
+            node = ArraySubscriptExprNode()
+            cast_node = ImplicitCastExprNode()
+            cast_node.parent = node
+            cast_node.type = ref_node.type
+            cast_node.cast = "<ArrayToPointerDecay>"
+            cast_node.child = ref_node
+            ref_node.parent = cast_node
+            node.array_child = cast_node
+            node.type = result["ast_node"].type
+            if ctx.INT() is None:
+                # Array Index is an ID
+                node.index_child = self.visit(ctx.ID()[1])
+                node.index_child.parent = node
+            else:
+                # Array Index is an IntegerLiteral
+                node.index_child = IntergerLiteralNode()
+                node.index_child.setValue(ctx.INT().getText())
+                node.index_child.parent = node
+            return node
+
+        return None
 
     # Visit a parse tree produced by GrammarParser#primLit.
     def visitPrimLit(self, ctx:GrammarParser.PrimLitContext):
@@ -622,19 +681,6 @@ class BuildASTVisitor(GrammarVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by GrammarParser#charptrPrim.
-    def visitCharptrPrim(self, ctx:GrammarParser.CharptrPrimContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by GrammarParser#floatptrPrim.
-    def visitFloatptrPrim(self, ctx:GrammarParser.FloatptrPrimContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by GrammarParser#intptrPrim.
-    def visitIntptrPrim(self, ctx:GrammarParser.IntptrPrimContext):
-        return self.visitChildren(ctx)
 
 
 
