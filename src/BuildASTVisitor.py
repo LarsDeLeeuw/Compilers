@@ -480,10 +480,11 @@ class BuildASTVisitor(GrammarVisitor):
         node.lhs_child = lhs_node
         node.rhs_child = rhs_node
         if node.operation == "&&" or node.operation == "||" or node.operation == "!=" or node.operation == "==":
-            node.type = 'bool'
+            node.type = 'int'
         elif node.operation == ">" or node.operation == "<" or node.operation == ">=" or node.operation == "<=":
-            node.type = 'bool'
+            node.type = 'int'
         elif node.operation == "=":
+            node.type = node.lhs_child.type
             if rhs_node.type == lhs_node.type:
                 pass
             else:

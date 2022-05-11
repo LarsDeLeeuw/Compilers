@@ -4,78 +4,72 @@ n2 [label="int ()"];
 n3 [label="main"];
 n4 [label="FuncScope"];
 n6 [label="Body"];
-n8 [label="DeclStmt"];
-n9 [label="VarDecl"];
-n10 [label="int"];
-n11 [label="x"];
-n12 [label="IntegerLiteral
+n8 [label="ExprStmt"];
+n9 [label="CallExpr
+void printf()"];
+n12 [label="BinExpr
+'&&'"];
+n13 [label="FloatingLiteral
+rvalue '1.0'"];
+n14 [label="FloatingLiteral
+rvalue '2.0'"];
+n15 [label="ExprStmt"];
+n16 [label="CallExpr
+void printf()"];
+n19 [label="BinExpr
+'&&'"];
+n20 [label="IntegerLiteral
 rvalue '0'"];
-n13 [label="DeclStmt"];
-n14 [label="VarDecl"];
-n15 [label="int *"];
-n16 [label="xp"];
-n17 [label="UnaryOperator
-lvalue prefix '&'"];
-n18 [label="DeclRefExpr
-lvalue Var 'x'"];
-n19 [label="ExprStmt"];
-n20 [label="BinExpr
-'='"];
-n21 [label="UnaryOperator
-lvalue prefix '*'"];
-n22 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n23 [label="DeclRefExpr
-lvalue Var 'xp'"];
-n24 [label="IntegerLiteral
-rvalue '10'"];
-n25 [label="ExprStmt"];
-n26 [label="CallExpr
+n21 [label="IntegerLiteral
+rvalue '2'"];
+n22 [label="ExprStmt"];
+n23 [label="CallExpr
 void printf()"];
-n29 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n30 [label="DeclRefExpr
-lvalue Var 'x'"];
-n31 [label="ExprStmt"];
-n32 [label="CallExpr
+n26 [label="BinExpr
+'||'"];
+n27 [label="FloatingLiteral
+rvalue '0.5'"];
+n28 [label="IntegerLiteral
+rvalue '1'"];
+n29 [label="ExprStmt"];
+n30 [label="CallExpr
 void printf()"];
-n35 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n36 [label="UnaryOperator
-lvalue prefix '*'"];
-n37 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n38 [label="DeclRefExpr
-lvalue Var 'xp'"];
-n39 [label="ExprStmt"];
-n40 [label="UnaryOperator
-lvalue postfix '++'"];
-n41 [label="UnaryOperator
-lvalue prefix '*'"];
-n42 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n43 [label="DeclRefExpr
-lvalue Var 'xp'"];
-n44 [label="ExprStmt"];
-n45 [label="CallExpr
+n33 [label="BinExpr
+'||'"];
+n34 [label="IntegerLiteral
+rvalue '0'"];
+n35 [label="IntegerLiteral
+rvalue '0'"];
+n36 [label="ExprStmt"];
+n37 [label="CallExpr
 void printf()"];
-n48 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n49 [label="DeclRefExpr
-lvalue Var 'x'"];
-n50 [label="ExprStmt"];
-n51 [label="CallExpr
+n40 [label="BinExpr
+'&&'"];
+n41 [label="BinExpr
+'||'"];
+n42 [label="FloatingLiteral
+rvalue '0.5'"];
+n43 [label="FloatingLiteral
+rvalue '0.0'"];
+n44 [label="BinExpr
+'||'"];
+n45 [label="FloatingLiteral
+rvalue '0.0'"];
+n46 [label="FloatingLiteral
+rvalue '1.0'"];
+n47 [label="ExprStmt"];
+n48 [label="CallExpr
 void printf()"];
-n54 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n55 [label="UnaryOperator
-lvalue prefix '*'"];
-n56 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n57 [label="DeclRefExpr
-lvalue Var 'xp'"];
-n58 [label="ReturnStmt"];
-n59 [label="IntegerLiteral
+n51 [label="UnaryOperator
+lvalue prefix '!'"];
+n52 [label="BinExpr
+'&&'"];
+n53 [label="IntegerLiteral
+rvalue '1'"];
+n54 [label="IntegerLiteral
+rvalue '2'"];
+n55 [label="ReturnStmt"];
+n56 [label="IntegerLiteral
 rvalue '1'"];
 n0 -> n1
 n1 -> n2
@@ -84,46 +78,39 @@ n1 -> n4
 n4 -> n6
 n6 -> n8
 n8 -> n9
-n9 -> n10
-n9 -> n11
 n9 -> n12
-n6 -> n13
-n13 -> n14
-n14 -> n15
-n14 -> n16
-n14 -> n17
-n17 -> n18
-n6 -> n19
+n12 -> n13
+n12 -> n14
+n6 -> n15
+n15 -> n16
+n16 -> n19
 n19 -> n20
-n20 -> n21
-n21 -> n22
+n19 -> n21
+n6 -> n22
 n22 -> n23
-n20 -> n24
-n6 -> n25
-n25 -> n26
-n26 -> n29
+n23 -> n26
+n26 -> n27
+n26 -> n28
+n6 -> n29
 n29 -> n30
-n6 -> n31
-n31 -> n32
-n32 -> n35
-n35 -> n36
+n30 -> n33
+n33 -> n34
+n33 -> n35
+n6 -> n36
 n36 -> n37
-n37 -> n38
-n6 -> n39
-n39 -> n40
+n37 -> n40
 n40 -> n41
 n41 -> n42
-n42 -> n43
-n6 -> n44
+n41 -> n43
+n40 -> n44
 n44 -> n45
-n45 -> n48
-n48 -> n49
-n6 -> n50
-n50 -> n51
-n51 -> n54
-n54 -> n55
+n44 -> n46
+n6 -> n47
+n47 -> n48
+n48 -> n51
+n51 -> n52
+n52 -> n53
+n52 -> n54
+n6 -> n55
 n55 -> n56
-n56 -> n57
-n6 -> n58
-n58 -> n59
 }
