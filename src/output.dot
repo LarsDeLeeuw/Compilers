@@ -1,115 +1,129 @@
 digraph {n0 [label="File"];
-n1 [label="VarDecl"];
-n2 [label="int[2]"];
-n3 [label="a"];
-n5 [label="FuncDecl"];
-n6 [label="int ()"];
-n7 [label="main"];
-n8 [label="FuncScope"];
-n10 [label="Body"];
-n12 [label="DeclStmt"];
-n13 [label="VarDecl"];
-n14 [label="int"];
-n15 [label="x"];
-n16 [label="IntegerLiteral
-rvalue '3'"];
-n17 [label="ExprStmt"];
-n18 [label="BinExpr
-'='"];
-n19 [label="ArraySubscriptExpr
-'int' lvalue"];
-n20 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n21 [label="DeclRefExpr
-lvalue Var 'a'"];
-n22 [label="IntegerLiteral
+n1 [label="FuncDecl"];
+n2 [label="int ()"];
+n3 [label="main"];
+n4 [label="FuncScope"];
+n6 [label="Body"];
+n8 [label="DeclStmt"];
+n9 [label="VarDecl"];
+n10 [label="int"];
+n11 [label="x"];
+n12 [label="IntegerLiteral
 rvalue '0'"];
-n23 [label="IntegerLiteral
-rvalue '1'"];
-n24 [label="ExprStmt"];
-n25 [label="BinExpr
+n13 [label="DeclStmt"];
+n14 [label="VarDecl"];
+n15 [label="int *"];
+n16 [label="xp"];
+n17 [label="UnaryOperator
+lvalue prefix '&'"];
+n18 [label="DeclRefExpr
+lvalue Var 'x'"];
+n19 [label="ExprStmt"];
+n20 [label="BinExpr
 '='"];
-n26 [label="ArraySubscriptExpr
-'int' lvalue"];
-n27 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n28 [label="DeclRefExpr
-lvalue Var 'a'"];
-n29 [label="IntegerLiteral
-rvalue '1'"];
-n30 [label="IntegerLiteral
-rvalue '2'"];
+n21 [label="UnaryOperator
+lvalue prefix '*'"];
+n22 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n23 [label="DeclRefExpr
+lvalue Var 'xp'"];
+n24 [label="IntegerLiteral
+rvalue '10'"];
+n25 [label="ExprStmt"];
+n26 [label="CallExpr
+void printf()"];
+n29 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n30 [label="DeclRefExpr
+lvalue Var 'x'"];
 n31 [label="ExprStmt"];
 n32 [label="CallExpr
 void printf()"];
 n35 [label="ImplicitCastExpr
 <LValueToRValue>"];
-n36 [label="ArraySubscriptExpr
-'int' lvalue"];
+n36 [label="UnaryOperator
+lvalue prefix '*'"];
 n37 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
+<LValueToRValue>"];
 n38 [label="DeclRefExpr
-lvalue Var 'a'"];
-n39 [label="IntegerLiteral
-rvalue '0'"];
-n40 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n41 [label="ArraySubscriptExpr
-'int' lvalue"];
+lvalue Var 'xp'"];
+n39 [label="ExprStmt"];
+n40 [label="UnaryOperator
+lvalue postfix '++'"];
+n41 [label="UnaryOperator
+lvalue prefix '*'"];
 n42 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n43 [label="DeclRefExpr
-lvalue Var 'a'"];
-n44 [label="IntegerLiteral
-rvalue '1'"];
-n45 [label="ImplicitCastExpr
 <LValueToRValue>"];
-n46 [label="DeclRefExpr
+n43 [label="DeclRefExpr
+lvalue Var 'xp'"];
+n44 [label="ExprStmt"];
+n45 [label="CallExpr
+void printf()"];
+n48 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n49 [label="DeclRefExpr
 lvalue Var 'x'"];
-n47 [label="ReturnStmt"];
-n48 [label="IntegerLiteral
+n50 [label="ExprStmt"];
+n51 [label="CallExpr
+void printf()"];
+n54 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n55 [label="UnaryOperator
+lvalue prefix '*'"];
+n56 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n57 [label="DeclRefExpr
+lvalue Var 'xp'"];
+n58 [label="ReturnStmt"];
+n59 [label="IntegerLiteral
 rvalue '1'"];
 n0 -> n1
 n1 -> n2
 n1 -> n3
-n0 -> n5
-n5 -> n6
-n5 -> n7
-n5 -> n8
-n8 -> n10
-n10 -> n12
-n12 -> n13
+n1 -> n4
+n4 -> n6
+n6 -> n8
+n8 -> n9
+n9 -> n10
+n9 -> n11
+n9 -> n12
+n6 -> n13
 n13 -> n14
-n13 -> n15
-n13 -> n16
-n10 -> n17
+n14 -> n15
+n14 -> n16
+n14 -> n17
 n17 -> n18
-n18 -> n19
+n6 -> n19
 n19 -> n20
 n20 -> n21
-n19 -> n22
-n18 -> n23
-n10 -> n24
-n24 -> n25
+n21 -> n22
+n22 -> n23
+n20 -> n24
+n6 -> n25
 n25 -> n26
-n26 -> n27
-n27 -> n28
 n26 -> n29
-n25 -> n30
-n10 -> n31
+n29 -> n30
+n6 -> n31
 n31 -> n32
 n32 -> n35
 n35 -> n36
 n36 -> n37
 n37 -> n38
-n36 -> n39
-n32 -> n40
+n6 -> n39
+n39 -> n40
 n40 -> n41
 n41 -> n42
 n42 -> n43
-n41 -> n44
-n32 -> n45
-n45 -> n46
-n10 -> n47
-n47 -> n48
+n6 -> n44
+n44 -> n45
+n45 -> n48
+n48 -> n49
+n6 -> n50
+n50 -> n51
+n51 -> n54
+n54 -> n55
+n55 -> n56
+n56 -> n57
+n6 -> n58
+n58 -> n59
 }

@@ -119,8 +119,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
 
     def test_dereferenceAssignment(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "dereferenceAssignment"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
@@ -295,8 +293,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
     
     def test_modulo(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "modulo"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
@@ -575,8 +571,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
 
     def test_variables4(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "variables4"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])

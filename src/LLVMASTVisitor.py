@@ -192,92 +192,54 @@ class LLVMASTVisitor(ASTVisitor):
                     raise Exception("LLVM Panic")
             else:
                 var = result["ast_node"]
-                if var.array:
-                    if var.id in self.idcount.keys():
-                        self.idcount[var.id] += 1
-                    else:
-                        self.idcount[var.id] = 0
-                    self.idshadowing[serial] = var.id + str(self.idcount[var.id])
-                    # Allocate
-                    if var.type == 'int':
-                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                        self.buffer["functs"] += " = alloca ["+str(var.len)+" x i32], align 4\n"
-                    elif var.type == 'float':
-                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                        self.buffer["functs"] += " = alloca ["+str(var.len)+" x float], align 4\n"
-                    elif var.type == 'char':
-                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                        self.buffer["functs"] += " = alloca ["+str(var.len)+" x i8], align 4\n"
-                    else:
-                        raise Exception("LLVM Panic")
-                    if var.init:
-                        raise Exception("LLVM NOT IMPLEMENTED YET")
-                        if not var.init_expr is None and issubclass(type(var.init_expr), LiteralNode):
-                            # Init
-                            self.memory[serial] = var.init_expr.value
-                            if var.type == 'int':
-                                self.buffer["functs"] += "\t" + "store i32 " + str(var.init_expr.value)
-                                self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                            elif var.type == 'float':
-                                self.buffer["functs"] += "\t" + "store float " + str(var.init_expr.value)
-                                self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                            elif var.type == 'char':
-                                self.buffer["functs"] += "\t" + "store i8 " + str(var.init_expr.value)
-                                self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"
+
+                if var.id in self.idcount.keys():
+                    self.idcount[var.id] += 1
                 else:
-                    if var.id in self.idcount.keys():
-                        self.idcount[var.id] += 1
-                    else:
-                        self.idcount[var.id] = 0
+                    self.idcount[var.id] = 0
+                if self.idcount[var.id] == 0:
+                    self.idshadowing[serial] = var.id
+                else:
                     self.idshadowing[serial] = var.id + str(self.idcount[var.id])
-                    # Allocate
-                    if var.type == 'int':
-                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                        self.buffer["functs"] += " = alloca i32, align 4\n"
-                    elif var.type == 'float':
-                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                        self.buffer["functs"] += " = alloca float, align 4\n"
-                    elif var.type == 'char':
-                        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                        self.buffer["functs"] += " = alloca i8, align 4\n"
-                    if var.init:
-                        if not var.init_expr is None:
-                            if issubclass(type(var.init_expr), LiteralNode):
-                                # Init
-                                if var.type == 'int':
-                                    self.buffer["functs"] += "\t" + "store i32 " + str(var.init_expr.value)
-                                    self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                                elif var.type == 'float':
-                                    self.buffer["functs"] += "\t" + "store float " + str(var.init_expr.value)
-                                    self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                                elif var.type == 'char':
-                                    self.buffer["functs"] += "\t" + "store i8 " + str(var.init_expr.value)
-                                    self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                            elif type(var.init_expr) is ImplicitCastExprNode:
-                                # Currently assuming lhs and rhs will be same type
-                                if var.init_expr.cast == "<LValueToRValue>":
-                                    self.visit(var.init_expr)
-                                    # Init
-                                    if var.type == 'int':
-                                        self.buffer["functs"] += "\t" + "store i32 %" + str(self.register_count-1)
-                                        self.buffer["functs"] += ", i32* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                                    elif var.type == 'float':
-                                        self.buffer["functs"] += "\t" + "store float %" + str(self.register_count-1)
-                                        self.buffer["functs"] += ", float* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                                    elif var.type == 'char':
-                                        self.buffer["functs"] += "\t" + "store i8 %" + str(self.register_count-1)
-                                        self.buffer["functs"] += ", i8* %" + str(self.idshadowing[serial]) + ", align 4\n"
-                                else:
-                                    print("Still needs work")
-                            elif type(var.init_expr) is UnaryExprNode:
-                                if var.init_expr.operation == "&":
-                                    pass
-                                else:
-                                    raise Exception("VarDecl init with Unary not fully implemented yet")
-                            elif type(var.init_expr) is CallExprNode:
-                                raise Exception("VarDecl init with CallExpr not implemented yet")
-                            else:
-                                raise Exception("LLVM Panic {}".format(var.init_expr))
+
+                var_type = var.type.split(" ")
+                llvm_type = None
+                if var_type[0] == "char":
+                    llvm_type = "i8"
+                elif var_type[0] == "int":
+                    llvm_type = "i32"
+                elif var_type[0] == "float":
+                    llvm_type = "float"
+                else:
+                    print("What is this?")
+
+                llvm_align = "4"
+
+                if len(var_type) == 2:
+                    if not var.array:
+                        llvm_align = "8"
+                    llvm_type += var_type[1]
+                
+                if var.array:
+                    # Build the array type currently no multidim support
+                    llvm_array = "[" + str(var.getLen()) + " x " + llvm_type + "]"
+                    llvm_type = llvm_array
+
+                self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+                self.buffer["functs"] += " = alloca "+llvm_type+", align "+llvm_align+"\n"
+                
+                if var.init:
+                    if var.array:
+                        raise Exception("LLVM NOT IMPLEMENTED YET")
+                    
+                    if issubclass(type(var.init_expr), IntergerLiteralNode):
+                        self.buffer["functs"] += "\t" + "store "+ llvm_type +" " + str(var.init_expr.value)
+                        self.buffer["functs"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
+                    else:
+                        self.visit(var.init_expr)
+                        self.buffer["functs"] += "\t" + "store "+ llvm_type +" %" + str(self.register_count-1)
+                        self.buffer["functs"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
+
         returnFlag = False
 
         for StmtNode in node.children:
@@ -316,7 +278,8 @@ class LLVMASTVisitor(ASTVisitor):
             self.buffer["functs"] += "\tret void\n"
         else:
             if issubclass(type(node.child), ExprNode):
-                self.buffer["functs"] += "\tstore i32 "+str(node.child.value)+", i32* %retval, align 4\n"
+                self.visit(node.child)
+                self.buffer["functs"] += "\tstore i32 "+str(self.register_count-1)+", i32* %retval, align 4\n"
                 self.buffer["functs"] += "\t%"+str(self.register_count)+" = load i32, i32* %retval, align 4\n"
                 self.buffer["functs"] += "\tret i32 %"+str(self.register_count)+"\n"
                 self.register_count += 1
@@ -967,7 +930,7 @@ class LLVMASTVisitor(ASTVisitor):
             else:
                 raise Exception("Unsupported rhs_child.type for LLVM BinExpr &&")
             self.buffer["functs"] += "\tbr label %" + label_false + "\n\n"
-
+                
             self.buffer["functs"] += label_false + ":\n"
             self.current_label = label_false
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = phi i1 [ false, %" + label_prev + " ], [ %" + str(self.register_count-1) + ", %" + label_true + " ]\n"
@@ -987,6 +950,9 @@ class LLVMASTVisitor(ASTVisitor):
                 self.buffer["functs"] += ", i8* %" + str(self.register_count-1) + ", align 4\n"
             else:
                 raise Exception("LLVM Panic")
+        elif node.operation == "%":
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = srem i32 %" + str(lhs_register_count) + ", %" + str(rhs_register_count) + "\n"
+            self.register_count += 1
         else:
             print("I dont know this bin op yet kind regards ~compiler")
 
@@ -1034,15 +1000,49 @@ class LLVMASTVisitor(ASTVisitor):
             self.register_count += 1
         elif node.operation == "&":
             type_split = node.type.split(" ")
+            llvm_type = None
             if type_split[0] == "int":
-                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i32"+type_split[1]+" %" +str(child_register_count)+", align 8\n"
-                self.register_count += 1
+                llvm_type = "i32"
+            elif type_split[0] == "float":
+                llvm_type = "float"
+            elif type_split[0] == "char":
+                llvm_type = "i8"
+            else:
+                print("what")
+            if len(type_split) == 2:
+                llvm_type += type_split[1]
+            
+
+            if type_split[0] == "int":
+                pass
+                # self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+" %" +str(child_register_count)+", align 8\n"
+                # self.register_count += 1
             else:
                 print("Not implemented yet")
+        elif node.operation == "*":
+            type_split = node.type.split(" ")
+            llvm_type = None
+            if type_split[0] == "int":
+                llvm_type = "i32"
+            elif type_split[0] == "float":
+                llvm_type = "float"
+            elif type_split[0] == "char":
+                llvm_type = "i8"
+            else:
+                print("what")
+            if len(type_split) == 2:
+                llvm_type += len(type_split[1])*"*"
+            
+
+            if type_split[0] == "int":
+                pass
+                # self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %" +str(child_register_count)+", align 8\n"
+                # self.register_count += 1
+            else:
+                print("Not implemented yet")
+
         elif node.operation == "++" and not node.prefix:
             '''Stores rvalue before operation in latest register, excute operation'''
-            if not (type(node.child) is DeclRefExprNode):
-                print("I can only perform this on IdRef")
             child_type = node.child.type.split(" ")
             llvm_type = None
             if child_type[0] == "char":

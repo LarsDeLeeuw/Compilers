@@ -49,6 +49,18 @@ class BuildASTVisitor(GrammarVisitor):
                 else:
                     self.STT.set_attribute("printf", "ast_node", dummy_node)
                     self.STT.set_attribute("printf", "object", "Function")
+                node.includes["<stdio.h>"] += ["declare i32 @__isoc99_scanf(i8*, ...)\n"]
+                dummy_node = FunctionDeclNode()
+                dummy_node.init = True
+                dummy_node.id = "__isoc99_scanf"
+                dummy_node.included = True
+                dummy_node.return_type = "void"
+                result = self.STT.insert("__isoc99_scanf")
+                if result is None:
+                    raise Exception("Failed to insert library function in symboltable")
+                else:
+                    self.STT.set_attribute("__isoc99_scanf", "ast_node", dummy_node)
+                    self.STT.set_attribute("__isoc99_scanf", "object", "Function")
 
         for Decl in ctx.decl():
             decl_node = self.visit(Decl)
@@ -547,7 +559,7 @@ class BuildASTVisitor(GrammarVisitor):
         elif node.operation == "*":
             temp = node.child.type.split(" ")
             if len(temp) == 1:
-                raise Exception("Syntax error: Cannot dereference lvalue")
+                raise Exception("Syntax error: Cannot dereference rvalue")
                 node.type = node.child.type + " *"
             else:
                 node.type = temp[0] + "*"*(len(temp[1])-1)
@@ -592,6 +604,18 @@ class BuildASTVisitor(GrammarVisitor):
                 arg_node.parent = cast_node
                 cast_node.parent = node
                 node.children.append(cast_node)
+            elif type(arg_node) is UnaryExprNode:
+                if arg_node.operation == "*":
+                    cast_node = ImplicitCastExprNode()
+                    cast_node.type = arg_node.type
+                    cast_node.cast = "<LValueToRValue>"
+                    cast_node.child = arg_node
+                    arg_node.parent = cast_node
+                    cast_node.parent = node
+                    node.children.append(cast_node)
+                else:
+                    arg_node.parent = node
+                    node.children.append(arg_node)
             else:
                 arg_node.parent = node
                 node.children.append(arg_node)
