@@ -447,7 +447,7 @@ class LLVMASTVisitor(ASTVisitor):
                         elif form_data.type == 'char':
                             hold[str(self.register_count-1)] = "i8"
                         else:
-                            print("oopsiee")
+                            print("oopsiee {}".format(form_data.type))
                     
                     # debug
                     # print(hold)
@@ -569,7 +569,7 @@ class LLVMASTVisitor(ASTVisitor):
             llvm_type = "float"
         else:
             print("what is this?")
-
+        #######################
         if len(split_type) == 2:
             '''Special ptr operations'''
             llvm_type += split_type[1]
@@ -857,7 +857,7 @@ class LLVMASTVisitor(ASTVisitor):
             else:
                 print("Not implemented yet")
         elif node.operation == "*":
-            type_split = node.type.split(" ")
+            type_split = node.child.type.split(" ")
             llvm_type = None
             if type_split[0] == "int":
                 llvm_type = "i32"
@@ -869,12 +869,13 @@ class LLVMASTVisitor(ASTVisitor):
                 print("what")
             if len(type_split) == 2:
                 llvm_type += len(type_split[1])*"*"
-            
+                        
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %" +str(child_register_count)+", align 4\n"
+            self.register_count += 1
 
             if type_split[0] == "int":
                 pass
-                # self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %" +str(child_register_count)+", align 8\n"
-                # self.register_count += 1
+                
             else:
                 print("Not implemented yet")
 

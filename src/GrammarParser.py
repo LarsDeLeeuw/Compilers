@@ -12,7 +12,7 @@ else:
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\63")
-        buf.write("\u0105\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\u0108\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\3\2\3\2\7\2\23\n\2\f\2\16\2\26\13\2\3\2\6\2\31")
         buf.write("\n\2\r\2\16\2\32\3\3\5\3\36\n\3\3\3\3\3\3\3\3\3\3\3\5")
         buf.write("\3%\n\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\7\3.\n\3\f\3\16\3")
@@ -31,38 +31,38 @@ def serializedATN():
         buf.write("\n\4\3\5\7\5\u00bf\n\5\f\5\16\5\u00c2\13\5\3\6\3\6\3\6")
         buf.write("\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\7\6\u00d0\n\6\f\6")
         buf.write("\16\6\u00d3\13\6\3\6\5\6\u00d6\n\6\3\6\3\6\3\6\3\6\3\6")
-        buf.write("\5\6\u00dd\n\6\3\6\5\6\u00e0\n\6\3\6\3\6\3\6\3\6\3\6\3")
-        buf.write("\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6")
-        buf.write("\3\6\3\6\3\6\3\6\7\6\u00f9\n\6\f\6\16\6\u00fc\13\6\3\7")
-        buf.write("\3\7\3\b\3\b\3\b\5\b\u0103\n\b\3\b\2\3\n\t\2\4\6\b\n\f")
-        buf.write("\16\2\f\6\2\13\13\r\16\26\26\32\34\4\2..\61\61\3\2\13")
-        buf.write("\f\4\2\r\16\31\31\3\2\17\20\3\2\21\22\3\2\23\24\3\2\27")
-        buf.write("\30\3\2\33\34\3\2,/\2\u0131\2\24\3\2\2\2\4q\3\2\2\2\6")
-        buf.write("\u00bb\3\2\2\2\b\u00c0\3\2\2\2\n\u00df\3\2\2\2\f\u00fd")
-        buf.write("\3\2\2\2\16\u0102\3\2\2\2\20\21\7\"\2\2\21\23\7\62\2\2")
-        buf.write("\22\20\3\2\2\2\23\26\3\2\2\2\24\22\3\2\2\2\24\25\3\2\2")
-        buf.write("\2\25\30\3\2\2\2\26\24\3\2\2\2\27\31\5\4\3\2\30\27\3\2")
-        buf.write("\2\2\31\32\3\2\2\2\32\30\3\2\2\2\32\33\3\2\2\2\33\3\3")
-        buf.write("\2\2\2\34\36\7!\2\2\35\34\3\2\2\2\35\36\3\2\2\2\36\37")
-        buf.write("\3\2\2\2\37 \5\16\b\2 $\7\61\2\2!\"\7\3\2\2\"#\7.\2\2")
-        buf.write("#%\7\4\2\2$!\3\2\2\2$%\3\2\2\2%\64\3\2\2\2&\'\7\25\2\2")
-        buf.write("\'\65\5\n\6\2()\7\25\2\2)*\7\5\2\2*/\5\n\6\2+,\7\6\2\2")
-        buf.write(",.\5\n\6\2-+\3\2\2\2.\61\3\2\2\2/-\3\2\2\2/\60\3\2\2\2")
-        buf.write("\60\62\3\2\2\2\61/\3\2\2\2\62\63\7\7\2\2\63\65\3\2\2\2")
-        buf.write("\64&\3\2\2\2\64(\3\2\2\2\64\65\3\2\2\2\65\66\3\2\2\2\66")
-        buf.write("\67\7\b\2\2\67r\3\2\2\28;\5\16\b\29;\7 \2\2:8\3\2\2\2")
-        buf.write(":9\3\2\2\2;<\3\2\2\2<=\7\61\2\2=M\7\t\2\2>?\5\16\b\2?")
-        buf.write("@\7\61\2\2@G\3\2\2\2AB\7\6\2\2BC\5\16\b\2CD\7\61\2\2D")
-        buf.write("F\3\2\2\2EA\3\2\2\2FI\3\2\2\2GE\3\2\2\2GH\3\2\2\2HN\3")
-        buf.write("\2\2\2IG\3\2\2\2JK\5\16\b\2KL\7\61\2\2LN\3\2\2\2M>\3\2")
-        buf.write("\2\2MJ\3\2\2\2MN\3\2\2\2NO\3\2\2\2OP\7\n\2\2Pr\7\b\2\2")
-        buf.write("QT\5\16\b\2RT\7 \2\2SQ\3\2\2\2SR\3\2\2\2TU\3\2\2\2UV\7")
-        buf.write("\61\2\2Vf\7\t\2\2WX\5\16\b\2XY\7\61\2\2Y`\3\2\2\2Z[\7")
-        buf.write("\6\2\2[\\\5\16\b\2\\]\7\61\2\2]_\3\2\2\2^Z\3\2\2\2_b\3")
-        buf.write("\2\2\2`^\3\2\2\2`a\3\2\2\2ag\3\2\2\2b`\3\2\2\2cd\5\16")
-        buf.write("\b\2de\7\61\2\2eg\3\2\2\2fW\3\2\2\2fc\3\2\2\2fg\3\2\2")
-        buf.write("\2gh\3\2\2\2hi\7\n\2\2im\7\5\2\2jl\5\6\4\2kj\3\2\2\2l")
-        buf.write("o\3\2\2\2mk\3\2\2\2mn\3\2\2\2np\3\2\2\2om\3\2\2\2pr\7")
+        buf.write("\5\6\u00dd\n\6\3\6\5\6\u00e0\n\6\3\6\5\6\u00e3\n\6\3\6")
+        buf.write("\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3")
+        buf.write("\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\7\6\u00fc\n\6\f\6\16")
+        buf.write("\6\u00ff\13\6\3\7\3\7\3\b\3\b\3\b\5\b\u0106\n\b\3\b\2")
+        buf.write("\3\n\t\2\4\6\b\n\f\16\2\13\6\2\13\13\r\16\26\26\32\34")
+        buf.write("\3\2\13\f\4\2\r\16\31\31\3\2\17\20\3\2\21\22\3\2\23\24")
+        buf.write("\3\2\27\30\3\2\33\34\3\2,/\2\u0135\2\24\3\2\2\2\4q\3\2")
+        buf.write("\2\2\6\u00bb\3\2\2\2\b\u00c0\3\2\2\2\n\u00e2\3\2\2\2\f")
+        buf.write("\u0100\3\2\2\2\16\u0105\3\2\2\2\20\21\7\"\2\2\21\23\7")
+        buf.write("\62\2\2\22\20\3\2\2\2\23\26\3\2\2\2\24\22\3\2\2\2\24\25")
+        buf.write("\3\2\2\2\25\30\3\2\2\2\26\24\3\2\2\2\27\31\5\4\3\2\30")
+        buf.write("\27\3\2\2\2\31\32\3\2\2\2\32\30\3\2\2\2\32\33\3\2\2\2")
+        buf.write("\33\3\3\2\2\2\34\36\7!\2\2\35\34\3\2\2\2\35\36\3\2\2\2")
+        buf.write("\36\37\3\2\2\2\37 \5\16\b\2 $\7\61\2\2!\"\7\3\2\2\"#\7")
+        buf.write(".\2\2#%\7\4\2\2$!\3\2\2\2$%\3\2\2\2%\64\3\2\2\2&\'\7\25")
+        buf.write("\2\2\'\65\5\n\6\2()\7\25\2\2)*\7\5\2\2*/\5\n\6\2+,\7\6")
+        buf.write("\2\2,.\5\n\6\2-+\3\2\2\2.\61\3\2\2\2/-\3\2\2\2/\60\3\2")
+        buf.write("\2\2\60\62\3\2\2\2\61/\3\2\2\2\62\63\7\7\2\2\63\65\3\2")
+        buf.write("\2\2\64&\3\2\2\2\64(\3\2\2\2\64\65\3\2\2\2\65\66\3\2\2")
+        buf.write("\2\66\67\7\b\2\2\67r\3\2\2\28;\5\16\b\29;\7 \2\2:8\3\2")
+        buf.write("\2\2:9\3\2\2\2;<\3\2\2\2<=\7\61\2\2=M\7\t\2\2>?\5\16\b")
+        buf.write("\2?@\7\61\2\2@G\3\2\2\2AB\7\6\2\2BC\5\16\b\2CD\7\61\2")
+        buf.write("\2DF\3\2\2\2EA\3\2\2\2FI\3\2\2\2GE\3\2\2\2GH\3\2\2\2H")
+        buf.write("N\3\2\2\2IG\3\2\2\2JK\5\16\b\2KL\7\61\2\2LN\3\2\2\2M>")
+        buf.write("\3\2\2\2MJ\3\2\2\2MN\3\2\2\2NO\3\2\2\2OP\7\n\2\2Pr\7\b")
+        buf.write("\2\2QT\5\16\b\2RT\7 \2\2SQ\3\2\2\2SR\3\2\2\2TU\3\2\2\2")
+        buf.write("UV\7\61\2\2Vf\7\t\2\2WX\5\16\b\2XY\7\61\2\2Y`\3\2\2\2")
+        buf.write("Z[\7\6\2\2[\\\5\16\b\2\\]\7\61\2\2]_\3\2\2\2^Z\3\2\2\2")
+        buf.write("_b\3\2\2\2`^\3\2\2\2`a\3\2\2\2ag\3\2\2\2b`\3\2\2\2cd\5")
+        buf.write("\16\b\2de\7\61\2\2eg\3\2\2\2fW\3\2\2\2fc\3\2\2\2fg\3\2")
+        buf.write("\2\2gh\3\2\2\2hi\7\n\2\2im\7\5\2\2jl\5\6\4\2kj\3\2\2\2")
+        buf.write("lo\3\2\2\2mk\3\2\2\2mn\3\2\2\2np\3\2\2\2om\3\2\2\2pr\7")
         buf.write("\7\2\2q\35\3\2\2\2q:\3\2\2\2qS\3\2\2\2r\5\3\2\2\2st\5")
         buf.write("\n\6\2tu\7\b\2\2u\u00bc\3\2\2\2vx\7!\2\2wv\3\2\2\2wx\3")
         buf.write("\2\2\2xy\3\2\2\2yz\5\16\b\2z~\7\61\2\2{|\7\3\2\2|}\7.")
@@ -97,38 +97,40 @@ def serializedATN():
         buf.write("\5\6\4\2\u00be\u00bd\3\2\2\2\u00bf\u00c2\3\2\2\2\u00c0")
         buf.write("\u00be\3\2\2\2\u00c0\u00c1\3\2\2\2\u00c1\t\3\2\2\2\u00c2")
         buf.write("\u00c0\3\2\2\2\u00c3\u00c4\b\6\1\2\u00c4\u00c5\7\t\2\2")
-        buf.write("\u00c5\u00c6\5\n\6\2\u00c6\u00c7\7\n\2\2\u00c7\u00e0\3")
-        buf.write("\2\2\2\u00c8\u00c9\t\2\2\2\u00c9\u00e0\5\n\6\16\u00ca")
+        buf.write("\u00c5\u00c6\5\n\6\2\u00c6\u00c7\7\n\2\2\u00c7\u00e3\3")
+        buf.write("\2\2\2\u00c8\u00c9\t\2\2\2\u00c9\u00e3\5\n\6\16\u00ca")
         buf.write("\u00cb\7\61\2\2\u00cb\u00d5\7\t\2\2\u00cc\u00d1\5\n\6")
         buf.write("\2\u00cd\u00ce\7\6\2\2\u00ce\u00d0\5\n\6\2\u00cf\u00cd")
         buf.write("\3\2\2\2\u00d0\u00d3\3\2\2\2\u00d1\u00cf\3\2\2\2\u00d1")
         buf.write("\u00d2\3\2\2\2\u00d2\u00d6\3\2\2\2\u00d3\u00d1\3\2\2\2")
         buf.write("\u00d4\u00d6\5\n\6\2\u00d5\u00cc\3\2\2\2\u00d5\u00d4\3")
-        buf.write("\2\2\2\u00d5\u00d6\3\2\2\2\u00d6\u00d7\3\2\2\2\u00d7\u00e0")
-        buf.write("\7\n\2\2\u00d8\u00dc\7\61\2\2\u00d9\u00da\7\3\2\2\u00da")
-        buf.write("\u00db\t\3\2\2\u00db\u00dd\7\4\2\2\u00dc\u00d9\3\2\2\2")
-        buf.write("\u00dc\u00dd\3\2\2\2\u00dd\u00e0\3\2\2\2\u00de\u00e0\5")
-        buf.write("\f\7\2\u00df\u00c3\3\2\2\2\u00df\u00c8\3\2\2\2\u00df\u00ca")
-        buf.write("\3\2\2\2\u00df\u00d8\3\2\2\2\u00df\u00de\3\2\2\2\u00e0")
-        buf.write("\u00fa\3\2\2\2\u00e1\u00e2\f\f\2\2\u00e2\u00e3\t\4\2\2")
-        buf.write("\u00e3\u00f9\5\n\6\r\u00e4\u00e5\f\13\2\2\u00e5\u00e6")
-        buf.write("\t\5\2\2\u00e6\u00f9\5\n\6\f\u00e7\u00e8\f\n\2\2\u00e8")
-        buf.write("\u00e9\t\6\2\2\u00e9\u00f9\5\n\6\13\u00ea\u00eb\f\t\2")
-        buf.write("\2\u00eb\u00ec\t\7\2\2\u00ec\u00f9\5\n\6\n\u00ed\u00ee")
-        buf.write("\f\b\2\2\u00ee\u00ef\t\b\2\2\u00ef\u00f9\5\n\6\t\u00f0")
-        buf.write("\u00f1\f\7\2\2\u00f1\u00f2\t\t\2\2\u00f2\u00f9\5\n\6\b")
-        buf.write("\u00f3\u00f4\f\6\2\2\u00f4\u00f5\7\25\2\2\u00f5\u00f9")
-        buf.write("\5\n\6\7\u00f6\u00f7\f\r\2\2\u00f7\u00f9\t\n\2\2\u00f8")
-        buf.write("\u00e1\3\2\2\2\u00f8\u00e4\3\2\2\2\u00f8\u00e7\3\2\2\2")
-        buf.write("\u00f8\u00ea\3\2\2\2\u00f8\u00ed\3\2\2\2\u00f8\u00f0\3")
-        buf.write("\2\2\2\u00f8\u00f3\3\2\2\2\u00f8\u00f6\3\2\2\2\u00f9\u00fc")
-        buf.write("\3\2\2\2\u00fa\u00f8\3\2\2\2\u00fa\u00fb\3\2\2\2\u00fb")
-        buf.write("\13\3\2\2\2\u00fc\u00fa\3\2\2\2\u00fd\u00fe\t\13\2\2\u00fe")
-        buf.write("\r\3\2\2\2\u00ff\u0103\7\35\2\2\u0100\u0103\7\37\2\2\u0101")
-        buf.write("\u0103\7\36\2\2\u0102\u00ff\3\2\2\2\u0102\u0100\3\2\2")
-        buf.write("\2\u0102\u0101\3\2\2\2\u0103\17\3\2\2\2!\24\32\35$/\64")
-        buf.write(":GMS`fmqw~\u0089\u008e\u009a\u00a7\u00b0\u00b4\u00bb\u00c0")
-        buf.write("\u00d1\u00d5\u00dc\u00df\u00f8\u00fa\u0102")
+        buf.write("\2\2\2\u00d5\u00d6\3\2\2\2\u00d6\u00d7\3\2\2\2\u00d7\u00e3")
+        buf.write("\7\n\2\2\u00d8\u00df\7\61\2\2\u00d9\u00dc\7\3\2\2\u00da")
+        buf.write("\u00dd\5\n\6\2\u00db\u00dd\7.\2\2\u00dc\u00da\3\2\2\2")
+        buf.write("\u00dc\u00db\3\2\2\2\u00dd\u00de\3\2\2\2\u00de\u00e0\7")
+        buf.write("\4\2\2\u00df\u00d9\3\2\2\2\u00df\u00e0\3\2\2\2\u00e0\u00e3")
+        buf.write("\3\2\2\2\u00e1\u00e3\5\f\7\2\u00e2\u00c3\3\2\2\2\u00e2")
+        buf.write("\u00c8\3\2\2\2\u00e2\u00ca\3\2\2\2\u00e2\u00d8\3\2\2\2")
+        buf.write("\u00e2\u00e1\3\2\2\2\u00e3\u00fd\3\2\2\2\u00e4\u00e5\f")
+        buf.write("\f\2\2\u00e5\u00e6\t\3\2\2\u00e6\u00fc\5\n\6\r\u00e7\u00e8")
+        buf.write("\f\13\2\2\u00e8\u00e9\t\4\2\2\u00e9\u00fc\5\n\6\f\u00ea")
+        buf.write("\u00eb\f\n\2\2\u00eb\u00ec\t\5\2\2\u00ec\u00fc\5\n\6\13")
+        buf.write("\u00ed\u00ee\f\t\2\2\u00ee\u00ef\t\6\2\2\u00ef\u00fc\5")
+        buf.write("\n\6\n\u00f0\u00f1\f\b\2\2\u00f1\u00f2\t\7\2\2\u00f2\u00fc")
+        buf.write("\5\n\6\t\u00f3\u00f4\f\7\2\2\u00f4\u00f5\t\b\2\2\u00f5")
+        buf.write("\u00fc\5\n\6\b\u00f6\u00f7\f\6\2\2\u00f7\u00f8\7\25\2")
+        buf.write("\2\u00f8\u00fc\5\n\6\7\u00f9\u00fa\f\r\2\2\u00fa\u00fc")
+        buf.write("\t\t\2\2\u00fb\u00e4\3\2\2\2\u00fb\u00e7\3\2\2\2\u00fb")
+        buf.write("\u00ea\3\2\2\2\u00fb\u00ed\3\2\2\2\u00fb\u00f0\3\2\2\2")
+        buf.write("\u00fb\u00f3\3\2\2\2\u00fb\u00f6\3\2\2\2\u00fb\u00f9\3")
+        buf.write("\2\2\2\u00fc\u00ff\3\2\2\2\u00fd\u00fb\3\2\2\2\u00fd\u00fe")
+        buf.write("\3\2\2\2\u00fe\13\3\2\2\2\u00ff\u00fd\3\2\2\2\u0100\u0101")
+        buf.write("\t\n\2\2\u0101\r\3\2\2\2\u0102\u0106\7\35\2\2\u0103\u0106")
+        buf.write("\7\37\2\2\u0104\u0106\7\36\2\2\u0105\u0102\3\2\2\2\u0105")
+        buf.write("\u0103\3\2\2\2\u0105\u0104\3\2\2\2\u0106\17\3\2\2\2\"")
+        buf.write("\24\32\35$/\64:GMS`fmqw~\u0089\u008e\u009a\u00a7\u00b0")
+        buf.write("\u00b4\u00bb\u00c0\u00d1\u00d5\u00dc\u00df\u00e2\u00fb")
+        buf.write("\u00fd\u0105")
         return buf.getvalue()
 
 
@@ -1367,11 +1369,11 @@ class GrammarParser ( Parser ):
             super().__init__(parser)
             self.copyFrom(ctx)
 
-        def ID(self, i:int=None):
-            if i is None:
-                return self.getTokens(GrammarParser.ID)
-            else:
-                return self.getToken(GrammarParser.ID, i)
+        def ID(self):
+            return self.getToken(GrammarParser.ID, 0)
+        def expr(self):
+            return self.getTypedRuleContext(GrammarParser.ExprContext,0)
+
         def INT(self):
             return self.getToken(GrammarParser.INT, 0)
 
@@ -1401,9 +1403,9 @@ class GrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 221
+            self.state = 224
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,27,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,28,self._ctx)
             if la_ == 1:
                 localctx = GrammarParser.ParensExprContext(self, localctx)
                 self._ctx = localctx
@@ -1476,20 +1478,27 @@ class GrammarParser ( Parser ):
                 _prevctx = localctx
                 self.state = 214
                 self.match(GrammarParser.ID)
-                self.state = 218
+                self.state = 221
                 self._errHandler.sync(self)
-                la_ = self._interp.adaptivePredict(self._input,26,self._ctx)
+                la_ = self._interp.adaptivePredict(self._input,27,self._ctx)
                 if la_ == 1:
                     self.state = 215
                     self.match(GrammarParser.T__0)
-                    self.state = 216
-                    _la = self._input.LA(1)
-                    if not(_la==GrammarParser.INT or _la==GrammarParser.ID):
-                        self._errHandler.recoverInline(self)
-                    else:
-                        self._errHandler.reportMatch(self)
-                        self.consume()
-                    self.state = 217
+                    self.state = 218
+                    self._errHandler.sync(self)
+                    la_ = self._interp.adaptivePredict(self._input,26,self._ctx)
+                    if la_ == 1:
+                        self.state = 216
+                        self.expr(0)
+                        pass
+
+                    elif la_ == 2:
+                        self.state = 217
+                        self.match(GrammarParser.INT)
+                        pass
+
+
+                    self.state = 220
                     self.match(GrammarParser.T__1)
 
 
@@ -1499,32 +1508,32 @@ class GrammarParser ( Parser ):
                 localctx = GrammarParser.LitExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 220
+                self.state = 223
                 localctx.value = self.lit()
                 pass
 
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 248
+            self.state = 251
             self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,29,self._ctx)
+            _alt = self._interp.adaptivePredict(self._input,30,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    self.state = 246
+                    self.state = 249
                     self._errHandler.sync(self)
-                    la_ = self._interp.adaptivePredict(self._input,28,self._ctx)
+                    la_ = self._interp.adaptivePredict(self._input,29,self._ctx)
                     if la_ == 1:
                         localctx = GrammarParser.BinExprContext(self, GrammarParser.ExprContext(self, _parentctx, _parentState))
                         localctx.left = _prevctx
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 223
+                        self.state = 226
                         if not self.precpred(self._ctx, 10):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 10)")
-                        self.state = 224
+                        self.state = 227
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
                         if not(_la==GrammarParser.MUL or _la==GrammarParser.DIV):
@@ -1532,7 +1541,7 @@ class GrammarParser ( Parser ):
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 225
+                        self.state = 228
                         localctx.right = self.expr(11)
                         pass
 
@@ -1540,11 +1549,11 @@ class GrammarParser ( Parser ):
                         localctx = GrammarParser.BinExprContext(self, GrammarParser.ExprContext(self, _parentctx, _parentState))
                         localctx.left = _prevctx
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 226
+                        self.state = 229
                         if not self.precpred(self._ctx, 9):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 9)")
-                        self.state = 227
+                        self.state = 230
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
                         if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.ADD) | (1 << GrammarParser.SUB) | (1 << GrammarParser.MOD))) != 0)):
@@ -1552,7 +1561,7 @@ class GrammarParser ( Parser ):
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 228
+                        self.state = 231
                         localctx.right = self.expr(10)
                         pass
 
@@ -1560,11 +1569,11 @@ class GrammarParser ( Parser ):
                         localctx = GrammarParser.BinExprContext(self, GrammarParser.ExprContext(self, _parentctx, _parentState))
                         localctx.left = _prevctx
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 229
+                        self.state = 232
                         if not self.precpred(self._ctx, 8):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 8)")
-                        self.state = 230
+                        self.state = 233
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
                         if not(_la==GrammarParser.GRT or _la==GrammarParser.LST):
@@ -1572,7 +1581,7 @@ class GrammarParser ( Parser ):
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 231
+                        self.state = 234
                         localctx.right = self.expr(9)
                         pass
 
@@ -1580,11 +1589,11 @@ class GrammarParser ( Parser ):
                         localctx = GrammarParser.BinExprContext(self, GrammarParser.ExprContext(self, _parentctx, _parentState))
                         localctx.left = _prevctx
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 232
+                        self.state = 235
                         if not self.precpred(self._ctx, 7):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 7)")
-                        self.state = 233
+                        self.state = 236
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
                         if not(_la==GrammarParser.EQ or _la==GrammarParser.GEQ):
@@ -1592,7 +1601,7 @@ class GrammarParser ( Parser ):
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 234
+                        self.state = 237
                         localctx.right = self.expr(8)
                         pass
 
@@ -1600,11 +1609,11 @@ class GrammarParser ( Parser ):
                         localctx = GrammarParser.BinExprContext(self, GrammarParser.ExprContext(self, _parentctx, _parentState))
                         localctx.left = _prevctx
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 235
+                        self.state = 238
                         if not self.precpred(self._ctx, 6):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 6)")
-                        self.state = 236
+                        self.state = 239
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
                         if not(_la==GrammarParser.LEQ or _la==GrammarParser.NEQ):
@@ -1612,7 +1621,7 @@ class GrammarParser ( Parser ):
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 237
+                        self.state = 240
                         localctx.right = self.expr(7)
                         pass
 
@@ -1620,11 +1629,11 @@ class GrammarParser ( Parser ):
                         localctx = GrammarParser.BinExprContext(self, GrammarParser.ExprContext(self, _parentctx, _parentState))
                         localctx.left = _prevctx
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 238
+                        self.state = 241
                         if not self.precpred(self._ctx, 5):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 5)")
-                        self.state = 239
+                        self.state = 242
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
                         if not(_la==GrammarParser.AND or _la==GrammarParser.OR):
@@ -1632,7 +1641,7 @@ class GrammarParser ( Parser ):
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 240
+                        self.state = 243
                         localctx.right = self.expr(6)
                         pass
 
@@ -1640,24 +1649,24 @@ class GrammarParser ( Parser ):
                         localctx = GrammarParser.BinExprContext(self, GrammarParser.ExprContext(self, _parentctx, _parentState))
                         localctx.left = _prevctx
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 241
+                        self.state = 244
                         if not self.precpred(self._ctx, 4):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 4)")
-                        self.state = 242
+                        self.state = 245
                         localctx.op = self.match(GrammarParser.ASS)
-                        self.state = 243
+                        self.state = 246
                         localctx.right = self.expr(5)
                         pass
 
                     elif la_ == 8:
                         localctx = GrammarParser.PostUnaryExprContext(self, GrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 244
+                        self.state = 247
                         if not self.precpred(self._ctx, 11):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 11)")
-                        self.state = 245
+                        self.state = 248
                         localctx.op = self._input.LT(1)
                         _la = self._input.LA(1)
                         if not(_la==GrammarParser.PPP or _la==GrammarParser.MPP):
@@ -1668,9 +1677,9 @@ class GrammarParser ( Parser ):
                         pass
 
              
-                self.state = 250
+                self.state = 253
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,29,self._ctx)
+                _alt = self._interp.adaptivePredict(self._input,30,self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re
@@ -1738,7 +1747,7 @@ class GrammarParser ( Parser ):
         try:
             localctx = GrammarParser.PrimLitContext(self, localctx)
             self.enterOuterAlt(localctx, 1)
-            self.state = 251
+            self.state = 254
             localctx.lit_prim = self._input.LT(1)
             _la = self._input.LA(1)
             if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GrammarParser.CHAR) | (1 << GrammarParser.STRING) | (1 << GrammarParser.INT) | (1 << GrammarParser.FLOAT))) != 0)):
@@ -1850,25 +1859,25 @@ class GrammarParser ( Parser ):
         localctx = GrammarParser.PrimContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_prim)
         try:
-            self.state = 256
+            self.state = 259
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [GrammarParser.KEY_CHAR]:
                 localctx = GrammarParser.CharPrimContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 253
+                self.state = 256
                 self.match(GrammarParser.KEY_CHAR)
                 pass
             elif token in [GrammarParser.KEY_FLOAT]:
                 localctx = GrammarParser.FloatPrimContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 254
+                self.state = 257
                 self.match(GrammarParser.KEY_FLOAT)
                 pass
             elif token in [GrammarParser.KEY_INT]:
                 localctx = GrammarParser.IntPrimContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 255
+                self.state = 258
                 self.match(GrammarParser.KEY_INT)
                 pass
             else:

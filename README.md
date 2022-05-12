@@ -39,7 +39,7 @@ X: Niet werkend of niet geïmplementeerd
 | 1.3.2 | Reserved Words Optional        | X |
 |       | switch, case, default          | X |
 | 1.4   | Variables                      | V |
-| 1.5   | Casting                        | X |
+| 1.5   | Explicit Casting               | X |
 | 1.6   | Comments                       | V |
 |       | ignored                        | V |
 | 1.7   | Scopes                         | V |

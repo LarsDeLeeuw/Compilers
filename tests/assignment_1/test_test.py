@@ -1,12 +1,14 @@
-#===================================================================#
-# Name        : test_ass1.py                                        #
-# Author      : Lars De Leeuw                                       #
-# Date        : 11/03/2022                                          #
-# Version     : 0.1                                                 #
-# Description : unittest.TestSuite containing all unittest.TestCase #
-#               associated with testing the quality, features       #
-#               and requirements implemented for assignment 1.      #
-#===================================================================#
+'''
+╔═══════════════════════════════════════════════════════════════════╗
+║ Name        : test_ass1.py                                        ║
+║ Author      : Lars De Leeuw                                       ║
+║ Date        : 11/03/2022                                          ║
+║ Version     : 0.1                                                 ║
+║ Description : unittest.TestSuite containing all unittest.TestCase ║
+║               associated with testing the quality, features       ║
+║               and requirements implemented for assignment 1.      ║
+╚═══════════════════════════════════════════════════════════════════╝
+'''
 import unittest
 import sys
 import io
@@ -613,8 +615,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
 
     def test_variables6(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "variables6"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
@@ -657,8 +657,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
 
     def test_variables8(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "variables8"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])

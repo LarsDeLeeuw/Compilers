@@ -125,7 +125,7 @@ class BuildASTVisitor(GrammarVisitor):
                     elif node.type == "float" and node.init_expr.type == "int":
                         cast_node.cast = "<IntegralToFloating>"
                     else:
-                        print("Need to cast but dont know this cast yet")
+                        print("Need to cast in line {} but dont know this cast yet".format(ctx.start.line))
                     cast_node.type = node.type
                     cast_node.child = node.init_expr
                     cast_node.child.parent = cast_node
@@ -321,7 +321,7 @@ class BuildASTVisitor(GrammarVisitor):
                     elif var_decl.type == "float" and var_decl.init_expr.type == "int":
                         cast_node.cast = "<IntegralToFloating>"
                     else:
-                        print("Need to cast but dont know this cast yet")
+                        print("Need to cast ({}) in line {} but dont know this cast yet".format(var_decl.init_expr.type,ctx.start.line))
                     cast_node.type = var_decl.type
                     cast_node.child = var_decl.init_expr
                     cast_node.child.parent = cast_node
@@ -537,7 +537,7 @@ class BuildASTVisitor(GrammarVisitor):
         node.prefix = True
         node.operation = switcher.get(ctx.op.type, None)
         expr_node = self.visit(ctx.expr())
-        if (not (node.operation == "&")) and ((type(expr_node) is DeclRefExprNode) or (type(expr_node) is ArraySubscriptExprNode)):
+        if (not (node.operation == "&" or node.operation == "*")) and ((type(expr_node) is DeclRefExprNode) or (type(expr_node) is ArraySubscriptExprNode)):
             cast_node = ImplicitCastExprNode()
             cast_node.type = expr_node.type
             cast_node.cast = "<LValueToRValue>"
@@ -556,14 +556,16 @@ class BuildASTVisitor(GrammarVisitor):
             if len(temp) == 1:
                 node.type = node.child.type + " *"
             else:
-                node.type = temp[0] + "*"*(len(temp[1])+1)
+                node.type = temp[0] +" "+"*"*(len(temp[1])+1)
         elif node.operation == "*":
             temp = node.child.type.split(" ")
             if len(temp) == 1:
                 raise Exception("Syntax error: Cannot dereference rvalue")
-                node.type = node.child.type + " *"
             else:
-                node.type = temp[0] + "*"*(len(temp[1])-1)
+                if len(temp[1]) == 1:
+                    node.type = temp[0]
+                else: 
+                    node.type = temp[0] + " " + "*"*(len(temp[1])-1)
         else:
             node.type = node.child.type
         node.child = expr_node
@@ -630,7 +632,7 @@ class BuildASTVisitor(GrammarVisitor):
 
     # Visit a parse tree produced by GrammarParser#idExpr.
     def visitIdExpr(self, ctx:GrammarParser.IdExprContext):
-        call_id = ctx.ID()[0].getText()
+        call_id = ctx.ID().getText()
         ref_node = DeclRefExprNode()
         result = self.STT.lookup(call_id)
         if result is None:
@@ -646,7 +648,7 @@ class BuildASTVisitor(GrammarVisitor):
                 ref_node.type = result["ast_node"].type
             ref_node.ref["ast_node"].used = True
 
-        if ctx.INT() is None and len(ctx.ID()) == 1:
+        if ctx.INT() is None and ctx.expr() is None:
             return ref_node
         else:
             node = ArraySubscriptExprNode()
@@ -659,8 +661,10 @@ class BuildASTVisitor(GrammarVisitor):
             node.array_child = cast_node
             node.type = result["ast_node"].type
             if ctx.INT() is None:
-                # Array Index is an ID
-                node.index_child = self.visit(ctx.ID()[1])
+                # Array Index is an expr
+                if ctx.expr() is None:
+                    raise Exception("dl")
+                node.index_child = self.visit(ctx.expr())
                 node.index_child.parent = node
             else:
                 # Array Index is an IntegerLiteral

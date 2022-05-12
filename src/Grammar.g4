@@ -30,7 +30,7 @@ expr
     | left=expr op=('||'|'&&') right=expr                   # binExpr
     | left=expr op='=' right=expr                           # binExpr
     | ID '(' ( ( ((expr))(','(expr))* ) | (expr) )? ')'     # callExpr
-    | ID ('['(ID|INT)']')?                                  # idExpr
+    | ID ('['(expr|INT)']')?                                # idExpr
     | value=lit                                             # litExpr
     ;
 
