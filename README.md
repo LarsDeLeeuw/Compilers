@@ -4,10 +4,12 @@ My grammar is in src/Grammar.g4,
     
 To run python main.py input.c
 
-TODO: Throw syntax error when break or continue statement not in loop/switch
+TODO: Throw syntax error when break or continue statement not in loop/switch scope
       Implement DeadCode/Unreachable Code, my break and continue depend on it, break/return/continueStmt node should be last stmtnode of a scope
       forwardDeclaration.c works but is not fully implemented yet for example arguments arent checked yet when init an decl function
-
+      Need to implement for-loop
+      Need to add type implicitcasts for binaryop expr
+      
 
 # About
 This compiler is written in python and attempts to succesfully compile a subset of the C language to MIPS instructions using ANTLR.

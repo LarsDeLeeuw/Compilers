@@ -8,7 +8,7 @@ int main()
    int count;
    int c;
    printf("Enter the number of prime numbers required\n");
-   // scanf("%d",&n);
+   scanf("%d",&n);
 
    if ( n >= 1 )
    {

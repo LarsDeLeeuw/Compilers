@@ -206,7 +206,7 @@ class VisualASTVisitor(ASTVisitor):
 
     def visitCallExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ str("CallExpr\n"+node.children[0].ref["ast_node"].return_type+" " + node.children[0].ref["ast_node"].id) +'()"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("CallExpr\n"+node.children[0].ref["ast_node"].type+" " + node.children[0].ref["ast_node"].id) +'()"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         storeref = self.refcount

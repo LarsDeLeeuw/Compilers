@@ -42,7 +42,7 @@ class BuildASTVisitor(GrammarVisitor):
                 dummy_node.init = True
                 dummy_node.id = "printf"
                 dummy_node.included = True
-                dummy_node.return_type = "void"
+                dummy_node.type = "void"
                 result = self.STT.insert("printf")
                 if result is None:
                     raise Exception("Failed to insert library function in symboltable")
@@ -52,15 +52,15 @@ class BuildASTVisitor(GrammarVisitor):
                 node.includes["<stdio.h>"] += ["declare i32 @__isoc99_scanf(i8*, ...)\n"]
                 dummy_node = FunctionDeclNode()
                 dummy_node.init = True
-                dummy_node.id = "__isoc99_scanf"
+                dummy_node.id = "scanf"
                 dummy_node.included = True
-                dummy_node.return_type = "void"
-                result = self.STT.insert("__isoc99_scanf")
+                dummy_node.type = "void"
+                result = self.STT.insert("scanf")
                 if result is None:
                     raise Exception("Failed to insert library function in symboltable")
                 else:
-                    self.STT.set_attribute("__isoc99_scanf", "ast_node", dummy_node)
-                    self.STT.set_attribute("__isoc99_scanf", "object", "Function")
+                    self.STT.set_attribute("scanf", "ast_node", dummy_node)
+                    self.STT.set_attribute("scanf", "object", "Function")
 
         for Decl in ctx.decl():
             decl_node = self.visit(Decl)
@@ -75,18 +75,24 @@ class BuildASTVisitor(GrammarVisitor):
         node = VarDeclNode()
         node.id = ctx.ID().getText()
         node.line = ctx.start.line
-        node.type = ctx.prim().getText()
 
         if ctx.KEY_CONST() is None:
             node.const = False
         else:
             node.const = True
+        
+        temp = ctx.prim().getText().split('*')
+        node.type = temp[0]
+        if len(temp) >= 2:
+            node.type += " "
+            node.type += (len(temp)-1)*"*"
 
         if ctx.INT() is None:
             node.array = False
         else:
             node.array = True
             node.len = int(ctx.INT().getText())
+            node.type += "[" + ctx.INT().getText() + "]"
 
         if len(ctx.expr()) == 0:
             node.init = False
@@ -150,9 +156,9 @@ class BuildASTVisitor(GrammarVisitor):
         node.line = ctx.start.line
         node.init = False
         if(ctx.KEY_VOID() is None):
-            node.return_type = ctx.prim()[0].getText()
+            node.type = ctx.prim()[0].getText()
         else:
-            node.return_type = "void"
+            node.type = "void"
         node.id = ctx.ID()[0].getText()
         if(len(ctx.prim()) > 1):
             for i in range(len(ctx.prim())-1):
@@ -201,7 +207,7 @@ class BuildASTVisitor(GrammarVisitor):
         self.STT.new_scope()
 
         if(ctx.KEY_VOID() is None):
-            node.return_type = ctx.prim()[0].getText()
+            node.type = ctx.prim()[0].getText()
             if(len(ctx.prim()) > 1):
                 for i in range(len(ctx.prim())-1):
                     parm_type = ctx.prim()[i+1].getText()
@@ -213,7 +219,7 @@ class BuildASTVisitor(GrammarVisitor):
                     parm_var.parent = node
                     node.children.append(parm_var)
         else:
-            node.return_type = "void"
+            node.type = "void"
             if(len(ctx.prim()) > 0):
                 for i in range(len(ctx.prim())):
                     parm_type = ctx.prim()[i].getText()
@@ -284,6 +290,7 @@ class BuildASTVisitor(GrammarVisitor):
         else:
             var_decl.array = True
             var_decl.len = int(ctx.INT().getText())
+            var_decl.type += "[" + ctx.INT().getText() + "]"
 
         if len(ctx.expr()) == 0:
             var_decl.init = False
@@ -485,7 +492,11 @@ class BuildASTVisitor(GrammarVisitor):
             node.type = 'int'
         elif node.operation == "=":
             node.type = node.lhs_child.type
-            if rhs_node.type == lhs_node.type:
+            parsed_type = lhs_node.parseType()
+            lhs_type_noarr = parsed_type[2]
+            if parsed_type[0]:
+                rhs_type_noarr += parsed_type[3]
+            if lhs_type_noarr == rhs_node.type:
                 pass
             else:
                 cast_node = ImplicitCastExprNode()
@@ -552,11 +563,17 @@ class BuildASTVisitor(GrammarVisitor):
         if node.operation == "!":
                 node.type = 'int'
         elif node.operation == "&":
-            temp = node.child.type.split(" ")
-            if len(temp) == 1:
-                node.type = node.child.type + " *"
+            temp = node.child.parseType()
+            if temp[0]:
+                if temp[1]:
+                    node.type = temp[2] +" "+"*"*(len(temp[3])+1) + "[" + temp[4][0] + "]"
+                else:
+                    node.type = temp[2] +" "+"*"*(len(temp[3])+1)
             else:
-                node.type = temp[0] +" "+"*"*(len(temp[1])+1)
+                if temp[1]:
+                    node.type = temp[2] + " *" + "[" + temp[4][0] + "]"
+                else:
+                    node.type = temp[2] + " *"    
         elif node.operation == "*":
             temp = node.child.type.split(" ")
             if len(temp) == 1:
@@ -591,7 +608,7 @@ class BuildASTVisitor(GrammarVisitor):
             functionref_node.parent = node
             functionref_node.ref = result
             functionref_node.id = result["ast_node"].id
-            functionref_node.type = result["ast_node"].return_type
+            functionref_node.type = result["ast_node"].type
             functionref_node.function = True
             functionref_node.signature = result["ast_node"].getSignature()
             node.children.append(functionref_node)
@@ -599,7 +616,23 @@ class BuildASTVisitor(GrammarVisitor):
         for arg in ctx.expr():
             arg_node = self.visit(arg)
 
-            if type(arg_node) is DeclRefExprNode or type(arg_node) is ArraySubscriptExprNode:
+            if type(arg_node) is DeclRefExprNode:
+                cast_node = ImplicitCastExprNode()
+                temp_split = arg_node.parseType()
+                if temp_split[1]:
+                    cast_node.cast = "<ArrayToPointerDecay>"
+                    if temp_split[0]:
+                        cast_node.type = temp_split[2] + " "+ temp_split[3] + "*" +  "[" + temp_split[4][0] + "]"
+                    else:
+                        cast_node.type = temp_split[2] + " *" + "[" + temp_split[4][0] + "]"
+                else:
+                    cast_node.cast = "<LValueToRValue>"
+                    cast_node.type = arg_node.type
+                cast_node.child = arg_node
+                arg_node.parent = cast_node
+                cast_node.parent = node
+                node.children.append(cast_node)
+            elif type(arg_node) is ArraySubscriptExprNode:
                 cast_node = ImplicitCastExprNode()
                 cast_node.type = arg_node.type
                 cast_node.cast = "<LValueToRValue>"
@@ -619,6 +652,16 @@ class BuildASTVisitor(GrammarVisitor):
                 else:
                     arg_node.parent = node
                     node.children.append(arg_node)
+            elif type(arg_node) is StringLiteralNode:
+                cast_node = ImplicitCastExprNode()
+                cast_node.type = arg_node.type
+                temp_split = arg_node.parseType()
+                cast_node.cast = "<ArrayToPointerDecay>"
+                cast_node.type = "char *"
+                cast_node.child = arg_node
+                arg_node.parent = cast_node
+                cast_node.parent = node
+                node.children.append(cast_node)
             else:
                 arg_node.parent = node
                 node.children.append(arg_node)
@@ -641,7 +684,7 @@ class BuildASTVisitor(GrammarVisitor):
             ref_node.id = result["ast_node"].id
             ref_node.ref = result
             if result["object"] == "Function":
-                ref_node.type = result["ast_node"].return_type
+                ref_node.type = result["ast_node"].type
                 ref_node.function = True
                 ref_node.signature = result["ast_node"].getSignature()
             else:

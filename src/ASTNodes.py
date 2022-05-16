@@ -27,6 +27,43 @@ class DeclNode(AbstractNode):
         self.line = None    # int
         self.column = None  # int
 
+    def parseType(self):
+        if self.type is None:
+            return None
+        temp = self.type.split(" ")
+        prim = None
+        ptr = None
+        array = None
+        if len(temp) == 2:
+            isPtr = True
+        else:
+            isPtr = False
+        if isPtr:
+            prim = temp[0]
+            temp = temp[1].split("[")
+            if len(temp) == 1:
+                isArray = False
+                ptr = temp[0]
+            else:
+                isArray = True
+                ptr = temp[0]
+                for i, j in enumerate(temp):
+                    temp[i] = j.strip("]")
+                array = temp[1:]
+        else:
+            temp = temp[0].split("[")
+            if len(temp) == 1:
+                isArray = False
+                prim = temp[0]
+            else:
+                isArray = True
+                prim = temp[0]
+                for i, j in enumerate(temp):
+                    temp[i] = j.strip("]")
+                array = temp[1:]
+                    
+        return [isPtr, isArray, prim, ptr, array]
+
 class VarDeclNode(DeclNode):
     
     def __init__(self):
@@ -58,15 +95,15 @@ class FunctionDeclNode(DeclNode):
         self.used = False
         self.id = None
         self.included = False   # true if included from outer lib
-        self.return_type = None # string, if no return_type -> 'void'
+        self.type = None        # string, if no return_type -> 'void'
         self.arg_types = []     # [string, ...)
         self.children = []      # first signature.len are ParmVar, last is ScopeStmt
 
     def getSignature(self):
-        if self.return_type is None:
+        if self.type is None:
             output = "void ("
         else:
-            output = self.return_type + " ("
+            output = self.type + " ("
         index = 0
         lensign = len(self.arg_types)
         for sign in self.arg_types:
@@ -150,6 +187,43 @@ class ExprNode(AbstractNode):
     def __init__(self):
         self.line = None
         self.column = None
+    
+    def parseType(self):
+        if self.type is None:
+            return None
+        temp = self.type.split(" ")
+        prim = None
+        ptr = None
+        array = None
+        if len(temp) == 2:
+            isPtr = True
+        else:
+            isPtr = False
+        if isPtr:
+            prim = temp[0]
+            temp = temp[1].split("[")
+            if len(temp) == 1:
+                isArray = False
+                ptr = temp[0]
+            else:
+                isArray = True
+                ptr = temp[0]
+                for i, j in enumerate(temp):
+                    temp[i] = j.strip("]")
+                array = temp[1:]
+        else:
+            temp = temp[0].split("[")
+            if len(temp) == 1:
+                isArray = False
+                prim = temp[0]
+            else:
+                isArray = True
+                prim = temp[0]
+                for i, j in enumerate(temp):
+                    temp[i] = j.strip("]")
+                array = temp[1:]
+                    
+        return [isPtr, isArray, prim, ptr, array]
 
 class BinExprNode(ExprNode):
     
@@ -216,6 +290,7 @@ class LiteralNode(ExprNode):
         self.type = None
         self.value = None
         self.offset = 0
+        self.buffer = None
 
     def setValue(self, value):
         pass
@@ -249,29 +324,34 @@ class CharacterLiteralNode(LiteralNode):
             raise Exception("Failed setting value for CharacterLiteralNode")
 
 class StringLiteralNode(LiteralNode):
-    # Not sure about this one atm
-     def setValue(self, value):
+
+    def setValue(self, value):
         try:
             ''' When setting the value, first parse the string because escapechars are not behaving
                 Using offset because len('\n') = 1 but len('\0A') = 3 so this info needs to be kept.
             '''
-            buffer = ""
+            buffer = []
             escape_flag = False
             for character in str(value[1:-1]):
                 if escape_flag:
                     if character == "n":
-                        buffer += "\\0A"
+                        buffer.append("\\0A")
                         self.offset -= 2
+                    elif character == "t":
+                        buffer.append("\\09")
                     else:
-                        buffer += "\\" + character
+                        buffer.append("\\" + str(character))
                     escape_flag = False
                     continue
                 if character == '\\':
                     escape_flag = True
                 else:
-                    buffer += character
-            self.value = buffer
-            self.type = "string"
+                    buffer.append(str(character))
+            self.buffer = buffer
+            self.value = ""
+            for char in buffer:
+                self.value += char
+            self.type = "char[" + str(len(buffer)) + "]"
         except:
             raise Exception("Failed setting value for StringLiteralNode")
 

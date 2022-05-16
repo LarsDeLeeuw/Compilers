@@ -49,8 +49,10 @@ class LLVMASTVisitor(ASTVisitor):
         return 0
 
     def visitVarDeclNode(self, node):
+        ''' This needs a refactor jezus '''
         self.buffer["pre"] += "@" + node.id + " = dso_local global "
-        if node.type == 'int':
+        parsed_type = node.parseType()
+        if parsed_type[2] == 'int':
             if node.array:
                 if node.init:
                     self.buffer["pre"] += "[" + str(node.getLen()) + " x i32] ["
@@ -67,7 +69,7 @@ class LLVMASTVisitor(ASTVisitor):
                     self.buffer["pre"] += "i32 " + str(node.init_expr.value) + ", align 4\n"
                 else:
                     self.buffer["pre"] += "i32 " + str(0) + ", align 4\n"
-        elif node.type == 'float':
+        elif parsed_type[2] == 'float':
             if node.array:
                 if node.init:
                     self.buffer["pre"] += "[" + str(node.getLen()) + " x float] ["
@@ -84,7 +86,7 @@ class LLVMASTVisitor(ASTVisitor):
                     self.buffer["pre"] += "float " + str(node.init_expr.value) + ", align 4\n"
                 else:
                     self.buffer["pre"] += "float " + str(0) + ", align 4\n"
-        elif node.type == 'char':
+        elif parsed_type[2] == 'char':
             if node.array:
                 if node.init:
                     self.buffer["pre"] += "[" + str(node.getLen()) + " x i8] ["
@@ -108,9 +110,9 @@ class LLVMASTVisitor(ASTVisitor):
         if node.init:
             self.buffer["functs"] += "define dso_local "
             # Return_type
-            if node.return_type == "void":
+            if node.type == "void":
                 self.buffer["functs"] += "void"
-            elif node.return_type == 'int':
+            elif node.type == 'int':
                 if node.init:
                     self.buffer["functs"] += "i32"
                 else:
@@ -203,22 +205,25 @@ class LLVMASTVisitor(ASTVisitor):
                     self.idshadowing[serial] = var.id + str(self.idcount[var.id])
 
                 var_type = var.type.split(" ")
+                var_type = var.parseType()
                 llvm_type = None
-                if var_type[0] == "char":
+                llvm_align = "4"
+                if var_type[2] == "char":
                     llvm_type = "i8"
-                elif var_type[0] == "int":
+                    llvm_align = "1"
+                elif var_type[2] == "int":
                     llvm_type = "i32"
-                elif var_type[0] == "float":
+                elif var_type[2] == "float":
                     llvm_type = "float"
                 else:
                     print("What is this?")
 
-                llvm_align = "4"
-
-                if len(var_type) == 2:
+                if var_type[0]:
                     if not var.array:
                         llvm_align = "8"
-                    llvm_type += var_type[1]
+                    else:
+                        llvm_align = "16"
+                    llvm_type += var_type[3]
                 
                 if var.array:
                     # Build the array type currently no multidim support
@@ -253,25 +258,25 @@ class LLVMASTVisitor(ASTVisitor):
         
         if not returnFlag and type(node.parent) is FunctionDeclNode:
             # Check return type of function
-            if node.parent.return_type == "void":
+            if node.parent.type == "void":
                 self.buffer["functs"] += "\tret void\n"
-            elif node.parent.return_type == "int":
+            elif node.parent.type == "int":
                 self.buffer["functs"] += "\tstore i32 0, i32* %retval, align 4\n"
                 self.buffer["functs"] += "\t%"+str(self.register_count)+" = load i32, i32* %retval, align 4\n"
                 self.buffer["functs"] += "\tret i32 %"+str(self.register_count)+"\n"
                 self.register_count += 1
-            elif node.parent.return_type == "float":
+            elif node.parent.type == "float":
                 self.buffer["functs"] += "\tstore float 0.0, float* %retval, align 4\n"
                 self.buffer["functs"] += "\t%"+str(self.register_count)+" = load float, float* %retval, align 4\n"
                 self.buffer["functs"] += "\tret float %"+str(self.register_count)+"\n"
                 self.register_count += 1
-            elif node.parent.return_type == "char":
+            elif node.parent.type == "char":
                 self.buffer["functs"] += "\tstore i8 0, i8* %retval, align 4\n"
                 self.buffer["functs"] += "\t%"+str(self.register_count)+" = load i8, i8* %retval, align 4\n"
                 self.buffer["functs"] += "\tret i8 %"+str(self.register_count)+"\n"
                 self.register_count += 1
             else:
-                raise Exception("Cannot generate default return for type: {}".format(node.parent.return_type))
+                raise Exception("Cannot generate default return for type: {}".format(node.parent.type))
         
     def visitReturnStmtNode(self, node):
         if node.child is None:
@@ -424,28 +429,34 @@ class LLVMASTVisitor(ASTVisitor):
         else:
             if funct_node.included:
                 if funct_node.id == "printf":
-                    # Amount of i8 string contains
-                    byte_len = str(len(node.children[1].value)+node.children[1].offset+1)
-
-                    if node.children[1].value in self.str_constants:
-                        pass
-                    else:
-                        self.str_constants[node.children[1].value] = "@.str." + str(len(self.str_constants))
-                        self.buffer["str"] += self.str_constants[node.children[1].value] + " = private unnamed_addr constant ["
-                        self.buffer["str"] += byte_len + ' x i8] c"' + node.children[1].value + "\\00" +'", align 1\n'
-                    
                     hold = {}
 
-                    for form_data in node.children[2:(len(node.children))]:
+                    for form_data in node.children[1:(len(node.children))]:
                         self.visit(form_data)
-                        if form_data.type == 'int':
-                            hold[str(self.register_count-1)] = "i32"
-                        elif form_data.type == 'float':
+                        parsed_type = form_data.parseType()
+                        llvm_type = ""
+
+                        if parsed_type[2] == 'char':
+                            llvm_type += "i8"
+                        elif parsed_type[2] == 'int':
+                            llvm_type += "i32"
+                        elif parsed_type[2] == 'float':
+                            llvm_type += "double"
+                        else:
+                            print("oopsiee what is this {}".format(form_data.type))  
+
+                        if parsed_type[0]:
+                            llvm_type += parsed_type[3]
+                          
+
+                        if parsed_type[2] == 'int':
+                            hold[str(self.register_count-1)] = llvm_type
+                        elif parsed_type[2] == 'float':
                             self.buffer["functs"] += "\t%" + str("conv" + str(self.conv_count)) + " = fpext float %"+str(self.register_count-1)+" to double\n"
                             self.conv_count += 1
-                            hold[str("conv" + str(self.conv_count-1))] = "double"
-                        elif form_data.type == 'char':
-                            hold[str(self.register_count-1)] = "i8"
+                            hold[str("conv" + str(self.conv_count-1))] = llvm_type
+                        elif parsed_type[2] == 'char':
+                            hold[str(self.register_count-1)] = llvm_type
                         else:
                             print("oopsiee {}".format(form_data.type))
                     
@@ -454,17 +465,49 @@ class LLVMASTVisitor(ASTVisitor):
 
                     format_type = "i32"
                     self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
-                    self.buffer["functs"] += "@printf(i8* getelementptr inbounds (["+ byte_len +" x i8], ["+ byte_len
-                    self.buffer["functs"] += " x i8]* "+ self.str_constants[node.children[1].value] +", i32 0, i32 0)"
-                    if len(hold) == 0:
-                        self.buffer["functs"] += ')\n'
-                    else:
-                        self.buffer["functs"] += ', '
-                        for i, form_data in enumerate(hold):
-                            if i == len(hold) - 1:
-                                self.buffer["functs"] += hold[form_data]+" %" + form_data + ")\n"
-                            else:
-                                self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
+                    self.buffer["functs"] += "@printf("
+                    for i, form_data in enumerate(hold):
+                        if i == len(hold) - 1:
+                            self.buffer["functs"] += hold[form_data]+" %" + form_data + ")\n"
+                        else:
+                            self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
+                    self.call_count += 1
+                elif funct_node.id == "scanf":                    
+                    hold = {}
+
+                    for form_data in node.children[1:(len(node.children))]:
+                        self.visit(form_data)
+                        type_split = form_data.parseType()
+                        llvm_type = None
+                        if type_split[2] == "int":
+                            llvm_type = "i32"
+                        elif type_split[2] == "float":
+                            llvm_type = "float"
+                        elif type_split[2] == "char":
+                            llvm_type = "i8"
+                        else:
+                            print("what")
+                        if type_split[0]:
+                            if type_split[1]:
+                                llvm_array_type = "[" + type_split[4][0] + " x " + llvm_type + "]"
+                                llvm_type = llvm_array_type
+                            llvm_type += "*"
+                            hold[str(self.register_count-1)] = llvm_type
+                        else:
+                            print("Euhm {}".format(form_data.type))
+                    
+                    
+                    # debug
+                    # print(hold)
+
+                    format_type = "i32"
+                    self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
+                    self.buffer["functs"] += "@__isoc99_scanf("
+                    for i, form_data in enumerate(hold):
+                        if i == len(hold) - 1:
+                            self.buffer["functs"] += hold[form_data]+" %" + form_data + ")\n"
+                        else:
+                            self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
                     self.call_count += 1
             else:
                 hold = {}
@@ -480,7 +523,7 @@ class LLVMASTVisitor(ASTVisitor):
                     elif form_data.type == 'char':
                         hold[str(self.register_count-1)] = "i8"
 
-                if funct_node.return_type == "void":
+                if funct_node.type == "void":
                     self.buffer["functs"] += "\tcall void @" + funct_node.id + "("
                     if len(hold) == 0:
                         self.buffer["functs"] += ')\n'
@@ -490,7 +533,7 @@ class LLVMASTVisitor(ASTVisitor):
                                 self.buffer["functs"] += hold[form_data]+" %" + form_data + ")\n"
                             else:
                                 self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
-                elif funct_node.return_type == "int":
+                elif funct_node.type == "int":
                     self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 @" + funct_node.id + "("
                     self.call_count += 1
                     if len(hold) == 0:
@@ -559,17 +602,6 @@ class LLVMASTVisitor(ASTVisitor):
             rhs_register_count = self.register_count - 1
         # Generate the LLVM for the correct node.operation using %lhs_register and %rhs_register_count
         split_type = node.type.split(" ")
-        # The llvm_type created below is currently not used I believe
-        llvm_type = None
-        if split_type[0] == "char":
-            llvm_type = "i8"
-        elif split_type[0] == "int":
-            llvm_type = "i32"
-        elif split_type[0] == "float":
-            llvm_type = "float"
-        else:
-            print("what is this?")
-        #######################
         if len(split_type) == 2:
             '''Special ptr operations'''
             llvm_type += split_type[1]
@@ -667,18 +699,19 @@ class LLVMASTVisitor(ASTVisitor):
                 self.register_count += 1
             elif node.operation == "=":
                 lhs_split_type = node.lhs_child.type.split(" ")
+                lhs_split_type = node.lhs_child.parseType()
                 llvm_lhs_type = None
                 llvm_lhs_align = "4"
-                if lhs_split_type[0] == "char":
+                if lhs_split_type[2] == "char":
                     llvm_lhs_type = "i8"
-                elif lhs_split_type[0] == "int":
+                elif lhs_split_type[2] == "int":
                     llvm_lhs_type = "i32"
-                elif lhs_split_type[0] == "float":
+                elif lhs_split_type[2] == "float":
                     llvm_lhs_type = "float"
                 else:
                     print("What is this")
-                if len(lhs_split_type) == 2:
-                    llvm_lhs_type += lhs_split_type[1]
+                if lhs_split_type[0]:
+                    llvm_lhs_type += lhs_split_type[3]
                     llvm_lhs_align = "8"
                 self.visit(node.lhs_child)
                 self.buffer["functs"] += "\t" + "store "+llvm_lhs_type+" " + "%"+str(rhs_register_count)
@@ -836,49 +869,35 @@ class LLVMASTVisitor(ASTVisitor):
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
             self.register_count += 1
         elif node.operation == "&":
-            type_split = node.type.split(" ")
+            type_split = node.parseType()
             llvm_type = None
-            if type_split[0] == "int":
+            if type_split[2] == "int":
                 llvm_type = "i32"
-            elif type_split[0] == "float":
+            elif type_split[2] == "float":
                 llvm_type = "float"
-            elif type_split[0] == "char":
+            elif type_split[2] == "char":
                 llvm_type = "i8"
             else:
                 print("what")
-            if len(type_split) == 2:
-                llvm_type += type_split[1]
-            
 
-            if type_split[0] == "int":
-                pass
-                # self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+" %" +str(child_register_count)+", align 8\n"
-                # self.register_count += 1
-            else:
-                print("Not implemented yet")
+            if type_split[0]:
+                llvm_type += type_split[3]
         elif node.operation == "*":
-            type_split = node.child.type.split(" ")
+            type_split = node.child.parseType()
             llvm_type = None
-            if type_split[0] == "int":
+            if type_split[2] == "int":
                 llvm_type = "i32"
-            elif type_split[0] == "float":
+            elif type_split[2] == "float":
                 llvm_type = "float"
-            elif type_split[0] == "char":
+            elif type_split[2] == "char":
                 llvm_type = "i8"
             else:
                 print("what")
-            if len(type_split) == 2:
-                llvm_type += len(type_split[1])*"*"
+            if type_split[0]:
+                llvm_type += len(type_split[3])*"*"
                         
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %" +str(child_register_count)+", align 4\n"
             self.register_count += 1
-
-            if type_split[0] == "int":
-                pass
-                
-            else:
-                print("Not implemented yet")
-
         elif node.operation == "++" and not node.prefix:
             '''Stores rvalue before operation in latest register, excute operation'''
             child_type = node.child.type.split(" ")
@@ -912,32 +931,37 @@ class LLVMASTVisitor(ASTVisitor):
             self.visit(node.child)
             # Convert to RValue
             child_type = node.child.type.split(" ")
+            child_type = node.child.parseType()
             llvm_type = None
-            if child_type[0] == "char":
+            if child_type[2] == "char":
                 llvm_type = "i8"
-            elif child_type[0] == "int":
+            elif child_type[2] == "int":
                 llvm_type = "i32"
-            elif child_type[0] == "float":
+            elif child_type[2] == "float":
                 llvm_type = "float"
             else:
                 print("what is this")
             llvm_align = "4"
-            if len(child_type) == 2:
-                llvm_type += child_type[1]
+            if child_type[0]:
+                llvm_type += child_type[3]
                 llvm_align = "8"
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %"+str(self.register_count-1)+", align "+llvm_align+"\n"
             self.register_count += 1
         elif node.cast == "<ArrayToPointerDecay>":
             '''Currently not build for multidim yet'''
+            if type(node.child) is StringLiteralNode:
+                self.visit(node.child)
+                return
+
             llvm_array_type = None
 
-            child_type = node.child.ref["ast_node"].type.split(" ")
+            child_type = node.child.ref["ast_node"].parseType()
             llvm_type = None
-            if child_type[0] == "char":
+            if child_type[2] == "char":
                 llvm_type = "i8"
-            elif child_type[0] == "int":
+            elif child_type[2] == "int":
                 llvm_type = "i32"
-            elif child_type[0] == "float":
+            elif child_type[2] == "float":
                 llvm_type = "float"
             else:
                 print("what is this")
@@ -954,8 +978,15 @@ class LLVMASTVisitor(ASTVisitor):
             else:
                 llvm_id = str(self.idshadowing[serial])
 
-            # Write partial LLVM instruction, parent ArraySubscriptExpr should finish it with index.
-            self.buffer["functs"] += "\t%" + str(self.register_count) + " = getelementptr inbounds "+llvm_array_type+", "+llvm_array_type+"* "+llvm_pre+llvm_id+", i64 0, i64 "
+            # .
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = getelementptr inbounds "+llvm_array_type+", "+llvm_array_type+"* "+llvm_pre+llvm_id+", i64 0, i64 0\n"
+            self.register_count += 1
+        elif node.cast == "<FloatingToIntegral>":
+            pass
+        elif node.cast == "<IntegralToFloating>":
+            self.visit(node.child)
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(self.register_count-1) + " to float\n"
+            self.register_count += 1
             
 
     def visitArraySubscriptExprNode(self, node):
@@ -963,8 +994,20 @@ class LLVMASTVisitor(ASTVisitor):
         self.visit(node.index_child)
         self.buffer["functs"] += "\t%" + str(self.register_count) + " = sext i32 %" + str(self.register_count-1) + " to i64\n"
         self.register_count += 1
+        index_register = self.register_count-1
         self.visit(node.array_child)
-        self.buffer["functs"] += "%" + str(self.register_count-1) + "\n"
+        child_type = node.array_child.parseType()
+        llvm_type = None
+        if child_type[2] == "char":
+            llvm_type = "i8"
+        elif child_type[2] == "int":
+            llvm_type = "i32"
+        elif child_type[2] == "float":
+            llvm_type = "float"
+        else:
+            print("what is this")
+
+        self.buffer["functs"] += "\t%" + str(self.register_count) + " = getelementptr inbounds "+llvm_type+", "+llvm_type+"* "+"%"+str(self.register_count-1)+", i64 "+"%" + str(index_register) + "\n"
         self.register_count += 1
 
 
@@ -974,20 +1017,24 @@ class LLVMASTVisitor(ASTVisitor):
             print("gotta fix this")
         else:
             serial = node.ref["serial"]
-            child_type = node.ref["ast_node"].type.split(" ")
+            child_type = node.ref["ast_node"].parseType()
             llvm_type = None
-            if child_type[0] == "char":
+            if child_type[2] == "char":
                 llvm_type = "i8"
-            elif child_type[0] == "int":
+            elif child_type[2] == "int":
                 llvm_type = "i32"
-            elif child_type[0] == "float":
+            elif child_type[2] == "float":
                 llvm_type = "float"
             else:
                 print("what is this")
 
-            if len(child_type) == 2:
-                llvm_type += child_type[1]
-            
+            if child_type[0]:
+                llvm_type += child_type[3]
+
+            if node.ref["ast_node"].array:
+                llvm_array_type = "[" + str(node.ref["ast_node"].getLen()) + " x " + llvm_type + "]"
+                llvm_type = llvm_array_type
+
             llvm_pre = "%"
 
             if node.ref["global"]:
@@ -1024,4 +1071,14 @@ class LLVMASTVisitor(ASTVisitor):
         self.buffer["functs"] += "\t%" + str(self.register_count) + " = load i8, i8* %"+str(self.register_count-1)+", align 4\n"
         self.register_count += 1
 
-    
+    def visitStringLiteralNode(self, node):
+        if node.value in self.str_constants:
+            pass
+        else:
+            self.str_constants[node.value] = "@.str." + str(len(self.str_constants))
+            self.buffer["str"] += self.str_constants[node.value] + " = private unnamed_addr constant ["
+            self.buffer["str"] += str(len(node.buffer)+1) + ' x i8] c"' + node.value + "\\00" +'", align 1\n'
+
+        self.buffer["functs"] += "\t%" + str(self.register_count) + " = getelementptr inbounds ["+ str(len(node.buffer)+1) +" x i8], ["+ str(len(node.buffer)+1)
+        self.buffer["functs"] += " x i8]* "+ self.str_constants[node.value] +", i32 0, i32 0\n"
+        self.register_count += 1
