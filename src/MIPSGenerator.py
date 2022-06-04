@@ -19,6 +19,8 @@ class MIPSGenerator(ASTVisitor):
         self.register_count = 0
         self.lor_count = 0
         self.land_count = 0
+        self.lnot_count = 0
+        self.fcmp_count = 0
         self.inc_count = 0
         self.dec_count = 0
         self.if_count = 0
@@ -61,6 +63,9 @@ class MIPSGenerator(ASTVisitor):
     
     def visitExprStmtNode(self, node):
         self.visit(node.child)
+
+    def visitIfStmtNode(self, node):
+        pass
     
     def visitCallExprNode(self, node):
         # Save contents of $a0-$a3 into memory if caller needs them later.
@@ -133,6 +138,59 @@ class MIPSGenerator(ASTVisitor):
                     self.buffer["text"] += "\tli $v0, 4\n\tla $a0, " + part + "\n\tsyscall\n"
 
 
+    def visitUnaryExprNode(self, node):
+        # Save register $s0
+        self.buffer["text"] += "\t# Entering UnaryExprNode.\n"
+        # self.buffer["text"] += "\tsubi $sp, $sp, 4\n"
+        # self.buffer["text"] += "\tsw $s0, 0($sp)\n"
+
+        self.visit(node.child)
+
+        if node.prefix:
+            if node.child.type == "float":
+                self.buffer["text"] += "\tmtc1 $t0, $f0\n"
+
+                if node.operation == "!":
+                    self.buffer["text"] += "\tmfc1 $zero, $f2\n\tcvt.s.w $f2, $f2\n"
+                    # Compare if child == 0, this sets flag in coprocessor if true.
+                    # Branch to lnot.x.true if set.
+                    self.buffer["text"] += "\tc.eq.s $f0, $f2\n"
+                    self.buffer["text"] += "\tbc1t lnot.{}.true\n".format(self.lnot_count)
+                     # lnot.x.false block
+                    self.buffer["text"] += "lnot.{}.false:\n".format(self.lnot_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb lnot.{}.end\n".format(self.lnot_count)
+                    # lnot.x.true block
+                    self.buffer["text"] += "lnot.{}.true:\n".format(self.lnot_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # lnot.x.end block
+                    self.buffer["text"] += "lnot.{}.end:\n".format(self.lnot_count)
+                    self.lnot_count += 1
+                elif node.operation == "-":
+                    pass
+            else:
+                if node.operation == "!":
+                    # Branch to lnot.x.true if $t0 == 0.
+                    self.buffer["text"] += "\tbeq $t0, $zero, lnot.{}.true\n".format(self.lnot_count)
+                    # lnot.x.false block
+                    self.buffer["text"] += "lnot.{}.false:\n".format(self.lnot_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb lnot.{}.end\n".format(self.lnot_count)
+                    # lnot.x.true block
+                    self.buffer["text"] += "lnot.{}.true:\n".format(self.lnot_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # lnot.x.end block
+                    self.buffer["text"] += "lnot.{}.end:\n".format(self.lnot_count)
+                    self.lnot_count += 1
+                elif node.operation == "-":
+                    pass
+        else:
+            pass
+
+        # Restore register $s0
+        # self.buffer["text"] += "\tlw $s0, 0($sp)\n"
+        # self.buffer["text"] += "\taddi $sp, $sp, 4\n"
+        self.buffer["text"] += "\t# Exiting UnaryExprNode.\n"
 
     def visitBinExprNode(self, node):
         # Save registers $s0, $s1
@@ -165,27 +223,176 @@ class MIPSGenerator(ASTVisitor):
             else:
                 pass
 
-            if node.operation == "+":
-                self.buffer["text"] += "\tadd.s $f0, $f0, $f1\n"
-            elif node.operation == "-":
-                self.buffer["text"] += "\tsub.s $f0, $f0, $f1\n"
-            elif node.operation == "*":
-                self.buffer["text"] += "\tmul.s $f0, $f0, $f1\n"
-            elif node.operation == "/":
-                self.buffer["text"] += "\tdiv.s $f0, $f0, $f1\n"
+            if node.operation in ["+", "-", "*", "/"]:
+                if node.operation == "+":
+                    self.buffer["text"] += "\tadd.s $f0, $f0, $f1\n"
+                elif node.operation == "-":
+                    self.buffer["text"] += "\tsub.s $f0, $f0, $f1\n"
+                elif node.operation == "*":
+                    self.buffer["text"] += "\tmul.s $f0, $f0, $f1\n"
+                elif node.operation == "/":
+                    self.buffer["text"] += "\tdiv.s $f0, $f0, $f1\n"
 
-            self.buffer["text"] += "\tmfc1 $t0, $f0\n"
+                self.buffer["text"] += "\tmfc1 $t0, $f0\n"
+            else:
+                if node.operation == "&&":
+                    self.buffer["text"] += "\tmfc1 $zero, $f2\n\tcvt.s.w $f2, $f2\n"
+                    # Compare if lhs == 0, this sets flag in coprocessor if true.
+                    # Branch to land.x.false if set.
+                    self.buffer["text"] += "\tc.eq.s $f0, $f2\n"
+                    self.buffer["text"] += "\tbc1t land.{}.false\n".format(self.land_count)
+                    # Compare if rhs == 0, this sets flag in coprocessor if true.
+                    # Branch to land.x.true if not set.
+                    self.buffer["text"] += "\tc.eq.s $f1, $f2\n"
+                    self.buffer["text"] += "\tbc1f land.{}.true\n".format(self.land_count)
+                    # land.x.false block
+                    self.buffer["text"] += "land.{}.false:\n".format(self.land_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb land.{}.end\n".format(self.land_count)
+                    # land.x.true block
+                    self.buffer["text"] += "land.{}.true:\n".format(self.land_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # land.x.end block
+                    self.buffer["text"] += "land.{}.end:\n".format(self.land_count)
+                    self.land_count += 1
+                elif node.operation == "||":
+                    self.buffer["text"] += "\tmfc1 $zero, $f2\n\tcvt.s.w $f2, $f2\n"
+                    # Compare if lhs == 0, this sets flag in coprocessor if true.
+                    # Branch to lor.x.true if not set.
+                    self.buffer["text"] += "\tc.eq.s $f0, $f2\n"
+                    self.buffer["text"] += "\tbc1f lor.{}.true\n".format(self.lor_count)
+                    # Compare if rhs == 0, this sets flag in coprocessor if true.
+                    # Branch to lor.x.true if not set.
+                    self.buffer["text"] += "\tc.eq.s $f1, $f2\n"
+                    self.buffer["text"] += "\tbc1f lor.{}.true\n".format(self.lor_count)
+                    # lor.x.false block
+                    self.buffer["text"] += "lor.{}.false:\n".format(self.lor_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb lor.{}.end\n".format(self.lor_count)
+                    # lor.x.true block
+                    self.buffer["text"] += "lor.{}.true:\n".format(self.lor_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # lor.x.end block
+                    self.buffer["text"] += "lor.{}.end:\n".format(self.lor_count)
+                    self.lor_count += 1
+                elif node.operation == ">":
+                    self.buffer["text"] += "\tc.lt.s $f1, $f0\n"
+                    self.buffer["text"] += "\tbc1t fcmp.{}.true\n".format(self.fcmp_count)
+                    # fcmp.x.false block
+                    self.buffer["text"] += "fcmp.{}.false:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb fcmp.{}.end\n".format(self.fcmp_count)
+                    # fcmp.x.true block
+                    self.buffer["text"] += "fcmp.{}.true:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # fcmp.x.end block
+                    self.buffer["text"] += "fcmp.{}.end:\n".format(self.fcmp_count)
+                    self.fcmp_count += 1
+                elif node.operation == "<":
+                    self.buffer["text"] += "\tc.lt.s $f0, $f1\n"
+                    self.buffer["text"] += "\tbc1t fcmp.{}.true\n".format(self.fcmp_count)
+                    # fcmp.x.false block
+                    self.buffer["text"] += "fcmp.{}.false:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb fcmp.{}.end\n".format(self.fcmp_count)
+                    # fcmp.x.true block
+                    self.buffer["text"] += "fcmp.{}.true:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # fcmp.x.end block
+                    self.buffer["text"] += "fcmp.{}.end:\n".format(self.fcmp_count)
+                    self.fcmp_count += 1
+                elif node.operation == ">=":
+                    self.buffer["text"] += "\tc.le.s $f1, $f0\n"
+                    self.buffer["text"] += "\tbc1t fcmp.{}.true\n".format(self.fcmp_count)
+                    # fcmp.x.false block
+                    self.buffer["text"] += "fcmp.{}.false:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb fcmp.{}.end\n".format(self.fcmp_count)
+                    # fcmp.x.true block
+                    self.buffer["text"] += "fcmp.{}.true:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # fcmp.x.end block
+                    self.buffer["text"] += "fcmp.{}.end:\n".format(self.fcmp_count)
+                    self.fcmp_count += 1
+                elif node.operation == "<=":
+                    self.buffer["text"] += "\tc.le.s $f0, $f1\n"
+                    self.buffer["text"] += "\tbc1t fcmp.{}.true\n".format(self.fcmp_count)
+                    # fcmp.x.false block
+                    self.buffer["text"] += "fcmp.{}.false:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb fcmp.{}.end\n".format(self.fcmp_count)
+                    # fcmp.x.true block
+                    self.buffer["text"] += "fcmp.{}.true:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # fcmp.x.end block
+                    self.buffer["text"] += "fcmp.{}.end:\n".format(self.fcmp_count)
+                    self.fcmp_count += 1
+                elif node.operation == "!=":
+                    self.buffer["text"] += "\tc.eq.s $f0, $f1\n"
+                    self.buffer["text"] += "\tbc1f fcmp.{}.true\n".format(self.fcmp_count)
+                    # fcmp.x.false block
+                    self.buffer["text"] += "fcmp.{}.false:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb fcmp.{}.end\n".format(self.fcmp_count)
+                    # fcmp.x.true block
+                    self.buffer["text"] += "fcmp.{}.true:\n".format(self.fcmp_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # fcmp.x.end block
+                    self.buffer["text"] += "fcmp.{}.end:\n".format(self.fcmp_count)
+                    self.fcmp_count += 1
         else:
             # Need int instructions
-            if node.operation == "+":
-                self.buffer["text"] += "\tadd $t0, $s0, $s1\n"
-            elif node.operation == "-":
-                self.buffer["text"] += "\tsub $t0, $s0, $s1\n"
-            elif node.operation == "*":
-                self.buffer["text"] += "\tmul $t0, $s0, $s1\n"
-            elif node.operation == "/":
-                self.buffer["text"] += "\tdiv $t0, $s0, $s1\n"
-        
+            if node.operation in ["+", "-", "*", "/"]:
+                if node.operation == "+":
+                    self.buffer["text"] += "\tadd $t0, $s0, $s1\n"
+                elif node.operation == "-":
+                    self.buffer["text"] += "\tsub $t0, $s0, $s1\n"
+                elif node.operation == "*":
+                    self.buffer["text"] += "\tmul $t0, $s0, $s1\n"
+                elif node.operation == "/":
+                    self.buffer["text"] += "\tdiv $t0, $s0, $s1\n"
+            else:
+                if node.operation == "&&":
+                    # Branch to land.x.false if == 0.
+                    self.buffer["text"] += "\tbeq $s0, $zero land.{}.false\n".format(self.land_count)
+                    # Branch to land.x.true if != 0.
+                    self.buffer["text"] += "\tbne $s1, $zero land.{}.true\n".format(self.land_count)
+                    # land.x.false block
+                    self.buffer["text"] += "land.{}.false:\n".format(self.land_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb land.{}.end\n".format(self.land_count)
+                    # land.x.true block
+                    self.buffer["text"] += "land.{}.true:\n".format(self.land_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # land.x.end block
+                    self.buffer["text"] += "land.{}.end:\n".format(self.land_count)
+                    self.land_count += 1
+                elif node.operation == "||":
+                    # Branch to lor.x.true if $s0 != 0
+                    self.buffer["text"] += "\tbne $s0, $zero lor.{}.true\n".format(self.lor_count)
+                    # Branch to lor.x.true if $s1 != 0
+                    self.buffer["text"] += "\tbne $s1, $zero lor.{}.true\n".format(self.lor_count)
+                    # lor.x.false block
+                    self.buffer["text"] += "lor.{}.false:\n".format(self.lor_count)
+                    self.buffer["text"] += "\tli $t0, 0\n"
+                    self.buffer["text"] += "\tb lor.{}.end\n".format(self.lor_count)
+                    # lor.x.true block
+                    self.buffer["text"] += "lor.{}.true:\n".format(self.lor_count)
+                    self.buffer["text"] += "\tli $t0, 1\n"
+                    # lor.x.end block
+                    self.buffer["text"] += "lor.{}.end:\n".format(self.lor_count)
+                    self.lor_count += 1
+                elif node.operation == ">":
+                    self.buffer["text"] += "\tslt $t0, $s1, $s0\n"
+                elif node.operation == "<":
+                    self.buffer["text"] += "\tslt $t0, $s0, $s1\n"
+                elif node.operation == ">=":
+                    self.buffer["text"] += "\tsle $t0, $s1, $s0\n"
+                elif node.operation == "<=":
+                    self.buffer["text"] += "\tsle $t0, $s0, $s1\n"
+                elif node.operation == "!=":
+                    self.buffer["text"] += "\tsne $t0, $s0, $s1\n"
+
         # Restore registers $s0, $s1
         self.buffer["text"] += "\tlw $s0, 4($sp)\n"
         self.buffer["text"] += "\tlw $s1, 0($sp)\n"

@@ -62,6 +62,48 @@ class TestBenchmarkCorrectCodeMIPS(unittest.TestCase):
         GeneratedFile.close()
         RefFile.close()
 
+    def test_comparisons1(self):
+        name = "comparisons1"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"b'MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\\n\\n", str(run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout))
+        Copyrightcleanup = re.split(r"\\n'$", Copyrightcleanup[1])
+        Copyrightcleanup = Copyrightcleanup[0]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+
+    def test_comparisons2(self):
+        name = "comparisons2"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"b'MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\\n\\n", str(run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout))
+        Copyrightcleanup = re.split(r"\\n'$", Copyrightcleanup[1])
+        Copyrightcleanup = Copyrightcleanup[0]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+
 
 def suite():
     """Creates unittest.TestSuite"""
