@@ -3,9 +3,11 @@ grammar Grammar;
 prog: (KEY_INCLUDE LIB)* decl+ ;
 
 decl: KEY_CONST? prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'      #varDecl
-    | (prim | KEY_VOID) ID '('( ( (prim ID)(','prim ID)* ) | prim ID )?')' ';'                      #funcheadsupDecl           
-    | (prim | KEY_VOID) ID '(' ( ( (prim ID)(','prim ID)* ) | prim ID )? ')' '{' stat* '}'          #funcDecl
+    | (prim | KEY_VOID) ID '('( ( (func_arg)(','func_arg)* ) | func_arg )?')' ';'                   #funcheadsupDecl           
+    | (prim | KEY_VOID) ID '(' ( ( (func_arg)(','func_arg)* ) | func_arg )? ')' '{' stat* '}'       #funcDecl
     ;
+
+func_arg: prim ID ('['INT?']')? ;
 
 stat: expr ';'                                                                                      # exprStat
     | KEY_CONST? prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'      # declStat

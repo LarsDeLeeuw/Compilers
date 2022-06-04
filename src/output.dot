@@ -4,34 +4,96 @@ n2 [label="int ()"];
 n3 [label="main"];
 n4 [label="FuncScope"];
 n6 [label="Body"];
-n8 [label="DeclStmt"];
-n9 [label="VarDecl"];
-n10 [label="int"];
-n11 [label="x"];
-n12 [label="IntegerLiteral
-rvalue '5'"];
-n13 [label="DeclStmt"];
-n14 [label="VarDecl"];
-n15 [label="float"];
-n16 [label="y"];
-n17 [label="ImplicitCastExpr
-<IntegralToFloating>"];
-n18 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n19 [label="DeclRefExpr
-lvalue Var 'x'"];
-n20 [label="DeclStmt"];
-n21 [label="VarDecl"];
-n22 [label="float"];
-n23 [label="z"];
-n24 [label="BinExpr
+n8 [label="ExprStmt"];
+n9 [label="CallExpr
+void printf()"];
+n11 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n13 [label="BinExpr
 '+'"];
-n25 [label="FloatingLiteral
+n14 [label="IntegerLiteral
+rvalue '5'"];
+n15 [label="IntegerLiteral
+rvalue '5'"];
+n16 [label="ExprStmt"];
+n17 [label="CallExpr
+void printf()"];
+n19 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n21 [label="BinExpr
+'+'"];
+n22 [label="FloatingLiteral
+rvalue '4.5'"];
+n23 [label="FloatingLiteral
+rvalue '5.5'"];
+n24 [label="ExprStmt"];
+n25 [label="CallExpr
+void printf()"];
+n27 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n29 [label="BinExpr
+'-'"];
+n30 [label="IntegerLiteral
+rvalue '15'"];
+n31 [label="IntegerLiteral
+rvalue '5'"];
+n32 [label="ExprStmt"];
+n33 [label="CallExpr
+void printf()"];
+n35 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n37 [label="BinExpr
+'-'"];
+n38 [label="FloatingLiteral
+rvalue '10.5'"];
+n39 [label="FloatingLiteral
 rvalue '0.5'"];
-n26 [label="IntegerLiteral
-rvalue '1'"];
-n27 [label="ReturnStmt"];
-n28 [label="IntegerLiteral
+n40 [label="ExprStmt"];
+n41 [label="CallExpr
+void printf()"];
+n43 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n45 [label="BinExpr
+'*'"];
+n46 [label="IntegerLiteral
+rvalue '2'"];
+n47 [label="IntegerLiteral
+rvalue '5'"];
+n48 [label="ExprStmt"];
+n49 [label="CallExpr
+void printf()"];
+n51 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n53 [label="BinExpr
+'*'"];
+n54 [label="FloatingLiteral
+rvalue '20.0'"];
+n55 [label="FloatingLiteral
+rvalue '0.5'"];
+n56 [label="ExprStmt"];
+n57 [label="CallExpr
+void printf()"];
+n59 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n61 [label="BinExpr
+'/'"];
+n62 [label="IntegerLiteral
+rvalue '20'"];
+n63 [label="IntegerLiteral
+rvalue '2'"];
+n64 [label="ExprStmt"];
+n65 [label="CallExpr
+void printf()"];
+n67 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n69 [label="BinExpr
+'/'"];
+n70 [label="FloatingLiteral
+rvalue '5.0'"];
+n71 [label="FloatingLiteral
+rvalue '0.5'"];
+n72 [label="ReturnStmt"];
+n73 [label="IntegerLiteral
 rvalue '1'"];
 n0 -> n1
 n1 -> n2
@@ -40,23 +102,52 @@ n1 -> n4
 n4 -> n6
 n6 -> n8
 n8 -> n9
-n9 -> n10
 n9 -> n11
-n9 -> n12
-n6 -> n13
+n9 -> n13
 n13 -> n14
-n14 -> n15
-n14 -> n16
-n14 -> n17
-n17 -> n18
-n18 -> n19
-n6 -> n20
-n20 -> n21
+n13 -> n15
+n6 -> n16
+n16 -> n17
+n17 -> n19
+n17 -> n21
 n21 -> n22
 n21 -> n23
-n21 -> n24
+n6 -> n24
 n24 -> n25
-n24 -> n26
-n6 -> n27
-n27 -> n28
+n25 -> n27
+n25 -> n29
+n29 -> n30
+n29 -> n31
+n6 -> n32
+n32 -> n33
+n33 -> n35
+n33 -> n37
+n37 -> n38
+n37 -> n39
+n6 -> n40
+n40 -> n41
+n41 -> n43
+n41 -> n45
+n45 -> n46
+n45 -> n47
+n6 -> n48
+n48 -> n49
+n49 -> n51
+n49 -> n53
+n53 -> n54
+n53 -> n55
+n6 -> n56
+n56 -> n57
+n57 -> n59
+n57 -> n61
+n61 -> n62
+n61 -> n63
+n6 -> n64
+n64 -> n65
+n65 -> n67
+n65 -> n69
+n69 -> n70
+n69 -> n71
+n6 -> n72
+n72 -> n73
 }

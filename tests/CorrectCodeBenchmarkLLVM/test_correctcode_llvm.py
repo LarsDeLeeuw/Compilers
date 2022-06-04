@@ -16,7 +16,7 @@ from os.path import exists
 from subprocess import call, run
 
 
-class TestBenchmarkCorrectCode(unittest.TestCase):
+class TestBenchmarkCorrectCodeLLVM(unittest.TestCase):
     """Test"""
         
     def test_binaryOperations1(self):
@@ -141,10 +141,8 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         LLVMINPUT.close()
         CLANGLLVM.close()
 
-    def test_fibonacciRecursive(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
-        name = "fibonacciRecursive"
+    def test_fibonacciRecursiveStatic(self):
+        name = "fibonacciRecursiveStatic"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
         LLVMOutput = open("LLVMOutput", "w")
@@ -165,8 +163,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
 
     def test_floatToIntConversion(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "floatToIntConversion"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
@@ -272,8 +268,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
 
     def test_intToFloatConversion(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "intToFloatConversion"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
@@ -316,8 +310,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         CLANGLLVM.close()
     
     def test_pointerArgument(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "pointerArgument"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
@@ -338,28 +330,26 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
         LLVMINPUT.close()
         CLANGLLVM.close()
     
-    # def test_prime(self):
-    #     if not exists("input/dummy"):
-    #         self.skipTest("not implemented yet")
-    #     name = "prime"
-    #     inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
-    #     call(['python', '../../src/main.py', "-f"+inputfile])
-    #     LLVMOutput = open("LLVMOutput", "w")
-    #     LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
-    #     LLVMOutput.close()
+    def test_primeStatic(self):
+        name = "primeStatic"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        call(['python', '../../src/main.py', "-f"+inputfile])
+        LLVMOutput = open("LLVMOutput", "w")
+        LLVMOutput.write(str(run(['lli', 'main.ll'], capture_output=True).stdout))
+        LLVMOutput.close()
         
-    #     if not exists(name+".ll"):
-    #         run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
+        if not exists(name+".ll"):
+            run(["clang", "-w", "-S", inputfile, "-emit-llvm"])
         
-    #     CLANGLLVM = open("CLANGLLVM", 'w')
-    #     CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
-    #     CLANGLLVM.close()
+        CLANGLLVM = open("CLANGLLVM", 'w')
+        CLANGLLVM.write(str(run(['lli', name+'.ll'], capture_output=True).stdout))
+        CLANGLLVM.close()
 
-    #     LLVMINPUT = open("LLVMOutput", "r")
-    #     CLANGLLVM = open("CLANGLLVM", "r")
-    #     self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
-    #     LLVMINPUT.close()
-    #     CLANGLLVM.close()
+        LLVMINPUT = open("LLVMOutput", "r")
+        CLANGLLVM = open("CLANGLLVM", "r")
+        self.assertListEqual(list(LLVMINPUT), list(CLANGLLVM))
+        LLVMINPUT.close()
+        CLANGLLVM.close()
 
     def test_scoping(self):
         inputfile = "../CompilersBenchmark/CorrectCode/scoping.c"
@@ -486,8 +476,6 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
     #     CLANGLLVM.close()
 
     def test_unaryOperations(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
         name = "unaryOperations"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])
@@ -696,7 +684,7 @@ class TestBenchmarkCorrectCode(unittest.TestCase):
 def suite():
     """Creates unittest.TestSuite"""
     suite = unittest.TestSuite()
-    suite.addCase(TestBenchmarkCorrectCode)
+    suite.addCase(TestBenchmarkCorrectCodeLLVM)
     return suite
 
 if __name__ == '__main__':

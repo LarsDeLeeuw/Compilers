@@ -62,15 +62,15 @@ class STT:
         self.refcount = 0
         
         node = self.root
-        symbolsstr = "|{ index | id | used}"
+        symbolsstr = "<tr><td><b>index</b></td><td><b>id</b></td><td><b>init</b></td><td><b>used</b></td></tr>"
         index = 0
         for symbol_id in self.root.hashtable.keys():
             if index == self.current_symboltablenode.size -1:
-                symbolsstr += "|{ " + str(self.root.hashtable[symbol_id]) + "| " + symbol_id + "|" +  str(self.lookup(symbol_id)["ast_node"].used) + "}"
+                symbolsstr += "<tr><td>" + str(self.root.hashtable[symbol_id]) + "</td><td>" + symbol_id + "</td><td>" + str(self.lookup(symbol_id)["ast_node"].init) + "</td><td>" + str(self.lookup(symbol_id)["ast_node"].used) + "</td></tr>"
             else:
-                symbolsstr += "|{ " + str(self.root.hashtable[symbol_id]) + "| " + symbol_id + "|" +  str(self.lookup(symbol_id)["ast_node"].used) + "}"
+                symbolsstr += "<tr><td>" + str(self.root.hashtable[symbol_id]) + "</td><td>" + symbol_id + "</td><td>" +  str(self.lookup(symbol_id)["ast_node"].init) + "</td><td>" + str(self.lookup(symbol_id)["ast_node"].used) + "</td></tr>"
             index += 1
-        self.labelbuffer += "n"+str(self.nodecount)+' [label="{SymbolTable '+ symbolsstr +'}"];\n'
+        self.labelbuffer += "n"+str(self.nodecount)+" [label=<<table border='0' cellborder='1'> <tr><td colspan='4'><b>SymbolTable</b></td></tr>" + symbolsstr + "</table>>];\n"
         storeref = self.nodecount
 
         for childTable in self.root.children:
@@ -91,15 +91,15 @@ class STT:
     def outNode(self):
         thisnode = "n"+str((self.nodecount))
         self.edgebuffer +=  "n"+str((self.refcount)) +" -> "+ thisnode +"\n"
-        symbolsstr = "|{ index | id | used}"
+        symbolsstr = "<tr><td><b>index</b></td><td><b>id</b></td><td><b>init</b></td><td><b>used</b></td></tr>"
         index = 0
         for symbol_id in self.current_symboltablenode.hashtable.keys():
             if index == self.current_symboltablenode.size -1:
-                symbolsstr += "|{ " + str(self.current_symboltablenode.hashtable[symbol_id]) + "| " + symbol_id + "|" +  str(self.lookup(symbol_id)["ast_node"]) + "}"
+                symbolsstr += "<tr><td>" + str(self.current_symboltablenode.hashtable[symbol_id]) + "</td><td>" + symbol_id + "</td><td>" + str(self.lookup(symbol_id)["ast_node"].init) + "</td><td>" + str(self.lookup(symbol_id)["ast_node"].used) + "</td></tr>"
             else:
-                symbolsstr += "|{ " + str(self.current_symboltablenode.hashtable[symbol_id]) + "| " + symbol_id + "|" +  str(self.lookup(symbol_id)["ast_node"]) + "}"
+                symbolsstr += "<tr><td>" + str(self.current_symboltablenode.hashtable[symbol_id]) + "</td><td>" + symbol_id + "</td><td>" +  str(self.lookup(symbol_id)["ast_node"].init) + "</td><td>" + str(self.lookup(symbol_id)["ast_node"].used) + "</td></tr>"
             index += 1
-        self.labelbuffer += "n"+str(self.nodecount)+' [label="{SymbolTable '+ symbolsstr +'}"];\n'
+        self.labelbuffer += "n"+str(self.nodecount)+" [label=<<table border='0' cellborder='1'> <tr><td colspan='4'><b>SymbolTable</b></td></tr>" + symbolsstr + "</table>>];\n"
 
         storeref = self.nodecount
 

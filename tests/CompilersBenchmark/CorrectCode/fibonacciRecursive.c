@@ -12,9 +12,9 @@ int f(int a) {
 
 // Recursive fibonnaci
 int main(){
-	int n = 3;
+	int n;
     printf("Enter a number:");
-	// scanf("%d",&n);
+	scanf("%d",&n);
 	int i = 1;
 	while(i++ <= n){
 		printf("fib(%d)\t= %d;\n", i, f(i));

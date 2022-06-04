@@ -67,6 +67,7 @@ class DeclNode(AbstractNode):
 class VarDeclNode(DeclNode):
     
     def __init__(self):
+        super().__init__()
         self.used = False
         self.id = None          # string
         self.type = None        # string
@@ -91,13 +92,14 @@ class VarDeclNode(DeclNode):
 class FunctionDeclNode(DeclNode):
     
     def __init__(self):
+        super().__init__()
         self.init = False
         self.used = False
         self.id = None
         self.included = False   # true if included from outer lib
         self.type = None        # string, if no return_type -> 'void'
         self.arg_types = []     # [string, ...)
-        self.children = []      # first signature.len are ParmVar, last is ScopeStmt
+        self.children = []      # first arg_types.len are ParmVar, last is ScopeStmt
 
     def getSignature(self):
         if self.type is None:
@@ -118,11 +120,13 @@ class FunctionDeclNode(DeclNode):
 class ParmVarDeclNode(DeclNode):
     
     def __init__(self):
+        super().__init__()
         self.id = None
         self.type = None
         self.array = False
         self.len = None
         self.init = False
+        self.used = False
 
     def getLen(self):
         if(self.array):
@@ -142,44 +146,50 @@ class ScopeStmtNode(StmtNode):
     '''Node containing statements in same scope'''
     
     def __init__(self):
+        super().__init__()
         self.symboltable = None
         self.children = []
 
 class DeclStmtNode(StmtNode):
     
     def __init__(self):
+        super().__init__()
         self.child = None
 
 class ExprStmtNode(StmtNode):
     
     def __init__(self):
+        super().__init__()
         self.child = None
 
 class IfStmtNode(StmtNode):
     
     def __init__(self):
+        super().__init__()
         self.has_else = False
         self.children = []      # first child is cond, next is ifblock, optional else block
 
 class WhileStmtNode(StmtNode):
     
     def __init__(self):
+        super().__init__()
         self.children = []      # first child is cond, next scope
 
 class ReturnStmtNode(StmtNode):
     
     def __init__(self):
+        super().__init__()
         self.child = None
 
 class BreakStmtNode(StmtNode):
 
     def __init__(self):
-        pass
+        super().__init__()
 
 class ContinueStmtNode(StmtNode):
 
     def __init__(self):
-        pass
+        super().__init__()
 
 class ExprNode(AbstractNode):
     '''Superclass for ExprNodes'''
@@ -228,6 +238,7 @@ class ExprNode(AbstractNode):
 class BinExprNode(ExprNode):
     
     def __init__(self):
+        super().__init__()
         self.type = None
         self.operation = None
         self.lhs_child = None
@@ -236,6 +247,7 @@ class BinExprNode(ExprNode):
 class UnaryExprNode(ExprNode):
     
     def __init__(self):
+        super().__init__()
         self.type = None
         self.operation = None
         self.prefix = True
@@ -244,12 +256,14 @@ class UnaryExprNode(ExprNode):
 class CallExprNode(ExprNode):
     
     def __init__(self):
+        super().__init__()
         self.type = None
         self.children = []  # first function, then args
 
 class DeclRefExprNode(ExprNode):
     
     def __init__(self):
+        super().__init__()
         self.type = None
         self.signature = None
         self.function = False
@@ -259,6 +273,7 @@ class DeclRefExprNode(ExprNode):
 class ArraySubscriptExprNode(ExprNode):
 
     def __init__(self):
+        super().__init__()
         self.type = None
         self.lvalue = True
         self.array_child = None
@@ -267,6 +282,7 @@ class ArraySubscriptExprNode(ExprNode):
 class ImplicitCastExprNode(ExprNode):
     
     def __init__(self):
+        super().__init__()
         self.type = None
         self.cast = None
         self.child = None
@@ -275,6 +291,7 @@ class ImplicitCastExprNode(ExprNode):
 class InitListExprNode(ExprNode):
     
     def __init__(self):
+        super().__init__()
         self.type = None
         self.array = True
         self.len = None
@@ -291,6 +308,7 @@ class LiteralNode(ExprNode):
         self.value = None
         self.offset = 0
         self.buffer = None
+        self.rawbuffer = None
 
     def setValue(self, value):
         pass

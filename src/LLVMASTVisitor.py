@@ -14,6 +14,7 @@ class LLVMASTVisitor(ASTVisitor):
         self.lor_count = 0
         self.land_count = 0
         self.inc_count = 0
+        self.dec_count = 0
         self.if_count = 0
         self.while_count = 0
         self.current_label = None
@@ -112,18 +113,48 @@ class LLVMASTVisitor(ASTVisitor):
             # Return_type
             if node.type == "void":
                 self.buffer["functs"] += "void"
-            elif node.type == 'int':
-                if node.init:
-                    self.buffer["functs"] += "i32"
+            else:
+                return_type = node.parseType()
+                llvm_type = None
+                if return_type[2] == "char":
+                    llvm_type = "i8"
+                    llvm_align = "1"
+                elif return_type[2] == "int":
+                    llvm_type = "i32"
+                elif return_type[2] == "float":
+                    llvm_type = "float"
                 else:
-                    self.buffer["functs"] += "i32"
+                    print("What is this?")
+
+                if return_type[0]:
+                    llvm_type += return_type[3]
+                self.buffer["functs"] += llvm_type
+                
             self.buffer["functs"] += " @" + node.id + "("
-            for i, arg in enumerate(node.arg_types):
+            for i in range(len(node.arg_types)):
                 # Parm Type
-                if arg == 'int':
-                    self.buffer["functs"] += "i32 noundef %" + node.children[i].id
-                elif arg == 'float':
-                    self.buffer["functs"] += "float noundef %" + node.children[i].id
+                arg_type = node.children[i].parseType()
+                llvm_type = None
+                if arg_type[2] == "char":
+                    llvm_type = "i8"
+                    llvm_align = "1"
+                elif arg_type[2] == "int":
+                    llvm_type = "i32"
+                elif arg_type[2] == "float":
+                    llvm_type = "float"
+                else:
+                    print("What is this?")
+
+                if arg_type[0]:
+                    llvm_type += arg_type[3]
+                
+                if node.children[i].array:
+                    # Build the array type currently no multidim support
+                    pass
+                    # llvm_array = "[" + str(arg.getLen()) + " x " + llvm_type + "]"
+                    # llvm_type = llvm_array
+
+                self.buffer["functs"] += llvm_type+ " noundef %" + node.children[i].id
 
                 if i != len(node.arg_types) - 1:
                     self.buffer["functs"] += ", "
@@ -133,8 +164,9 @@ class LLVMASTVisitor(ASTVisitor):
             # Move to symboltable 
             self.STT.child_scope()
 
-            if node.id == "main":
+            if node.type == "int":
                 self.buffer["functs"] += "\t" + "%retval = alloca i32, align 4\n"
+
 
             self.visit(node.children[-1]) # ScopeStmtNode is last in children of initialised FuncDecl
             
@@ -150,6 +182,7 @@ class LLVMASTVisitor(ASTVisitor):
         self.lor_count = 0
         self.land_count = 0
         self.inc_count = 0
+        self.dec_count = 0
         self.if_count = 0
         self.while_count = 0
         self.idshadowing = {}
@@ -165,33 +198,50 @@ class LLVMASTVisitor(ASTVisitor):
             result = self.STT.lookup(symbol_id)
             serial = result["serial"]
             if type(result["ast_node"]) is ParmVarDeclNode:
-                arg = result["ast_node"]
-                if arg.id in self.idcount.keys():
-                    self.idcount[arg.id] += 1
+                var = result["ast_node"]
+
+                if var.id in self.idcount.keys():
+                    self.idcount[var.id] += 1
                 else:
-                    self.idcount[arg.id] = 0
-                if self.idcount[arg.id] == 0:
-                    self.idshadowing[serial] = arg.id
+                    self.idcount[var.id] = 0
+                if self.idcount[var.id] == 0:
+                    self.idshadowing[serial] = var.id
                 else:
-                    self.idshadowing[serial] = arg.id + str(self.idcount[arg.id])
+                    self.idshadowing[serial] = var.id + str(self.idcount[var.id])
+
+                var_type = var.type.split(" ")
+                var_type = var.parseType()
+                llvm_type = None
+                llvm_align = "4"
+                if var_type[2] == "char":
+                    llvm_type = "i8"
+                    llvm_align = "1"
+                elif var_type[2] == "int":
+                    llvm_type = "i32"
+                elif var_type[2] == "float":
+                    llvm_type = "float"
+                else:
+                    print("What is this?")
+
+                if var_type[0]:
+                    if not var.array:
+                        llvm_align = "8"
+                    else:
+                        llvm_align = "16"
+                    llvm_type += var_type[3]
+                
+                if var.array:
+                    # Build the array type currently no multidim support
+                    llvm_array = "[" + str(var.getLen()) + " x " + llvm_type + "]"
+                    llvm_type = llvm_array
+
               # Allocate
-                if arg.type == 'int':
-                    self.buffer["functs"] += "\t" + "%" + self.idshadowing[serial]
-                    self.buffer["functs"] += ".addr = alloca i32, align 4\n"
-                elif arg.type == 'float':
-                    self.buffer["functs"] += "\t" + "%" + self.idshadowing[serial]
-                    self.buffer["functs"] += ".addr = alloca float, align 4\n"
-                else:
-                    raise Exception("LLVM Panic")
+                self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+                self.buffer["functs"] += ".addr = alloca "+llvm_type+", align "+llvm_align+"\n"
                 # Init
-                if arg.type == 'int':
-                    self.buffer["functs"] += "\t" + "store i32 %" + self.idshadowing[serial]
-                    self.buffer["functs"] += ", i32* %" + self.idshadowing[serial] + ".addr, align 4\n"
-                elif arg.type == 'float':
-                    self.buffer["functs"] += "\t" + "store float %" + self.idshadowing[serial]
-                    self.buffer["functs"] += ", float* %" + self.idshadowing[serial] + ".addr, align 4\n"
-                else:
-                    raise Exception("LLVM Panic")
+                self.buffer["functs"] += "\t" + "store "+llvm_type+" %" + self.idshadowing[serial]
+                self.buffer["functs"] += ", "+llvm_type+"* %" + self.idshadowing[serial] + ".addr, align "+llvm_align+"\n"
+            
             else:
                 var = result["ast_node"]
 
@@ -247,6 +297,9 @@ class LLVMASTVisitor(ASTVisitor):
 
         returnFlag = False
 
+        if type(node.parent) is IfStmtNode:
+            store_br = self.absolute_br[-1]
+
         for StmtNode in node.children:
             # DeclStmts already done above with symboltable
             if type(StmtNode) is DeclNode:
@@ -254,7 +307,19 @@ class LLVMASTVisitor(ASTVisitor):
             else:
                 if type(StmtNode) is ReturnStmtNode:
                     returnFlag = True
+                    self.visit(StmtNode)
+                    self.buffer["functs"] += "\n"
+                    break
                 self.visit(StmtNode)
+        
+        if type(node.parent) is IfStmtNode:
+            if not returnFlag:
+                check_br = self.absolute_br.pop()
+                if check_br != store_br:
+                    self.absolute_br.remove(store_br)
+                    store_br = check_br
+                self.buffer["functs"] += "\tbr label %" + store_br + "\n\n"
+
         
         if not returnFlag and type(node.parent) is FunctionDeclNode:
             # Check return type of function
@@ -284,7 +349,7 @@ class LLVMASTVisitor(ASTVisitor):
         else:
             if issubclass(type(node.child), ExprNode):
                 self.visit(node.child)
-                self.buffer["functs"] += "\tstore i32 "+str(self.register_count-1)+", i32* %retval, align 4\n"
+                self.buffer["functs"] += "\tstore i32 %"+str(self.register_count-1)+", i32* %retval, align 4\n"
                 self.buffer["functs"] += "\t%"+str(self.register_count)+" = load i32, i32* %retval, align 4\n"
                 self.buffer["functs"] += "\tret i32 %"+str(self.register_count)+"\n"
                 self.register_count += 1
@@ -391,10 +456,10 @@ class LLVMASTVisitor(ASTVisitor):
         self.STT.child_scope()
         self.visit(node.children[1])
         self.STT.prev_scope()
-        br_to = self.absolute_br.pop()
-        if br_to != label_end:
-            self.absolute_br.remove(label_end)
-        self.buffer["functs"] += "\tbr label %" + br_to + "\n\n"
+        # br_to = self.absolute_br.pop()
+        # if br_to != label_end:
+        #     self.absolute_br.remove(label_end)
+        # self.buffer["functs"] += "\tbr label %" + br_to + "\n\n"
 
         if node.has_else:
             self.buffer["functs"] += label_false + ":\n"
@@ -403,10 +468,10 @@ class LLVMASTVisitor(ASTVisitor):
             self.STT.child_scope()
             self.visit(node.children[2])
             self.STT.prev_scope()
-            br_to = self.absolute_br.pop()
-            if br_to != label_end:
-                self.absolute_br.remove(label_end)
-            self.buffer["functs"] += "\tbr label %" + br_to + "\n\n"
+            # br_to = self.absolute_br.pop()
+            # if br_to != label_end:
+            #     self.absolute_br.remove(label_end)
+            # self.buffer["functs"] += "\tbr label %" + br_to + "\n\n"
 
         self.buffer["functs"] += label_end + ":\n"
         self.current_label = label_end
@@ -464,7 +529,7 @@ class LLVMASTVisitor(ASTVisitor):
                     # print(hold)
 
                     format_type = "i32"
-                    self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = call i32 (i8*, ...) "
                     self.buffer["functs"] += "@printf("
                     for i, form_data in enumerate(hold):
                         if i == len(hold) - 1:
@@ -472,6 +537,7 @@ class LLVMASTVisitor(ASTVisitor):
                         else:
                             self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
                     self.call_count += 1
+                    self.register_count += 1
                 elif funct_node.id == "scanf":                    
                     hold = {}
 
@@ -501,7 +567,7 @@ class LLVMASTVisitor(ASTVisitor):
                     # print(hold)
 
                     format_type = "i32"
-                    self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 (i8*, ...) "
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = call i32 (i8*, ...) "
                     self.buffer["functs"] += "@__isoc99_scanf("
                     for i, form_data in enumerate(hold):
                         if i == len(hold) - 1:
@@ -509,19 +575,28 @@ class LLVMASTVisitor(ASTVisitor):
                         else:
                             self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
                     self.call_count += 1
+                    self.register_count += 1
             else:
                 hold = {}
 
                 for form_data in node.children[1:(len(node.children))]:
                     self.visit(form_data)
-                    if form_data.type == 'int':
-                        hold[str(self.register_count-1)] = "i32"
-                    elif form_data.type == 'float':
-                        self.buffer["functs"] += "\t%" + str("conv" + str(self.conv_count)) + " = fpext float %"+str(self.register_count-1)+" to double\n"
-                        self.conv_count += 1
-                        hold[str("conv" + str(self.conv_count-1))] = "double"
-                    elif form_data.type == 'char':
-                        hold[str(self.register_count-1)] = "i8"
+                    type_split = form_data.parseType()
+                    llvm_type = None
+                    if type_split[2] == "int":
+                        llvm_type = "i32"
+                    elif type_split[2] == "float":
+                        llvm_type = "float"
+                    elif type_split[2] == "char":
+                        llvm_type = "i8"
+                    else:
+                        print("what")
+                    if type_split[0]:
+                        # if type_split[1]:
+                        #     llvm_array_type = "[" + type_split[4][0] + " x " + llvm_type + "]"
+                        #     llvm_type = llvm_array_type
+                        llvm_type += type_split[3]
+                    hold[str(self.register_count-1)] = llvm_type
 
                 if funct_node.type == "void":
                     self.buffer["functs"] += "\tcall void @" + funct_node.id + "("
@@ -534,8 +609,9 @@ class LLVMASTVisitor(ASTVisitor):
                             else:
                                 self.buffer["functs"] += hold[form_data]+" %" + form_data + ", "
                 elif funct_node.type == "int":
-                    self.buffer["functs"] += "\t%call" + str(self.call_count) + " = call i32 @" + funct_node.id + "("
+                    self.buffer["functs"] += "\t%" + str(self.register_count) + " = call i32 @" + funct_node.id + "("
                     self.call_count += 1
+                    self.register_count += 1
                     if len(hold) == 0:
                         self.buffer["functs"] += ')\n'
                     else:
@@ -826,20 +902,9 @@ class LLVMASTVisitor(ASTVisitor):
             else:
                 raise Exception("LLVM panic")
         else:
-            if type(node.child) is BinExprNode:
-                self.visitBinExprNode(node.child)
-                child_register_count = self.register_count - 1
-            elif type(node.child) is UnaryExprNode:
-                self.visitUnaryExprNode(node.child)
-                child_register_count = self.register_count - 1
-            elif type(node.child) is DeclRefExprNode:
-                self.visitDeclRefExprNode(node.child)
-                child_register_count = self.register_count - 1
-            elif type(node.child) is ImplicitCastExprNode:
-                self.visit(node.child)
-                child_register_count = self.register_count - 1
-            else:
-                raise Exception("Bad UnaryExpr")
+            self.visit(node.child)
+            child_register_count = self.register_count - 1
+        
         
         if node.operation == "!":
             child_type = node.child.type.split(" ")
@@ -867,6 +932,24 @@ class LLVMASTVisitor(ASTVisitor):
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = xor i1 %" +str(self.register_count-1)+", true\n"
             self.register_count += 1
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = zext i1 %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
+        elif node.operation == "-":
+            '''Stores numeric inverse in latest register'''
+            child_type = node.child.type.split(" ")
+            llvm_type = None
+            if child_type[0] == "char":
+                llvm_type = "i8"
+            elif child_type[0] == "int":
+                llvm_type = "i32"
+            elif child_type[0] == "float":
+                llvm_type = "float"
+            else:
+                print("what is this")
+            llvm_align = "4"
+            if len(child_type) == 2:
+                llvm_type += child_type[1]
+                llvm_align = "8"
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = sub nsw "+llvm_type+" 0,  %" +str(child_register_count)+"\n"
             self.register_count += 1
         elif node.operation == "&":
             type_split = node.parseType()
@@ -898,8 +981,8 @@ class LLVMASTVisitor(ASTVisitor):
                         
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %" +str(child_register_count)+", align 4\n"
             self.register_count += 1
-        elif node.operation == "++" and not node.prefix:
-            '''Stores rvalue before operation in latest register, excute operation'''
+        elif node.operation == "++":
+            '''Stores rvalue before operation in latest register, excute operation, if prefix load updated value to latest register'''
             child_type = node.child.type.split(" ")
             llvm_type = None
             if child_type[0] == "char":
@@ -919,8 +1002,35 @@ class LLVMASTVisitor(ASTVisitor):
             self.buffer["functs"] += "\t%" + "inc"+str(self.inc_count) + " = add nsw "+llvm_type+" %" +str(self.register_count-1)+", 1\n"
             self.inc_count += 1
             self.buffer["functs"] += "\tstore "+llvm_type+" %" + "inc"+str(self.inc_count-1) + ", "+llvm_type+"* %"+ str(child_register_count) + ", align "+llvm_align+"\n"
+            if node.prefix:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %"+str(child_register_count)+", align "+llvm_align+"\n"
+                self.register_count += 1
+        elif node.operation == "--":
+            '''Stores rvalue before operation in latest register, excute operation, if prefix load updated value to latest register'''
+            child_type = node.child.parseType()
+            llvm_type = None
+            if child_type[2] == "char":
+                llvm_type = "i8"
+            elif child_type[2] == "int":
+                llvm_type = "i32"
+            elif child_type[2] == "float":
+                llvm_type = "float"
+            else:
+                print("what is this: {}".format(child_type[2]))
+            llvm_align = "4"
+            if len(child_type) == 2:
+                llvm_type += child_type[1]
+                llvm_align = "8"
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %"+str(self.register_count-1)+", align "+llvm_align+"\n"
+            self.register_count += 1
+            self.buffer["functs"] += "\t%" + "dec"+str(self.dec_count) + " = add nsw "+llvm_type+" %" +str(self.register_count-1)+", -1\n"
+            self.dec_count += 1
+            self.buffer["functs"] += "\tstore "+llvm_type+" %" + "dec"+str(self.dec_count-1) + ", "+llvm_type+"* %"+ str(child_register_count) + ", align "+llvm_align+"\n"
+            if node.prefix:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = load "+llvm_type+", "+llvm_type+"* %"+str(child_register_count)+", align "+llvm_align+"\n"
+                self.register_count += 1
         else:
-            raise Exception("LLVM Panic")
+            raise Exception("LLVM Panic: {}".format(node.operation))
 
     def visitDeclStmtNode(self, node):
         pass
@@ -982,7 +1092,9 @@ class LLVMASTVisitor(ASTVisitor):
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = getelementptr inbounds "+llvm_array_type+", "+llvm_array_type+"* "+llvm_pre+llvm_id+", i64 0, i64 0\n"
             self.register_count += 1
         elif node.cast == "<FloatingToIntegral>":
-            pass
+            self.visit(node.child)
+            self.buffer["functs"] += "\t%" + str(self.register_count) + " = fptosi float %" + str(self.register_count-1) + " to i32\n"
+            self.register_count += 1
         elif node.cast == "<IntegralToFloating>":
             self.visit(node.child)
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = sitofp i32 %" + str(self.register_count-1) + " to float\n"
@@ -1041,7 +1153,10 @@ class LLVMASTVisitor(ASTVisitor):
                 llvm_pre = "@"
                 llvm_id = node.ref["ast_node"].id
             else:
-                llvm_id = str(self.idshadowing[serial])
+                if node.ref["object"] == "lvalue ParmVar":
+                    llvm_id = str(self.idshadowing[serial] + ".addr")
+                else:
+                    llvm_id = str(self.idshadowing[serial])
             
             self.buffer["functs"] += "\t%" + str(self.register_count) + " = getelementptr inbounds "+llvm_type+", "+llvm_type+"* "+llvm_pre+llvm_id+", i64 0\n"
             self.register_count += 1

@@ -75,6 +75,7 @@ class BuildASTVisitor(GrammarVisitor):
         node = VarDeclNode()
         node.id = ctx.ID().getText()
         node.line = ctx.start.line
+        node.column = ctx.start.column
 
         if ctx.KEY_CONST() is None:
             node.const = False
@@ -118,6 +119,8 @@ class BuildASTVisitor(GrammarVisitor):
                     cast_node.child = node.init_expr
                     cast_node.child.parent = cast_node
                     cast_node.type = cast_node.child.type
+                    cast_node.line = cast_node.child.line
+                    cast_node.column = cast_node.child.column
                     node.init_expr = cast_node
                 node.init_expr.parent = node
                 node.init = True
@@ -128,6 +131,7 @@ class BuildASTVisitor(GrammarVisitor):
                     cast_node.parent = node
                     if node.type == "int" and node.init_expr.type == "float":
                         cast_node.cast = "<FloatingToIntegral>"
+                        print("Line {} Column {}".format(node.init_expr.line, node.init_expr.column))
                     elif node.type == "float" and node.init_expr.type == "int":
                         cast_node.cast = "<IntegralToFloating>"
                     else:
@@ -153,18 +157,19 @@ class BuildASTVisitor(GrammarVisitor):
     # Visit a parse tree produced by GrammarParser#funcheadsupDecl.
     def visitFuncheadsupDecl(self, ctx:GrammarParser.FuncheadsupDeclContext):
         node = FunctionDeclNode()
-        node.line = ctx.start.line
+        node.line = ctx.ID().getSymbol().line
+        node.column = ctx.ID().getSymbol().column
         node.init = False
         if(ctx.KEY_VOID() is None):
-            node.type = ctx.prim()[0].getText()
+            node.type = ctx.prim().getText()
         else:
             node.type = "void"
-        node.id = ctx.ID()[0].getText()
-        if(len(ctx.prim()) > 1):
-            for i in range(len(ctx.prim())-1):
-                parm_type = ctx.prim()[i+1].getText()
-                parm_id = ctx.ID()[i+1].getText()
-                node.signature.append(parm_type)
+        node.id = ctx.ID().getText()
+        if(len(ctx.func_arg()) > 0):
+            for i in range(len(ctx.func_arg())):
+                parm_type = ctx.func_arg()[i].prim().getText()
+                parm_id = ctx.func_arg()[i].ID().getText()
+                node.arg_types.append(parm_type)
                 parm_var = ParmVarDeclNode()
                 parm_var.type = parm_type
                 parm_var.id = parm_id
@@ -172,7 +177,8 @@ class BuildASTVisitor(GrammarVisitor):
         
         result = self.STT.insert(node.id)
         if result is None:
-            raise Exception("Failed to insert Function '{}' in symboltable".format(node.id))
+            pass
+            # raise Exception("Failed to insert Function '{}' in symboltable".format(node.id))
         else:
             self.STT.set_attribute(node.id, "ast_node", node)
             self.STT.set_attribute(node.id, "object", "Function")
@@ -183,9 +189,10 @@ class BuildASTVisitor(GrammarVisitor):
     # Visit a parse tree produced by GrammarParser#funcDecl.
     def visitFuncDecl(self, ctx:GrammarParser.FuncDeclContext):
         node = FunctionDeclNode()
-        node.line = ctx.start.line
+        node.line = ctx.ID().getSymbol().line
+        node.column = ctx.ID().getSymbol().column
         node.init = True
-        node.id = ctx.ID()[0].getText()
+        node.id = ctx.ID().getText()
 
         result = self.STT.insert(node.id)
         if result is None:
@@ -207,29 +214,33 @@ class BuildASTVisitor(GrammarVisitor):
         self.STT.new_scope()
 
         if(ctx.KEY_VOID() is None):
-            node.type = ctx.prim()[0].getText()
-            if(len(ctx.prim()) > 1):
-                for i in range(len(ctx.prim())-1):
-                    parm_type = ctx.prim()[i+1].getText()
-                    parm_id = ctx.ID()[i+1].getText()
-                    node.arg_types.append(parm_type)
-                    parm_var = ParmVarDeclNode()
-                    parm_var.type = parm_type
-                    parm_var.id = parm_id
-                    parm_var.parent = node
-                    node.children.append(parm_var)
+            node.type = ctx.prim().getText()
         else:
             node.type = "void"
-            if(len(ctx.prim()) > 0):
-                for i in range(len(ctx.prim())):
-                    parm_type = ctx.prim()[i].getText()
-                    parm_id = ctx.ID()[i+1].getText()
-                    node.arg_types.append(parm_type)
-                    parm_var = ParmVarDeclNode()
-                    parm_var.type = parm_type
-                    parm_var.id = parm_id
-                    parm_var.parent = node
-                    node.children.append(parm_var)
+        if(len(ctx.func_arg()) > 0):
+            for i in range(len(ctx.func_arg())):
+                parm_type = ctx.func_arg()[i].prim().getText()
+                temp = parm_type.split('*')
+                parm_type = temp[0]
+                if len(temp) >= 2:
+                    parm_type += " "
+                    parm_type += (len(temp)-1)*"*"
+
+                if len(ctx.func_arg()[i].getText().split("[")) >= 2:
+                    if ctx.func_arg()[i].INT() is None:
+                        parm_type += "[]"
+                    else:
+                        parm_type += "[" + str(ctx.func_arg()[i].INT().getText()) + "]"
+                
+                parm_id = ctx.func_arg()[i].ID().getText()
+                node.arg_types.append(parm_type)
+                parm_var = ParmVarDeclNode()
+                parm_var.line = ctx.func_arg()[i].start.line
+                parm_var.column = ctx.func_arg()[i].start.column
+                parm_var.type = parm_type
+                parm_var.id = parm_id
+                parm_var.parent = node
+                node.children.append(parm_var)
         
         for parmvar_node in node.children:
             result = self.STT.insert(parmvar_node.id)
@@ -278,7 +289,9 @@ class BuildASTVisitor(GrammarVisitor):
             var_decl.const = True
 
         var_decl.line = ctx.start.line
+        var_decl.column = ctx.start.column
         node.line = var_decl.line
+        node.column = var_decl.column
         temp = ctx.prim().getText().split('*')
         var_decl.type = temp[0]
         if len(temp) >= 2:
@@ -315,6 +328,8 @@ class BuildASTVisitor(GrammarVisitor):
                     cast_node.child = var_decl.init_expr
                     cast_node.child.parent = cast_node
                     cast_node.type = cast_node.child.type
+                    cast_node.line = cast_node.child.line
+                    cast_node.column = cast_node.child.column
                     var_decl.init_expr = cast_node
                 var_decl.init_expr.parent = var_decl
                 var_decl.init = True
@@ -331,6 +346,8 @@ class BuildASTVisitor(GrammarVisitor):
                         print("Need to cast ({}) in line {} but dont know this cast yet".format(var_decl.init_expr.type,ctx.start.line))
                     cast_node.type = var_decl.type
                     cast_node.child = var_decl.init_expr
+                    cast_node.line = cast_node.child.line
+                    cast_node.column = cast_node.child.column
                     cast_node.child.parent = cast_node
                     var_decl.init_expr = cast_node
 
@@ -352,6 +369,7 @@ class BuildASTVisitor(GrammarVisitor):
     def visitWhileStat(self, ctx:GrammarParser.WhileStatContext):
         node = WhileStmtNode()
         node.line = ctx.start.line
+        node.column = ctx.start.column
         cond_node = self.visit(ctx.expr())
         cond_node.parent = node
         node.children.append(cond_node)
@@ -376,6 +394,7 @@ class BuildASTVisitor(GrammarVisitor):
     def visitIfStat(self, ctx:GrammarParser.IfStatContext):
         node = IfStmtNode()
         node.line = ctx.start.line
+        node.column = ctx.start.column
         cond_node = self.visit(ctx.expr())
         cond_node.parent = node
         node.children.append(cond_node)
@@ -421,6 +440,13 @@ class BuildASTVisitor(GrammarVisitor):
             pass
         else:
             return_expr = self.visit(ctx.expr())
+            if type(return_expr) is DeclRefExprNode or type(return_expr) is ArraySubscriptExprNode:
+                    cast_node = ImplicitCastExprNode()
+                    cast_node.cast = "<LValueToRValue>"
+                    cast_node.child = return_expr
+                    cast_node.child.parent = cast_node
+                    cast_node.type = cast_node.child.type
+                    return_expr = cast_node
             return_expr.parent = node
             node.child = return_expr
         return node
@@ -429,12 +455,14 @@ class BuildASTVisitor(GrammarVisitor):
     def visitBreakStat(self, ctx:GrammarParser.BreakStatContext):
         node = BreakStmtNode()
         node.line = ctx.start.line
+        node.column = ctx.start.column
         return node
 
     # Visit a parse tree produced by GrammarParser#continueStat.
     def visitContinueStat(self, ctx:GrammarParser.ContinueStatContext):
         node = ContinueStmtNode()
         node.line = ctx.start.line
+        node.column = ctx.start.column
         return node
 
     # Visit a parse tree produced by GrammarParser#binExpr.
@@ -460,6 +488,7 @@ class BuildASTVisitor(GrammarVisitor):
         #       Expected type?
         node.operation = switcher.get(ctx.op.type, None)
         node.line = ctx.start.line 
+        node.column = ctx.op.column
         
         lhs_node = self.visit(ctx.left)
         if (not (node.operation == "=") ) and ((type(lhs_node) is DeclRefExprNode) or (type(lhs_node) is ArraySubscriptExprNode)):
@@ -486,11 +515,8 @@ class BuildASTVisitor(GrammarVisitor):
 
         node.lhs_child = lhs_node
         node.rhs_child = rhs_node
-        if node.operation == "&&" or node.operation == "||" or node.operation == "!=" or node.operation == "==":
-            node.type = 'int'
-        elif node.operation == ">" or node.operation == "<" or node.operation == ">=" or node.operation == "<=":
-            node.type = 'int'
-        elif node.operation == "=":
+
+        if node.operation == "=":
             node.type = node.lhs_child.type
             parsed_type = lhs_node.parseType()
             lhs_type_noarr = parsed_type[2]
@@ -511,8 +537,51 @@ class BuildASTVisitor(GrammarVisitor):
                 cast_node.child = rhs_node
                 rhs_node.parent = cast_node
                 node.rhs_child = cast_node
-        else:
+        elif node.operation == "+" or node.operation == "-" or node.operation == "*" or node.operation == "/":
+            lhs_type = lhs_node.parseType()
+            rhs_type = rhs_node.parseType()
+            
+            if lhs_type[2] == rhs_type[2]:
+                pass
+            else:
+                type_switch = {
+                "char" : 0,
+                "int"  : 1,
+                "float": 2,
+                }
+                if type_switch.get(lhs_type[2], None) > type_switch.get(rhs_type[2], None):
+                    if lhs_type[2] == "float":
+                        if rhs_type[2] == "int":
+                            cast_node = ImplicitCastExprNode()
+                            cast_node.parent = node
+                            cast_node.type = lhs_node.type
+                            cast_node.cast = "<IntegralToFloating>"
+                            cast_node.child = rhs_node
+                            rhs_node.parent = cast_node
+                            node.rhs_child = cast_node
+                        else:
+                            pass
+                    else:
+                        # lhs_type is larger and is not float, thus lhs_type is int and rhs_type is char.
+                        pass
+                else:
+                    if rhs_type[2] == "float":
+                        if lhs_type[2] == "int":
+                            cast_node = ImplicitCastExprNode()
+                            cast_node.parent = node
+                            cast_node.type = rhs_node.type
+                            cast_node.cast = "<IntegralToFloating>"
+                            cast_node.child = lhs_node
+                            lhs_node.parent = cast_node
+                            node.lhs_child = cast_node
+                        else:
+                            pass
+                    else:
+                        # lhs_type is larger and is not float, thus lhs_type is int and rhs_type is char.
+                        pass
             node.type = node.lhs_child.type
+        else:
+            node.type = "int"
 
         return node
 
@@ -527,6 +596,7 @@ class BuildASTVisitor(GrammarVisitor):
         expr_node.parent = node
         node.child = expr_node
         node.prefix = False
+        node.lvalue = True
         node.operation = switcher.get(ctx.op.type, None)
         node.type = node.child.type
         node.child = expr_node
@@ -548,17 +618,22 @@ class BuildASTVisitor(GrammarVisitor):
         node.prefix = True
         node.operation = switcher.get(ctx.op.type, None)
         expr_node = self.visit(ctx.expr())
-        if (not (node.operation == "&" or node.operation == "*")) and ((type(expr_node) is DeclRefExprNode) or (type(expr_node) is ArraySubscriptExprNode)):
+        node.lvalue = False
+        if (not (node.operation == "&" or node.operation == "*" or node.operation == "++" or node.operation == "--")) and ((type(expr_node) is DeclRefExprNode) or (type(expr_node) is ArraySubscriptExprNode)):
             cast_node = ImplicitCastExprNode()
             cast_node.type = expr_node.type
             cast_node.cast = "<LValueToRValue>"
             cast_node.child = expr_node
             expr_node.parent = cast_node
             expr_node = cast_node
-        else:
-            pass
+            node.lvalue = False
+        # Temp 
+        if (node.operation == "++" or node.operation == "--"):
+            node.lvalue = True
         expr_node.parent = node
         node.child = expr_node
+        node.line = ctx.start.line
+        node.column = ctx.start.column
         
         if node.operation == "!":
                 node.type = 'int'
@@ -577,7 +652,7 @@ class BuildASTVisitor(GrammarVisitor):
         elif node.operation == "*":
             temp = node.child.type.split(" ")
             if len(temp) == 1:
-                raise Exception("Syntax error: Cannot dereference rvalue")
+                raise Exception("Syntax error: Cannot dereference rvalue line {}".format(node.child.type))
             else:
                 if len(temp[1]) == 1:
                     node.type = temp[0]
@@ -599,23 +674,29 @@ class BuildASTVisitor(GrammarVisitor):
         node = CallExprNode()
         call_id = ctx.ID().getText()
         node.line = ctx.start.line
+        node.column = ctx.start.column
 
         result = self.STT.lookup(call_id)
         if result is None:
             raise Exception("Function {} not found in symboltable".format(call_id))
         else:
+            result["ast_node"].used = True
             functionref_node = DeclRefExprNode()
             functionref_node.parent = node
             functionref_node.ref = result
             functionref_node.id = result["ast_node"].id
             functionref_node.type = result["ast_node"].type
             functionref_node.function = True
+            functionref_node.line = ctx.ID().getSymbol().line
+            functionref_node.column = ctx.ID().getSymbol().column
             functionref_node.signature = result["ast_node"].getSignature()
             node.children.append(functionref_node)
+            node.type = functionref_node.type
    
         for arg in ctx.expr():
             arg_node = self.visit(arg)
-
+            arg_node.line = arg.start.line
+            arg_node.column = arg.start.column
             if type(arg_node) is DeclRefExprNode:
                 cast_node = ImplicitCastExprNode()
                 temp_split = arg_node.parseType()
@@ -691,6 +772,10 @@ class BuildASTVisitor(GrammarVisitor):
                 ref_node.type = result["ast_node"].type
             ref_node.ref["ast_node"].used = True
 
+        ref_node.type = result["ast_node"].type
+        ref_node.line = ctx.ID().getSymbol().line
+        ref_node.column = ctx.ID().getSymbol().column
+
         if ctx.INT() is None and ctx.expr() is None:
             return ref_node
         else:
@@ -713,7 +798,11 @@ class BuildASTVisitor(GrammarVisitor):
                 # Array Index is an IntegerLiteral
                 node.index_child = IntergerLiteralNode()
                 node.index_child.setValue(ctx.INT().getText())
+                node.index_child.line = ctx.INT().getSymbol().line
+                node.index_child.column = ctx.INT().getSymbol().column
                 node.index_child.parent = node
+            node.line = ctx.ID().getSymbol().line
+            node.column = ctx.ID().getSymbol().column
             return node
 
         return None
@@ -734,6 +823,9 @@ class BuildASTVisitor(GrammarVisitor):
             node.setValue(ctx.getText())
         else:
             node = AbstractNode()
+
+        node.line = ctx.start.line
+        node.column = ctx.start.column
 
         return node
 

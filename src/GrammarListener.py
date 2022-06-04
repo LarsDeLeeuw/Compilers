@@ -44,6 +44,15 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GrammarParser#func_arg.
+    def enterFunc_arg(self, ctx:GrammarParser.Func_argContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#func_arg.
+    def exitFunc_arg(self, ctx:GrammarParser.Func_argContext):
+        pass
+
+
     # Enter a parse tree produced by GrammarParser#exprStat.
     def enterExprStat(self, ctx:GrammarParser.ExprStatContext):
         pass

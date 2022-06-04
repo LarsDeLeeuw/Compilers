@@ -191,7 +191,10 @@ class VisualASTVisitor(ASTVisitor):
 
     def visitUnaryExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        label = "UnaryOperator\nlvalue "
+        if node.lvalue:
+            label = "UnaryOperator\nlvalue "
+        else:
+            label = "UnaryOperator\nrvalue "
         if node.prefix:
             label += "prefix '"
         else:
