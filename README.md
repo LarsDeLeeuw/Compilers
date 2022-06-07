@@ -20,7 +20,45 @@ Grammar:
 
 
 
-# About
+# Features
+
+## Grammar
+
+| Description                                                                                    | ?   |
+| ---------------------------------------------------------------------------------------------- | --- |
+| (mandatory) Binary operations +, -, *, and /.                                                  | V   |
+| (mandatory) Binary operations >, <, and ==.                                                    | V   |
+| (mandatory) Unary operators + and -                                                            | V   |
+| (mandatory) Brackets to overwrite the order of operations.                                     | V   |
+| (mandatory) Logical operators c-style "and", "or", and !.                                      | V   |
+| (optional) Comparison operators >=, <=, and !=.                                                | V   |
+| (optional) Binary operator %.                                                                  | V   |
+| (mandatory) Types.                                                                             | V   |
+| (mandatory) Reserved word: "const"                                                             | -   |
+| (mandatory) Variables.                                                                         | V   |
+| (mandatory) Pointer Operations * and &.                                                        | V   |
+| (optional) Identifier Operations -- and ++                                                     | V   |
+| (optional) Conversions. Implicit casts with warnings where needed. No explicit cast supported. | V   |
+| (mandatory) Comments. Comments are ignored.                                                    | V   |
+| (mandatory) Reserved word: "if"                                                                | V   |
+| (mandatory) Reserved word: "else"                                                              | V   |
+| (mandatory) Reserved word: "while"                                                             | V   |
+| (mandatory) Reserved word: "for"                                                               | -   |
+| (mandatory) Reserved word: "break"                                                             | V   |
+| (mandatory) Reserved word: "continue"                                                          | V   |
+| (optional) Reserved words: "switch", "case" and "default"                                      | X   |
+| (mandatory) Scope: "unnamed scope"                                                             | -   |
+| (mandatory) Scopes: "conditional", "loop" and "function"                                       | V   |
+| (mandatory) Local and global variables                                                         | V   |
+| (mandatory) Functions                                                                          | V   |
+| (mandatory) Arrays.                                                                            | V   |
+| (optional) Assignments of complete arrays or rows in case of multidimensional arrays.          | X   |
+| (optional) Dynamic arrays.                                                                     | X   |
+| (mandatory) Import.                                                                            | V   |
+| (mandatory) \<stdio.h\> printf()                                                               | V   |
+| (mandatory) \<stdio.h\> scanf()                                                                | V   |
+|                                                                                                |     |
+
 This compiler is written in python and attempts to succesfully compile a subset of the C language to MIPS instructions using ANTLR.
 
 V: Werkend  

@@ -350,7 +350,9 @@ class StringLiteralNode(LiteralNode):
             '''
             buffer = []
             escape_flag = False
+            self.rawbuffer = []
             for character in str(value[1:-1]):
+                self.rawbuffer.append(str(character))
                 if escape_flag:
                     if character == "n":
                         buffer.append("\\0A")
@@ -365,6 +367,10 @@ class StringLiteralNode(LiteralNode):
                     escape_flag = True
                 else:
                     buffer.append(str(character))
+            
+            self.rawvalue = ""
+            for char in self.rawbuffer:
+                self.rawvalue += char
             self.buffer = buffer
             self.value = ""
             for char in buffer:

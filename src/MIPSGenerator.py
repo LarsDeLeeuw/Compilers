@@ -236,7 +236,7 @@ class MIPSGenerator(ASTVisitor):
             processed_string = []
             actual_text = []
             temp = ""
-            for char in node.children[1].child.buffer:
+            for char in node.children[1].child.rawbuffer:
                 if char == '%':
                     format_flag = True
                     continue
@@ -588,8 +588,14 @@ class MIPSGenerator(ASTVisitor):
                     print("gotta fix this")
                 else:
                     return self.loadVar(result) # Should return the register where loaded ex "$t0"
+            print("Not fully defined behavior yet")
             self.visit(node.child)
             self.buffer["text"] += "\tlw $t0, 0($t0)\n"
+        elif node.cast == "<ArrayToPointerDecay>":
+            if type(node.child) is StringLiteralNode:
+                return self.visit(node.child)
+                
+
 
     def visitCharacterLiteralNode(self, node):
         self.buffer["text"] += "\tli $t0, {}\n".format(node.value)
@@ -611,4 +617,13 @@ class MIPSGenerator(ASTVisitor):
             self.buffer["text"] += "\tmfc1 $t0, $f0\n" 
         return "$t0"
 
-            
+    def visitStringLiteralNode(self, node):
+        if node.rawvalue in self.str_constants:
+            pass
+        else:
+            self.str_constants[node.rawvalue] = "str." + str(len(self.str_constants))
+            self.buffer["str"] += self.str_constants[node.rawvalue] + ': .asciiz "'
+            self.buffer["str"] += node.rawvalue +'"\n'
+        
+        self.buffer["text"] += "\tla $t0, " + self.str_constants[node.rawvalue] + "\n"
+        return "$t0"
