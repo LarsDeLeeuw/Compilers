@@ -4,72 +4,50 @@ n2 [label="int ()"];
 n3 [label="main"];
 n4 [label="FuncScope"];
 n6 [label="Body"];
-n8 [label="ExprStmt"];
-n9 [label="CallExpr
-void printf()"];
-n11 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n13 [label="BinExpr
-'<'"];
-n14 [label="IntegerLiteral
-rvalue '1'"];
-n15 [label="IntegerLiteral
-rvalue '2'"];
-n16 [label="ExprStmt"];
-n17 [label="CallExpr
-void printf()"];
-n19 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n21 [label="BinExpr
-'>'"];
-n22 [label="IntegerLiteral
-rvalue '1'"];
-n23 [label="IntegerLiteral
-rvalue '2'"];
-n24 [label="ExprStmt"];
-n25 [label="CallExpr
-void printf()"];
+n8 [label="DeclStmt"];
+n9 [label="VarDecl"];
+n10 [label="int"];
+n11 [label="x"];
+n12 [label="IntegerLiteral
+rvalue '10'"];
+n13 [label="DeclStmt"];
+n14 [label="VarDecl"];
+n15 [label="int"];
+n16 [label="y"];
+n18 [label="ExprStmt"];
+n19 [label="BinExpr
+'='"];
+n20 [label="DeclRefExpr
+lvalue Var 'y'"];
+n21 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n22 [label="DeclRefExpr
+lvalue Var 'x'"];
+n23 [label="DeclStmt"];
+n24 [label="VarDecl"];
+n25 [label="int"];
+n26 [label="z"];
 n27 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n29 [label="BinExpr
-'<='"];
-n30 [label="IntegerLiteral
-rvalue '1'"];
-n31 [label="IntegerLiteral
-rvalue '2'"];
-n32 [label="ExprStmt"];
-n33 [label="CallExpr
+<LValueToRValue>"];
+n28 [label="DeclRefExpr
+lvalue Var 'x'"];
+n29 [label="ExprStmt"];
+n30 [label="CallExpr
 void printf()"];
-n35 [label="ImplicitCastExpr
+n32 [label="ImplicitCastExpr
 <ArrayToPointerDecay>"];
-n37 [label="BinExpr
-'>='"];
-n38 [label="IntegerLiteral
-rvalue '1'"];
-n39 [label="IntegerLiteral
-rvalue '2'"];
-n40 [label="ExprStmt"];
-n41 [label="CallExpr
-void printf()"];
-n43 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n45 [label="BinExpr
-'!='"];
-n46 [label="BinExpr
-'>'"];
-n47 [label="FloatingLiteral
-rvalue '0.5'"];
-n48 [label="FloatingLiteral
-rvalue '0.0'"];
-n49 [label="BinExpr
-'>'"];
-n50 [label="FloatingLiteral
-rvalue '0.0'"];
-n51 [label="FloatingLiteral
-rvalue '1.0'"];
-n52 [label="ReturnStmt"];
-n53 [label="IntegerLiteral
-rvalue '1'"];
+n34 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n35 [label="DeclRefExpr
+lvalue Var 'x'"];
+n36 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n37 [label="DeclRefExpr
+lvalue Var 'y'"];
+n38 [label="ImplicitCastExpr
+<LValueToRValue>"];
+n39 [label="DeclRefExpr
+lvalue Var 'z'"];
 n0 -> n1
 n1 -> n2
 n1 -> n3
@@ -77,38 +55,31 @@ n1 -> n4
 n4 -> n6
 n6 -> n8
 n8 -> n9
+n9 -> n10
 n9 -> n11
-n9 -> n13
+n9 -> n12
+n6 -> n13
 n13 -> n14
-n13 -> n15
-n6 -> n16
-n16 -> n17
-n17 -> n19
-n17 -> n21
+n14 -> n15
+n14 -> n16
+n6 -> n18
+n18 -> n19
+n19 -> n20
+n19 -> n21
 n21 -> n22
-n21 -> n23
-n6 -> n24
+n6 -> n23
+n23 -> n24
 n24 -> n25
-n25 -> n27
-n25 -> n29
+n24 -> n26
+n24 -> n27
+n27 -> n28
+n6 -> n29
 n29 -> n30
-n29 -> n31
-n6 -> n32
-n32 -> n33
-n33 -> n35
-n33 -> n37
-n37 -> n38
-n37 -> n39
-n6 -> n40
-n40 -> n41
-n41 -> n43
-n41 -> n45
-n45 -> n46
-n46 -> n47
-n46 -> n48
-n45 -> n49
-n49 -> n50
-n49 -> n51
-n6 -> n52
-n52 -> n53
+n30 -> n32
+n30 -> n34
+n34 -> n35
+n30 -> n36
+n36 -> n37
+n30 -> n38
+n38 -> n39
 }

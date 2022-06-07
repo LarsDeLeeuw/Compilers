@@ -11,6 +11,15 @@ TODO: Throw syntax error when break or continue statement not in loop/switch sco
       Need to add type implicitcasts for binaryop expr
       
 
+Grammar:
+      TODO: 
+            * Add const support.
+            * Add unnamed scope support, should not be allot of work. These are illegal in global scope. But could recognise them and throw sementic error after.
+            * Add For-loop support, should be straightforward if I can create a while-loop that does the same thing.
+            * (Optional) Maybe implement switch, can be converted to if-else so not allot of work.
+
+
+
 # About
 This compiler is written in python and attempts to succesfully compile a subset of the C language to MIPS instructions using ANTLR.
 

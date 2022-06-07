@@ -209,7 +209,6 @@ class LLVMASTVisitor(ASTVisitor):
                 else:
                     self.idshadowing[serial] = var.id + str(self.idcount[var.id])
 
-                var_type = var.type.split(" ")
                 var_type = var.parseType()
                 llvm_type = None
                 llvm_align = "4"
@@ -287,7 +286,7 @@ class LLVMASTVisitor(ASTVisitor):
                     if var.array:
                         raise Exception("LLVM NOT IMPLEMENTED YET")
                     
-                    if issubclass(type(var.init_expr), IntergerLiteralNode):
+                    if issubclass(type(var.init_expr), LiteralNode):
                         self.buffer["functs"] += "\t" + "store "+ llvm_type +" " + str(var.init_expr.value)
                         self.buffer["functs"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
                     else:

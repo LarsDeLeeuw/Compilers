@@ -1,6 +1,54 @@
 from ASTVisitor import ASTVisitor
 from ASTNodes import *
 import copy
+from collections import deque
+
+class MIPSGeneratorRegisters():
+
+    def __init__(self):
+        self.active_registers = deque([])   # Queue
+        self.standby_registers = deque(["$s7", "$s6", "$s5", "$s4", "$s3", "$s2", "$s1", "$s0", "$t9", "$t8", "$t7", "$t6", "$t5", "$t4", "$t3"])  # Stack
+        self.state = {}                     # symbol.serial -> register
+        self.reverse_state = {}             # register -> symbol.serial
+
+    def lookup(self, serial):
+        if serial in self.state.keys():
+            self.active_registers.remove(self.state[serial])
+            self.active_registers.append(self.state[serial])
+            return self.state[serial]
+        else:
+            return None
+
+    def deprecate(self, register=None, serial=None):
+        if register is None and serial is None:
+            raise Exception("Misuse of deprecate method")
+        if register is None:
+            if serial in self.state.keys():
+                self.reverse_state.remove(self.state[serial])
+                self.active_registers.remove(self.state[serial])
+                self.standby_registers.append(self.state[serial])
+                self.state.remove(serial)
+                return None
+            else:
+                return None
+        else:
+            pass
+    
+    def insert(self, serial):
+        # Check if any standby_registers
+        if len(self.standby_registers) > 0:
+            register = self.standby_registers.pop()
+            self.active_registers.append(register)
+            self.state[serial] = register
+            self.reverse_state[register] = serial
+            return register
+        else:
+            # No standby, get least recently used active_register
+            register = self.active_registers.popleft()
+            self.state.remove(self.reverse_state[register])
+            self.state[serial] = register
+            self.reverse_state[register] = serial
+            return register
 
 class MIPSGenerator(ASTVisitor):
 
@@ -14,6 +62,7 @@ class MIPSGenerator(ASTVisitor):
         self.register = -1
         self.str_constants = {}
         self.float_constants = {}
+        self.registers = MIPSGeneratorRegisters()
         self.call_count = 0
         self.conv_count = 0
         self.register_count = 0
@@ -40,13 +89,38 @@ class MIPSGenerator(ASTVisitor):
         output = open(str(filename+".asm"), 'w')
         output.write(self.buffer["data"] + self.buffer["str"] + self.buffer["float"] + "\n\n" + self.buffer["text"] + self.buffer["exit"])
         output.close()
+
+    def storeVar(self, result, register):
+        # Check if variable somewhere in registers
+        if self.registers.lookup(result["serial"]) is None:
+            # Not in registers
+            self.buffer["text"] += "\tsw {}, {}($fp)\n".format(register, result["mem_offset"])
+        else:
+            # Data in register will be outdated thus remove association
+            self.registers.deprecate(serial=result["serial"])
+            self.buffer["text"] += "\tsw {}, {}($fp)\n".format(register, result["mem_offset"])
+
+    def loadVar(self, result):
+        # First check if present in registers
+        register = self.registers.lookup(result["serial"])
+        if register is None:
+            # If not present, choose register to load it into
+            register = self.registers.insert(result["serial"])
+            # Load into chosen register
+            self.buffer["text"] += "\tlw {}, {}($fp)\n".format(register, result["mem_offset"])
+            return register
+        else:
+            # Found in register.
+            return register
         
     def visitProgNode(self, node):
         for DeclChild in node.children:
             self.visit(DeclChild)
         
-        # self.buffer["main"] += "\t\tret i32 0\n}\n"
         return 0
+
+    def visitVarDeclNode(self, node):
+        pass
 
     def visitFunctionDeclNode(self, node):
         if node.init:    
@@ -55,10 +129,96 @@ class MIPSGenerator(ASTVisitor):
             self.STT.prev_scope()
 
     def visitScopeStmtNode(self, node):
+        memory_offset = -44 
+        for symbol_id in self.STT.current_symboltablenode.hashtable.keys():
+            # Allocate memory for every variable, store offset from frame pointer as attribute of symbol.
+            # Accumulate the total memory required, to move stack pointer.
+            result = self.STT.lookup(symbol_id)
+            type_temp = result["ast_node"].parseType()
+            if type_temp[1]:
+                memory_size = result["ast_node"].getLen() * 4
+                self.STT.set_attribute(symbol_id, "mem_offset", memory_offset)
+                memory_offset -= memory_size
+            else:
+                self.STT.set_attribute(symbol_id, "mem_offset", memory_offset)
+                memory_offset -= 4
+            print("{} {}($fp)".format(symbol_id, result["mem_offset"]))
+        
+        # Store previous frame pointer
+        self.buffer["text"] += "\tsw $fp, 0($sp)\t\t# Push old $fp ( control-link )\n"
+        self.buffer["text"] += "\tsw $fp, -4($sp)\t\t# Push activation link ( static-link )\n"
+        # Set framepointer for current frame
+        self.buffer["text"] += "\tmove $fp, $sp\t\t# Set $fp of new frame\n"
+        # Move stackpointer
+        self.buffer["text"] += "\taddi $sp, $sp, {}\t# Allocate {} bytes on the stack\n".format(memory_offset, memory_offset)
+        # Store $s0-s7 and $ra
+        self.buffer["text"] += "\tsw $ra, -8($fp)\t\t# Store value of return address\n"
+        self.buffer["text"] += "\tsw $s0, -12($fp)\t# Save incase it gets used locally\n"
+        self.buffer["text"] += "\tsw $s1, -16($fp)\t# Save incase it gets used locally\n"
+        self.buffer["text"] += "\tsw $s2, -20($fp)\t# Save incase it gets used locally\n"
+        self.buffer["text"] += "\tsw $s3, -24($fp)\t# Save incase it gets used locally\n"
+        self.buffer["text"] += "\tsw $s4, -28($fp)\t# Save incase it gets used locally\n"
+        self.buffer["text"] += "\tsw $s5, -32($fp)\t# Save incase it gets used locally\n"
+        self.buffer["text"] += "\tsw $s6, -36($fp)\t# Save incase it gets used locally\n"
+        self.buffer["text"] += "\tsw $s7, -40($fp)\t# Save incase it gets used locally\n"
+
         for StmtNode in node.children:
             self.visit(StmtNode)
+
+        print("Active registers: ", self.registers.active_registers)
+
+        self.buffer["text"] += "\tlw $ra, -8($fp)\t\t# Restore saved return address\n"
+        self.buffer["text"] += "\tlw $s0, -12($fp)\t# Restore saved register\n"
+        self.buffer["text"] += "\tlw $s1, -16($fp)\t# Restore saved register\n"
+        self.buffer["text"] += "\tlw $s2, -20($fp)\t# Restore saved register\n"
+        self.buffer["text"] += "\tlw $s3, -24($fp)\t# Restore saved register\n"
+        self.buffer["text"] += "\tlw $s4, -28($fp)\t# Restore saved register\n"
+        self.buffer["text"] += "\tlw $s5, -32($fp)\t# Restore saved register\n"
+        self.buffer["text"] += "\tlw $s6, -36($fp)\t# Restore saved register\n"
+        self.buffer["text"] += "\tlw $s7, -40($fp)\t# Restore saved register\n"
+        self.buffer["text"] += "\tmove $sp, $fp\t\t# Deallocate {} bytes from the stack\n".format(memory_offset)
+        self.buffer["text"] += "\tlw $fp, 0($sp)\t\t# Restore old framepointer\n"
     
     def visitDeclStmtNode(self, node):
+        var = node.child
+        result = self.STT.lookup(var.id)
+        type_temp = var.parseType()
+        if var.init:
+            if type_temp[1]:
+                pass
+            else:
+                if issubclass(type(var.init_expr), LiteralNode):
+                    if type_temp[2] == "float":
+                        if var.init_expr.value in self.float_constants:
+                            self.buffer["text"] += "\tl.s $f0, {}\n".format(self.float_constants[var.init_expr.value])
+                            self.buffer["text"] += "\tmfc1 $t0, $f0\n" 
+                            self.buffer["text"] += "\tsw $t0, {}($fp)\n".format(result["mem_offset"]) 
+                        else:
+                            self.float_constants[var.init_expr.value] = "float." + str(len(self.float_constants))
+                            self.buffer["float"] += str(self.float_constants[var.init_expr.value]) + ': .float '
+                            self.buffer["float"] += str(var.init_expr.value) + '\n'
+                            self.buffer["text"] += "\tl.s $f0, {}\n".format(self.float_constants[var.init_expr.value])
+                            self.buffer["text"] += "\tmfc1 $t0, $f0\n" 
+                            self.buffer["text"] += "\tsw $t0, {}($fp)\n".format(result["mem_offset"]) 
+                    else:
+                        self.buffer["text"] += "\tli $t0, {}\n".format(var.init_expr.value)
+                        self.buffer["text"] += "\tsw $t0, {}($fp)\n".format(result["mem_offset"])
+                        # self.buffer["text"] += "\t" + "store "+ llvm_type +" " + str(var.init_expr.value)
+                        # self.buffer["text"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
+                else:
+                    register = self.visit(var.init_expr)
+                    self.buffer["text"] += "\tsw {}, {}($fp)\n".format(register, result["mem_offset"]) 
+                    # self.buffer["text"] += "\t" + "store "+ llvm_type +" %" + str(self.register_count-1)
+                    # self.buffer["text"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
+        else:
+            if type_temp[2] == "char":
+                pass
+            elif type_temp[2] == "int":
+                pass
+            elif type_temp[2] == "float":
+                pass
+            else:
+                raise Exception("¸„٭⊹✡•~⍣°”ˆ˜¨ 乇尺尺の尺 ¨˜ˆ”°⍣~•✡⊹٭„¸")
         self.visit(node.child)
     
     def visitExprStmtNode(self, node):
@@ -125,18 +285,17 @@ class MIPSGenerator(ASTVisitor):
             for part in processed_string:
                 if type(part) is int:
                     self.buffer["text"] += "\tli $v0, {}\n".format(part)
-                    self.visit(node.children[format_arg])
+                    register = self.visit(node.children[format_arg])
                     format_arg += 1
                     if part == 2:
                         # load format_value to $f12
-                        self.buffer["text"] += "\tmtc1 $t0, $f0\n" 
+                        self.buffer["text"] += "\tmtc1 {}, $f0\n".format(register) 
                         self.buffer["text"] += "\tmov.s $f12, $f0\n\tsyscall\n" 
                     else:
                         # load format_value to $a0
-                        self.buffer["text"] += "\tmove $a0, $t0\n\tsyscall\n" 
+                        self.buffer["text"] += "\tmove $a0, {}\n\tsyscall\n".format(register) 
                 else:
                     self.buffer["text"] += "\tli $v0, 4\n\tla $a0, " + part + "\n\tsyscall\n"
-
 
     def visitUnaryExprNode(self, node):
         # Save register $s0
@@ -191,8 +350,21 @@ class MIPSGenerator(ASTVisitor):
         # self.buffer["text"] += "\tlw $s0, 0($sp)\n"
         # self.buffer["text"] += "\taddi $sp, $sp, 4\n"
         self.buffer["text"] += "\t# Exiting UnaryExprNode.\n"
+        return "$t0"
 
     def visitBinExprNode(self, node):
+
+        if node.operation == "=":
+            # Deal with lhs
+            if type(node.lhs_child) is DeclRefExprNode:
+                result = self.STT.lookup(node.lhs_child.ref["ast_node"].id)
+                register = self.visit(node.rhs_child)
+                self.storeVar(result, register)
+                return None
+            else:
+                raise Exception("Not yet")
+
+
         # Save registers $s0, $s1
         self.buffer["text"] += "\t# Entering BinExprNode.\n"
         self.buffer["text"] += "\tsubi $sp, $sp, 8\n"
@@ -398,13 +570,35 @@ class MIPSGenerator(ASTVisitor):
         self.buffer["text"] += "\tlw $s1, 0($sp)\n"
         self.buffer["text"] += "\taddi $sp, $sp, 8\n"
         self.buffer["text"] += "\t# Exiting BinExprNode.\n"
+        return "$t0"
+
+    def visitDeclRefExprNode(self, node):
+        result = self.STT.lookup(node.ref["ast_node"].id)
+        if result is None:
+            print("gotta fix this")
+        else:
+            self.buffer["text"] += "\taddi $t0, $fp, {}\n".format(result["mem_offset"])
+
 
     def visitImplicitCastExprNode(self, node):
-        pass
+        if node.cast == "<LValueToRValue>":
+            if type(node.child) is DeclRefExprNode:
+                result = self.STT.lookup(node.child.ref["ast_node"].id)
+                if result is None:
+                    print("gotta fix this")
+                else:
+                    return self.loadVar(result) # Should return the register where loaded ex "$t0"
+            self.visit(node.child)
+            self.buffer["text"] += "\tlw $t0, 0($t0)\n"
+
+    def visitCharacterLiteralNode(self, node):
+        self.buffer["text"] += "\tli $t0, {}\n".format(node.value)
+        return "$t0"
 
     def visitIntegerLiteralNode(self, node):
         self.buffer["text"] += "\tli $t0, {}\n".format(node.value)
-    
+        return "$t0"
+
     def visitFloatingLiteralNode(self, node):
         if node.value in self.float_constants:
             self.buffer["text"] += "\tl.s $f0, {}\n".format(self.float_constants[node.value])
@@ -415,6 +609,6 @@ class MIPSGenerator(ASTVisitor):
             self.buffer["float"] += str(node.value) + '\n'
             self.buffer["text"] += "\tl.s $f0, {}\n".format(self.float_constants[node.value])
             self.buffer["text"] += "\tmfc1 $t0, $f0\n" 
-
+        return "$t0"
 
             
