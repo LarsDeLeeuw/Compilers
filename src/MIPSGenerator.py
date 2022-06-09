@@ -21,7 +21,7 @@ class MIPSGeneratorRegisters():
 
     def reset(self):
         self.active_registers = deque([])   # Queue
-        self.standby_registers = deque(["$s7", "$s6", "$s5", "$s4", "$s3", "$s2", "$s1", "$s0", "$t9", "$t8", "$t7", "$t6", "$t5", "$t4", "$t3"])  # Stack
+        self.standby_registers = deque(["$s7", "$s6", "$s5", "$s4", "$s3", "$s2", "$t9", "$t8", "$t7", "$t6", "$t5", "$t4", "$t3"])  # Stack
         self.state = {}                     # symbol.serial -> register
         self.reverse_state = {}             # register -> symbol.serial
 
@@ -94,7 +94,7 @@ class MIPSGenerator(ASTVisitor):
 
     def generateFile(self, filename="main"):
         output = open(str(filename+".asm"), 'w')
-        output.write(self.buffer["data"] + self.buffer["str"] + self.buffer["float"] + self.buffer["global"] + "\n\n" + self.buffer["text"] + self.buffer["exit"])
+        output.write(self.buffer["data"] + self.buffer["str"] + ".align 2\n" + self.buffer["float"] + self.buffer["global"] + "\n\n" + self.buffer["text"] + self.buffer["exit"])
         output.close()
 
     def getResult(self, node):
@@ -211,7 +211,10 @@ class MIPSGenerator(ASTVisitor):
             else:
                 self.buffer["global"] += "_{}: .space 4\n".format(node.id)
         else:
-            self.buffer["global"] += "_{}: .space 4\n".format(node.id)
+            if type_temp[1]:
+                self.buffer["global"] += "_{}: .space {}\n".format(node.id, node.getLen()*4)
+            else:
+                self.buffer["global"] += "_{}: .space 4\n".format(node.id)
 
     def visitFunctionDeclNode(self, node):
         if node.init:    
@@ -761,6 +764,22 @@ class MIPSGenerator(ASTVisitor):
         result = self.getResult(node)
         return self.loadAddrVar(result)
 
+    def visitArraySubscriptExprNode(self, node):
+        self.buffer["text"] += "\tsubi $sp, $sp, 4\n"
+        self.buffer["text"] += "\tsw $s0, 0($sp)\n"
+        register = self.visit(node.index_child)
+        self.buffer["text"] += "\tsll $s0, {}, 2\n".format(register)
+
+        register = self.visit(node.array_child)
+
+        self.buffer["text"] += "\taddu $t0, {}, $s0\n".format(register)
+        # Restore register $s0
+        self.buffer["text"] += "\tlw $s0, 0($sp)\n"
+        self.buffer["text"] += "\taddi $sp, $sp, 4\n"
+        return "$t0"
+
+
+
     def visitImplicitCastExprNode(self, node):
         if node.cast == "<LValueToRValue>":
             if type(node.child) is DeclRefExprNode:
@@ -776,8 +795,9 @@ class MIPSGenerator(ASTVisitor):
         elif node.cast == "<ArrayToPointerDecay>":
             if type(node.child) is StringLiteralNode:
                 return self.visit(node.child)
+            
+            return self.visit(node.child)
                 
-
 
     def visitCharacterLiteralNode(self, node):
         self.buffer["text"] += "\tli $t0, {}\n".format(node.value)

@@ -6,76 +6,91 @@ n4 [label="FuncScope"];
 n6 [label="Body"];
 n8 [label="DeclStmt"];
 n9 [label="VarDecl"];
-n10 [label="int"];
-n11 [label="x"];
-n12 [label="IntegerLiteral
-rvalue '0'"];
-n13 [label="DeclStmt"];
-n14 [label="VarDecl"];
-n15 [label="int *"];
-n16 [label="xp"];
-n17 [label="UnaryOperator
-lvalue prefix '&'"];
-n18 [label="DeclRefExpr
-lvalue Var 'x'"];
-n19 [label="ExprStmt"];
-n20 [label="BinExpr
+n10 [label="int[3][3]"];
+n11 [label="a"];
+n13 [label="ExprStmt"];
+n14 [label="BinExpr
 '='"];
-n21 [label="UnaryOperator
-lvalue prefix '*'"];
-n22 [label="DeclRefExpr
-lvalue Var 'xp'"];
-n23 [label="IntegerLiteral
+n15 [label="ArraySubscriptExpr
+'int[3]' lvalue"];
+n16 [label="ImplicitCastExpr
+<ArrayToPointerDecay>"];
+n17 [label="DeclRefExpr
+lvalue Var 'a'"];
+n18 [label="IntegerLiteral
+rvalue '0'"];
+n19 [label="IntegerLiteral
 rvalue '10'"];
-n24 [label="ExprStmt"];
-n25 [label="CallExpr
-void printf()"];
-n27 [label="ImplicitCastExpr
+n20 [label="ExprStmt"];
+n21 [label="BinExpr
+'='"];
+n22 [label="ArraySubscriptExpr
+'int[3]' lvalue"];
+n23 [label="ImplicitCastExpr
 <ArrayToPointerDecay>"];
-n29 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n30 [label="DeclRefExpr
-lvalue Var 'x'"];
-n31 [label="ExprStmt"];
-n32 [label="CallExpr
-void printf()"];
-n34 [label="ImplicitCastExpr
+n24 [label="DeclRefExpr
+lvalue Var 'a'"];
+n25 [label="IntegerLiteral
+rvalue '1'"];
+n26 [label="IntegerLiteral
+rvalue '20'"];
+n27 [label="ExprStmt"];
+n28 [label="BinExpr
+'='"];
+n29 [label="ArraySubscriptExpr
+'int[3]' lvalue"];
+n30 [label="ImplicitCastExpr
 <ArrayToPointerDecay>"];
-n36 [label="ImplicitCastExpr
+n31 [label="DeclRefExpr
+lvalue Var 'a'"];
+n32 [label="IntegerLiteral
+rvalue '2'"];
+n33 [label="IntegerLiteral
+rvalue '30'"];
+n34 [label="DeclStmt"];
+n35 [label="VarDecl"];
+n36 [label="int"];
+n37 [label="i"];
+n38 [label="IntegerLiteral
+rvalue '1'"];
+n39 [label="WhileStmt"];
+n41 [label="BinExpr
+'<'"];
+n42 [label="ImplicitCastExpr
 <LValueToRValue>"];
-n37 [label="UnaryOperator
-lvalue prefix '*'"];
-n38 [label="DeclRefExpr
-lvalue Var 'xp'"];
-n39 [label="ExprStmt"];
-n40 [label="UnaryOperator
-lvalue postfix '++'"];
-n41 [label="UnaryOperator
-lvalue prefix '*'"];
-n42 [label="DeclRefExpr
-lvalue Var 'xp'"];
-n43 [label="ExprStmt"];
-n44 [label="CallExpr
+n43 [label="DeclRefExpr
+lvalue Var 'i'"];
+n44 [label="IntegerLiteral
+rvalue '4'"];
+n45 [label="Body"];
+n47 [label="ExprStmt"];
+n48 [label="CallExpr
 void printf()"];
-n46 [label="ImplicitCastExpr
+n50 [label="ImplicitCastExpr
 <ArrayToPointerDecay>"];
-n48 [label="ImplicitCastExpr
+n52 [label="ImplicitCastExpr
 <LValueToRValue>"];
-n49 [label="DeclRefExpr
-lvalue Var 'x'"];
-n50 [label="ExprStmt"];
-n51 [label="CallExpr
-void printf()"];
-n53 [label="ImplicitCastExpr
+n53 [label="ArraySubscriptExpr
+'int[3]' lvalue"];
+n54 [label="ImplicitCastExpr
 <ArrayToPointerDecay>"];
-n55 [label="ImplicitCastExpr
+n55 [label="DeclRefExpr
+lvalue Var 'a'"];
+n56 [label="BinExpr
+'-'"];
+n57 [label="ImplicitCastExpr
 <LValueToRValue>"];
-n56 [label="UnaryOperator
-lvalue prefix '*'"];
-n57 [label="DeclRefExpr
-lvalue Var 'xp'"];
-n58 [label="ReturnStmt"];
+n58 [label="DeclRefExpr
+lvalue Var 'i'"];
 n59 [label="IntegerLiteral
+rvalue '1'"];
+n60 [label="ExprStmt"];
+n61 [label="UnaryOperator
+lvalue postfix '++'"];
+n62 [label="DeclRefExpr
+lvalue Var 'i'"];
+n63 [label="ReturnStmt"];
+n64 [label="IntegerLiteral
 rvalue '1'"];
 n0 -> n1
 n1 -> n2
@@ -86,44 +101,52 @@ n6 -> n8
 n8 -> n9
 n9 -> n10
 n9 -> n11
-n9 -> n12
 n6 -> n13
 n13 -> n14
 n14 -> n15
-n14 -> n16
-n14 -> n17
-n17 -> n18
-n6 -> n19
-n19 -> n20
+n15 -> n16
+n16 -> n17
+n15 -> n18
+n14 -> n19
+n6 -> n20
 n20 -> n21
 n21 -> n22
-n20 -> n23
-n6 -> n24
-n24 -> n25
-n25 -> n27
-n25 -> n29
+n22 -> n23
+n23 -> n24
+n22 -> n25
+n21 -> n26
+n6 -> n27
+n27 -> n28
+n28 -> n29
 n29 -> n30
-n6 -> n31
-n31 -> n32
-n32 -> n34
-n32 -> n36
-n36 -> n37
-n37 -> n38
+n30 -> n31
+n29 -> n32
+n28 -> n33
+n6 -> n34
+n34 -> n35
+n35 -> n36
+n35 -> n37
+n35 -> n38
 n6 -> n39
-n39 -> n40
-n40 -> n41
+n39 -> n41
 n41 -> n42
-n6 -> n43
-n43 -> n44
-n44 -> n46
-n44 -> n48
-n48 -> n49
-n6 -> n50
-n50 -> n51
-n51 -> n53
-n51 -> n55
-n55 -> n56
+n42 -> n43
+n41 -> n44
+n39 -> n45
+n45 -> n47
+n47 -> n48
+n48 -> n50
+n48 -> n52
+n52 -> n53
+n53 -> n54
+n54 -> n55
+n53 -> n56
 n56 -> n57
-n6 -> n58
-n58 -> n59
+n57 -> n58
+n56 -> n59
+n45 -> n60
+n60 -> n61
+n61 -> n62
+n6 -> n63
+n63 -> n64
 }
