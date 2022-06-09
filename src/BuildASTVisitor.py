@@ -628,7 +628,7 @@ class BuildASTVisitor(GrammarVisitor):
             expr_node = cast_node
             node.lvalue = False
         # Temp 
-        if (node.operation == "++" or node.operation == "--"):
+        if (node.operation == "++" or node.operation == "--" or node.operation == "&" or node.operation == "*"):
             node.lvalue = True
         expr_node.parent = node
         node.child = expr_node

@@ -57,8 +57,37 @@ Grammar:
 | (mandatory) Import.                                                                            | V   |
 | (mandatory) \<stdio.h\> printf()                                                               | V   |
 | (mandatory) \<stdio.h\> scanf()                                                                | V   |
-|                                                                                                |     |
 
+## Visualisation
+
+My compiler provides the option to generate a visualisation of the generated AST and STT. 
+This visualisation returns two formats: the structure in dot format and a jpg interpreted from the dot file
+Disclaimer, this visualisation is a dev feature and I don't guarantee that the generated visualisation 
+matches the structure perfectly. For example the VarDeclNode of the AST appears to have 3 seperate children: 
+it's type, it's identifier and the init_expr. But in reality the only child of the VarDeclNode is the init_expr.
+
+| Description                           | ?   |
+| ------------------------------------- | --- |
+| (optional) Abstract Syntax Tree (AST) | V   |
+| (optional) Symbol Table Tree (STT)    | V   |
+
+## Optimizations
+
+| Description                                                              | ?   |
+| ------------------------------------------------------------------------ | --- |
+| (optional) Constant Folding                                              | -   |
+| (optional) Constant Propagation                                          | -   |
+| (mandatory) Unreachable code and dead code: after return in a function   | -   |
+| (mandatory) Unreachable code and dead code: break and continue in a loop | -   |
+| (optional) Unreachable code and dead code: unused variables              | -   |
+| (optional) Unreachable code and dead code: always false conditionals     | -   |
+
+
+## Code generation
+
+| Description | LLVM | MIPS |
+| ----------- | ---- | ---- |
+|             |      |      |
 This compiler is written in python and attempts to succesfully compile a subset of the C language to MIPS instructions using ANTLR.
 
 V: Werkend  

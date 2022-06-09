@@ -275,7 +275,6 @@ class ArraySubscriptExprNode(ExprNode):
     def __init__(self):
         super().__init__()
         self.type = None
-        self.lvalue = True
         self.array_child = None
         self.index_child = None
 
