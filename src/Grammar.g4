@@ -2,38 +2,42 @@ grammar Grammar;
 
 prog: (KEY_INCLUDE LIB)* decl+ ;
 
-decl: KEY_CONST? prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'      #varDecl
-    | (prim | KEY_VOID) ID '('( ( (func_arg)(','func_arg)* ) | func_arg )?')' ';'                   #funcheadsupDecl           
-    | (prim | KEY_VOID) ID '(' ( ( (func_arg)(','func_arg)* ) | func_arg )? ')' '{' stat* '}'       #funcDecl
+decl: prim varhelp (COMMA varhelp)* SEMICOLON      #varDecl
+    | (prim | KEY_VOID) ID OPEN_PAR (((func_arg)(COMMA func_arg)* ) | func_arg)? CLOSE_PAR SEMICOLON                   #funcheadsupDecl           
+    | (prim | KEY_VOID) ID OPEN_PAR (((func_arg)(COMMA func_arg)*) | func_arg)? CLOSE_PAR OPEN_CURLY stat* CLOSE_CURLY       #funcDecl
     ;
 
-func_arg: prim ID ('['INT?']')? ;
+varhelp: ID (OPEN_BRACKET expr CLOSE_BRACKET)? ((ASS expr) | (ASS OPEN_CURLY expr(COMMA expr)* CLOSE_CURLY))? ; 
 
-stat: expr ';'                                                                                      # exprStat
-    | KEY_CONST? prim ID ('['INT']')? ( ( '=' expr ) | ( '=' '{' expr (',' expr)* '}' ) )? ';'      # declStat
-    | KEY_WHILE '(' expr ')' '{' stat* '}'                                                          # whileStat
-    | KEY_IF '(' expr ')' '{' stat* '}' (KEY_ELSE '{' alias '}')?                                   # ifStat
-    | KEY_RETURN expr? ';'                                                                          # returnStat
-    | KEY_BREAK ';'                                                                                 # breakStat
-    | KEY_CONTINUE ';'                                                                              # continueStat
+func_arg: prim ID (OPEN_BRACKET INT? CLOSE_BRACKET)? ;
+
+stat: expr SEMICOLON                                                                                                    # exprStat
+    | prim varhelp (COMMA varhelp)* SEMICOLON                                                                           # declStat
+    | KEY_WHILE OPEN_PAR expr CLOSE_PAR OPEN_CURLY stat* CLOSE_CURLY                                                    # whileStat
+    | KEY_FOR OPEN_PAR (stat | SEMICOLON) expr SEMICOLON expr? CLOSE_PAR OPEN_CURLY alias CLOSE_CURLY      # forStat
+    | KEY_IF OPEN_PAR expr CLOSE_PAR OPEN_CURLY stat* CLOSE_CURLY (KEY_ELSE OPEN_CURLY alias CLOSE_CURLY)?              # ifStat
+    | KEY_RETURN expr? SEMICOLON                                                                                        # returnStat
+    | KEY_BREAK SEMICOLON                                                                                               # breakStat
+    | KEY_CONTINUE SEMICOLON                                                                                            # continueStat
+    | OPEN_CURLY stat* CLOSE_CURLY                                                                                      # unnamedScopeStat
     ;
 
 alias: stat* ;
 
 expr
-    : '(' expr ')'                                          # parensExpr
-    | op=('+'|'-'|'!'|'*'|'&'|'--'|'++') expr               # preUnaryExpr
-    | expr op=('++'|'--')                                   # postUnaryExpr
-    | left=expr op=('*'|'/') right=expr                     # binExpr
-    | left=expr op=('+'|'-'|'%') right=expr                 # binExpr
-    | left=expr op=('>'|'<') right=expr                     # binExpr
-    | left=expr op=('=='|'>=') right=expr                   # binExpr
-    | left=expr op=('<='|'!=') right=expr                   # binExpr
-    | left=expr op=('||'|'&&') right=expr                   # binExpr
-    | left=expr op='=' right=expr                           # binExpr
-    | ID '(' ( ( ((expr))(','(expr))* ) | (expr) )? ')'     # callExpr
-    | ID ('['(expr|INT)']')?                                # idExpr
-    | value=lit                                             # litExpr
+    : OPEN_PAR expr CLOSE_PAR                                       # parensExpr
+    | op=(ADD|SUB|NOT|MUL|DRF|MPP|PPP) expr                         # preUnaryExpr
+    | expr op=(PPP|MPP)                                             # postUnaryExpr
+    | left=expr op=(MUL|DIV) right=expr                             # binExpr
+    | left=expr op=(ADD|SUB|MOD) right=expr                         # binExpr
+    | left=expr op=(GRT|LST) right=expr                             # binExpr
+    | left=expr op=(EQ|GEQ) right=expr                              # binExpr
+    | left=expr op=(LEQ|NEQ) right=expr                             # binExpr
+    | left=expr op=(OR|AND) right=expr                              # binExpr
+    | left=expr op=ASS right=expr                                   # binExpr
+    | ID OPEN_PAR ((((expr)) (COMMA (expr))*) | (expr))? CLOSE_PAR  # callExpr
+    | ID (OPEN_BRACKET (expr|INT) CLOSE_BRACKET)?                   # idExpr
+    | value=lit                                                     # litExpr
     ;
 
 lit
@@ -41,10 +45,19 @@ lit
     ;
 
 prim
-    : KEY_CHAR                              # charPrim
-    | KEY_FLOAT                             # floatPrim
-    | KEY_INT                               # intPrim
+    : KEY_CONST? KEY_CHAR (MUL+)? KEY_CONST?    # charPrim
+    | KEY_CONST? KEY_FLOAT (MUL+)? KEY_CONST?   # floatPrim
+    | KEY_CONST? KEY_INT (MUL+)? KEY_CONST?     # intPrim
     ;
+
+COMMA : ',' ;
+SEMICOLON : ';' ;
+OPEN_CURLY : '{' ;
+CLOSE_CURLY : '}' ;
+OPEN_PAR : '(' ;
+CLOSE_PAR : ')' ;
+OPEN_BRACKET : '[' ;
+CLOSE_BRACKET : ']' ;
 
 MUL : '*' ;
 DIV : '/' ;
@@ -65,9 +78,9 @@ DRF : '&' ;
 PPP : '++';
 MPP : '--';
 
-KEY_CHAR : 'char' ((' '|MUL)* MUL)?;
-KEY_INT : 'int' ((' '|MUL)* MUL)?;
-KEY_FLOAT : 'float' ((' '|MUL)* MUL)?;
+KEY_CHAR : 'char' ;
+KEY_INT : 'int' ;
+KEY_FLOAT : 'float' ;
 KEY_VOID : 'void' ;
 
 KEY_CONST : 'const' ;
@@ -86,10 +99,6 @@ CHAR : ['] . ['] ;
 STRING : ["] .*? ["] ;
 INT : [0-9]+ ;
 FLOAT : [0-9]+ '.' [0-9]+ ;
-BOOL 
-    : 'true'
-    | 'false'
-    ;
 ID  : [a-zA-Z_]{1}[a-zA-Z0-9_]* ;
 LIB : '<' [a-z]+ '.h>' ;
 WS: [ \n\t\r]+ -> skip;

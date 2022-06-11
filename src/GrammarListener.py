@@ -44,6 +44,15 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GrammarParser#varhelp.
+    def enterVarhelp(self, ctx:GrammarParser.VarhelpContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#varhelp.
+    def exitVarhelp(self, ctx:GrammarParser.VarhelpContext):
+        pass
+
+
     # Enter a parse tree produced by GrammarParser#func_arg.
     def enterFunc_arg(self, ctx:GrammarParser.Func_argContext):
         pass
@@ -80,6 +89,15 @@ class GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GrammarParser#forStat.
+    def enterForStat(self, ctx:GrammarParser.ForStatContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#forStat.
+    def exitForStat(self, ctx:GrammarParser.ForStatContext):
+        pass
+
+
     # Enter a parse tree produced by GrammarParser#ifStat.
     def enterIfStat(self, ctx:GrammarParser.IfStatContext):
         pass
@@ -113,6 +131,15 @@ class GrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by GrammarParser#continueStat.
     def exitContinueStat(self, ctx:GrammarParser.ContinueStatContext):
+        pass
+
+
+    # Enter a parse tree produced by GrammarParser#unnamedScopeStat.
+    def enterUnnamedScopeStat(self, ctx:GrammarParser.UnnamedScopeStatContext):
+        pass
+
+    # Exit a parse tree produced by GrammarParser#unnamedScopeStat.
+    def exitUnnamedScopeStat(self, ctx:GrammarParser.UnnamedScopeStatContext):
         pass
 
 

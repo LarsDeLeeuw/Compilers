@@ -184,8 +184,8 @@ class TestBenchmarkCorrectCodeLLVM(unittest.TestCase):
         CLANGLLVM.close()
 
     def test_for(self):
-        if not exists("input/dummy"):
-            self.skipTest("not implemented yet")
+        # if not exists("input/dummy"):
+        #     self.skipTest("not implemented yet")
         name = "for"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         call(['python', '../../src/main.py', "-f"+inputfile])

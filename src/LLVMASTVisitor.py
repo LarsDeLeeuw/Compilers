@@ -241,58 +241,6 @@ class LLVMASTVisitor(ASTVisitor):
                 self.buffer["functs"] += "\t" + "store "+llvm_type+" %" + self.idshadowing[serial]
                 self.buffer["functs"] += ", "+llvm_type+"* %" + self.idshadowing[serial] + ".addr, align "+llvm_align+"\n"
             
-            else:
-                var = result["ast_node"]
-
-                if var.id in self.idcount.keys():
-                    self.idcount[var.id] += 1
-                else:
-                    self.idcount[var.id] = 0
-                if self.idcount[var.id] == 0:
-                    self.idshadowing[serial] = var.id
-                else:
-                    self.idshadowing[serial] = var.id + str(self.idcount[var.id])
-
-                var_type = var.type.split(" ")
-                var_type = var.parseType()
-                llvm_type = None
-                llvm_align = "4"
-                if var_type[2] == "char":
-                    llvm_type = "i8"
-                    llvm_align = "1"
-                elif var_type[2] == "int":
-                    llvm_type = "i32"
-                elif var_type[2] == "float":
-                    llvm_type = "float"
-                else:
-                    print("What is this?")
-
-                if var_type[0]:
-                    if not var.array:
-                        llvm_align = "8"
-                    else:
-                        llvm_align = "16"
-                    llvm_type += var_type[3]
-                
-                if var.array:
-                    # Build the array type currently no multidim support
-                    llvm_array = "[" + str(var.getLen()) + " x " + llvm_type + "]"
-                    llvm_type = llvm_array
-
-                self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
-                self.buffer["functs"] += " = alloca "+llvm_type+", align "+llvm_align+"\n"
-                
-                if var.init:
-                    if var.array:
-                        raise Exception("LLVM NOT IMPLEMENTED YET")
-                    
-                    if issubclass(type(var.init_expr), LiteralNode):
-                        self.buffer["functs"] += "\t" + "store "+ llvm_type +" " + str(var.init_expr.value)
-                        self.buffer["functs"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
-                    else:
-                        self.visit(var.init_expr)
-                        self.buffer["functs"] += "\t" + "store "+ llvm_type +" %" + str(self.register_count-1)
-                        self.buffer["functs"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
 
         returnFlag = False
 
@@ -302,7 +250,7 @@ class LLVMASTVisitor(ASTVisitor):
         for StmtNode in node.children:
             # DeclStmts already done above with symboltable
             if type(StmtNode) is DeclNode:
-                pass
+                self.visit(StmtNode)
             else:
                 if type(StmtNode) is ReturnStmtNode:
                     returnFlag = True
@@ -372,48 +320,91 @@ class LLVMASTVisitor(ASTVisitor):
         label_end = "while.end" + str(self.while_count)
         self.while_count += 1
         self.loop_stack.append((label_cond, label_end))
+        if len(node.children) == 2:
+            self.buffer["functs"] += "\tbr label %" + label_cond + "\n\n"
+            self.current_label = label_cond
+            self.buffer["functs"] += label_cond + ":\n"
+            condition_node = node.children[0]
+            self.visit(condition_node)
 
-        self.buffer["functs"] += "\tbr label %" + label_cond + "\n\n"
-        self.current_label = label_cond
-        self.buffer["functs"] += label_cond + ":\n"
-        condition_node = node.children[0]
-        self.visit(condition_node)
+            cond_type = condition_node.type.split(" ")
+            llvm_type = None
+            llvm_operation = "icmp ne"
+            llvm_cmpto = "0"
+            if cond_type[0] == "char":
+                llvm_type = "i8"
+            elif cond_type[0] == "int":
+                llvm_type = "i32"
+            elif cond_type[0] == "float":
+                llvm_type = "float"
+                llvm_operation = "fcmp ne"
+                llvm_cmpto = "0.000000e+00"
+            else:
+                print("What is this?")
 
-        cond_type = condition_node.type.split(" ")
-        llvm_type = None
-        llvm_operation = "icmp ne"
-        llvm_cmpto = "0"
-        if cond_type[0] == "char":
-            llvm_type = "i8"
-        elif cond_type[0] == "int":
-            llvm_type = "i32"
-        elif cond_type[0] == "float":
-            llvm_type = "float"
-            llvm_operation = "fcmp ne"
-            llvm_cmpto = "0.000000e+00"
+            if len(cond_type) == 2:
+                pass
+                llvm_type += cond_type[1]
+            else:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = "+llvm_operation+" "+llvm_type+" %" + str(self.register_count-1) + ", "+llvm_cmpto+"\n"
+                self.register_count += 1
+            self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_body + ", label %" + label_end + "\n\n"
+
+            self.buffer["functs"] += label_body + ":\n"
+            self.current_label = label_body
+            self.STT.child_scope()
+            self.visit(node.children[1])
+            self.buffer["functs"] += "\tbr label %" + label_cond + "\n\n"
+            self.STT.prev_scope()
+            if len(self.loop_stack) != 0:
+                if self.loop_stack[-1] == (label_cond, label_end):
+                    self.loop_stack.pop()
+            
+            self.buffer["functs"] += label_end + ":\n"
+            self.current_label = label_end
         else:
-            print("What is this?")
+            self.STT.child_scope()
+            self.visit(node.children[2])
+            self.buffer["functs"] += "\tbr label %" + label_cond + "\n\n"
+            self.current_label = label_cond
+            self.buffer["functs"] += label_cond + ":\n"
+            condition_node = node.children[0]
+            self.visit(condition_node)
 
-        if len(cond_type) == 2:
-            pass
-            llvm_type += cond_type[1]
-        else:
-            self.buffer["functs"] += "\t%" + str(self.register_count) + " = "+llvm_operation+" "+llvm_type+" %" + str(self.register_count-1) + ", "+llvm_cmpto+"\n"
-            self.register_count += 1
-        self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_body + ", label %" + label_end + "\n\n"
+            cond_type = condition_node.type.split(" ")
+            llvm_type = None
+            llvm_operation = "icmp ne"
+            llvm_cmpto = "0"
+            if cond_type[0] == "char":
+                llvm_type = "i8"
+            elif cond_type[0] == "int":
+                llvm_type = "i32"
+            elif cond_type[0] == "float":
+                llvm_type = "float"
+                llvm_operation = "fcmp ne"
+                llvm_cmpto = "0.000000e+00"
+            else:
+                print("What is this?")
 
-        self.buffer["functs"] += label_body + ":\n"
-        self.current_label = label_body
-        self.STT.child_scope()
-        self.visit(node.children[1])
-        self.buffer["functs"] += "\tbr label %" + label_cond + "\n\n"
-        self.STT.prev_scope()
-        if len(self.loop_stack) != 0:
-            if self.loop_stack[-1] == (label_cond, label_end):
-                self.loop_stack.pop()
-        
-        self.buffer["functs"] += label_end + ":\n"
-        self.current_label = label_end
+            if len(cond_type) == 2:
+                pass
+                llvm_type += cond_type[1]
+            else:
+                self.buffer["functs"] += "\t%" + str(self.register_count) + " = "+llvm_operation+" "+llvm_type+" %" + str(self.register_count-1) + ", "+llvm_cmpto+"\n"
+                self.register_count += 1
+            self.buffer["functs"] += "\tbr i1 %" + str(self.register_count-1) + ", label %" + label_body + ", label %" + label_end + "\n\n"
+
+            self.buffer["functs"] += label_body + ":\n"
+            self.current_label = label_body
+            self.visit(node.children[1])
+            self.buffer["functs"] += "\tbr label %" + label_cond + "\n\n"
+            self.STT.prev_scope()
+            if len(self.loop_stack) != 0:
+                if self.loop_stack[-1] == (label_cond, label_end):
+                    self.loop_stack.pop()
+            
+            self.buffer["functs"] += label_end + ":\n"
+            self.current_label = label_end
 
 
     def visitIfStmtNode(self, node):
@@ -1032,7 +1023,59 @@ class LLVMASTVisitor(ASTVisitor):
             raise Exception("LLVM Panic: {}".format(node.operation))
 
     def visitDeclStmtNode(self, node):
-        pass
+        result = self.STT.lookup(node.child.id)
+        serial = result["serial"]
+        var = result["ast_node"]
+
+        if var.id in self.idcount.keys():
+            self.idcount[var.id] += 1
+        else:
+            self.idcount[var.id] = 0
+        if self.idcount[var.id] == 0:
+            self.idshadowing[serial] = var.id
+        else:
+            self.idshadowing[serial] = var.id + str(self.idcount[var.id])
+
+        var_type = var.type.split(" ")
+        var_type = var.parseType()
+        llvm_type = None
+        llvm_align = "4"
+        if var_type[2] == "char":
+            llvm_type = "i8"
+            llvm_align = "1"
+        elif var_type[2] == "int":
+            llvm_type = "i32"
+        elif var_type[2] == "float":
+            llvm_type = "float"
+        else:
+            print("What is this?")
+
+        if var_type[0]:
+            if not var.array:
+                llvm_align = "8"
+            else:
+                llvm_align = "16"
+            llvm_type += var_type[3]
+        
+        if var.array:
+            # Build the array type currently no multidim support
+            llvm_array = "[" + str(var.getLen()) + " x " + llvm_type + "]"
+            llvm_type = llvm_array
+
+        self.buffer["functs"] += "\t" + "%" + str(self.idshadowing[serial])
+        self.buffer["functs"] += " = alloca "+llvm_type+", align "+llvm_align+"\n"
+        
+        if var.init:
+            if var.array:
+                raise Exception("LLVM NOT IMPLEMENTED YET")
+            
+            if issubclass(type(var.init_expr), LiteralNode):
+                self.buffer["functs"] += "\t" + "store "+ llvm_type +" " + str(var.init_expr.value)
+                self.buffer["functs"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
+            else:
+                self.visit(var.init_expr)
+                self.buffer["functs"] += "\t" + "store "+ llvm_type +" %" + str(self.register_count-1)
+                self.buffer["functs"] += ", "+ llvm_type +"* %" + str(self.idshadowing[serial]) + ", align "+ llvm_align +"\n"
     
     def visitImplicitCastExprNode(self, node):
         if node.cast == "<LValueToRValue>":

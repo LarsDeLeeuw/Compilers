@@ -29,6 +29,11 @@ class GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by GrammarParser#varhelp.
+    def visitVarhelp(self, ctx:GrammarParser.VarhelpContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by GrammarParser#func_arg.
     def visitFunc_arg(self, ctx:GrammarParser.Func_argContext):
         return self.visitChildren(ctx)
@@ -49,6 +54,11 @@ class GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by GrammarParser#forStat.
+    def visitForStat(self, ctx:GrammarParser.ForStatContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by GrammarParser#ifStat.
     def visitIfStat(self, ctx:GrammarParser.IfStatContext):
         return self.visitChildren(ctx)
@@ -66,6 +76,11 @@ class GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by GrammarParser#continueStat.
     def visitContinueStat(self, ctx:GrammarParser.ContinueStatContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by GrammarParser#unnamedScopeStat.
+    def visitUnnamedScopeStat(self, ctx:GrammarParser.UnnamedScopeStatContext):
         return self.visitChildren(ctx)
 
 

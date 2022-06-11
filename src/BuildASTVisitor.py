@@ -64,94 +64,101 @@ class BuildASTVisitor(GrammarVisitor):
 
         for Decl in ctx.decl():
             decl_node = self.visit(Decl)
-            decl_node.parent = node
-            node.children.append(decl_node)
+            for Decl_Node in decl_node:
+                Decl_Node.parent = node
+                node.children.append(Decl_Node)
 
         self.AST.root = node
         return 0
 
     # Visit a parse tree produced by GrammarParser#varDecl.
     def visitVarDecl(self, ctx:GrammarParser.VarDeclContext):
-        node = VarDeclNode()
-        node.id = ctx.ID().getText()
-        node.line = ctx.start.line
-        node.column = ctx.start.column
 
-        if ctx.KEY_CONST() is None:
-            node.const = False
-        else:
-            node.const = True
-        
-        temp = ctx.prim().getText().split('*')
-        node.type = temp[0]
-        if len(temp) >= 2:
-            node.type += " "
-            node.type += (len(temp)-1)*"*"
+        node_list = []
 
-        if ctx.INT() is None:
-            node.array = False
-        else:
-            node.array = True
-            node.len = int(ctx.INT().getText())
-            node.type += "[" + ctx.INT().getText() + "]"
+        for VarDecl in ctx.varhelp():
+            node = VarDeclNode()
+            node.id = VarDecl.ID().getText()
+            node.line = VarDecl.start.line
+            node.column = VarDecl.start.column
 
-        if len(ctx.expr()) == 0:
-            node.init = False
-        else:
-            if node.array:
-                init_list_node = InitListExprNode()
-                init_list_node.type = node.type
-                init_list_node.parent = node
-                # Check if supplied init array is same len as array
-                if node.len != len(ctx.expr()):
-                    raise Exception("Array initialised with incorrect amount of elements")
-                for Expr in ctx.expr():
-                    expr_node = self.visit(Expr)
-                    expr_node.parent = init_list_node
-                    init_list_node.children.append(expr_node)
-                node.init = True
-                node.init_expr = init_list_node
+            if len(ctx.prim().KEY_CONST()) == 0:
+                node.const = False
             else:
-                node.init_expr = self.visit(ctx.expr()[0])
-                if type(node.init_expr) is DeclRefExprNode or type(node.init_expr) is ArraySubscriptExprNode:
-                    cast_node = ImplicitCastExprNode()
-                    cast_node.cast = "<LValueToRValue>"
-                    cast_node.child = node.init_expr
-                    cast_node.child.parent = cast_node
-                    cast_node.type = cast_node.child.type
-                    cast_node.line = cast_node.child.line
-                    cast_node.column = cast_node.child.column
-                    node.init_expr = cast_node
-                node.init_expr.parent = node
-                node.init = True
-                if node.type == node.init_expr.type:
-                    pass
+                node.const = True
+
+            
+            temp = ctx.prim().getText().split('*')
+            node.type = temp[0]
+            if len(temp) >= 2:
+                node.type += " "
+                node.type += (len(temp)-1)*"*"
+
+            if VarDecl.OPEN_BRACKET() is None:
+                node.array = False
+            else:
+                size = self.visit(VarDecl.expr()[0])
+                node.array = True
+                node.len = int(size.value)
+                node.type += "[" + str(node.len) + "]"
+
+            if len(VarDecl.expr()) == 0 or (len(VarDecl.expr()) == 1 and node.array):
+                node.init = False
+            else:
+                if node.array:
+                    init_list_node = InitListExprNode()
+                    init_list_node.type = node.type
+                    init_list_node.parent = node
+                    # Check if supplied init array is same len as array
+                    if node.len != len(VarDecl.expr()) - 1:
+                        raise Exception("Array initialised with incorrect amount of elements")
+                    for Expr in ctx.expr():
+                        expr_node = self.visit(Expr)
+                        expr_node.parent = init_list_node
+                        init_list_node.children.append(expr_node)
+                    node.init = True
+                    node.init_expr = init_list_node
                 else:
-                    cast_node = ImplicitCastExprNode()
-                    cast_node.parent = node
-                    if node.type == "int" and node.init_expr.type == "float":
-                        cast_node.cast = "<FloatingToIntegral>"
-                        print("Line {} Column {}".format(node.init_expr.line, node.init_expr.column))
-                    elif node.type == "float" and node.init_expr.type == "int":
-                        cast_node.cast = "<IntegralToFloating>"
+                    node.init_expr = self.visit(VarDecl.expr()[0])
+                    if type(node.init_expr) is DeclRefExprNode or type(node.init_expr) is ArraySubscriptExprNode:
+                        cast_node = ImplicitCastExprNode()
+                        cast_node.cast = "<LValueToRValue>"
+                        cast_node.child = node.init_expr
+                        cast_node.child.parent = cast_node
+                        cast_node.type = cast_node.child.type
+                        cast_node.line = cast_node.child.line
+                        cast_node.column = cast_node.child.column
+                        node.init_expr = cast_node
+                    node.init_expr.parent = node
+                    node.init = True
+                    if node.type == node.init_expr.type:
+                        pass
                     else:
-                        print("Need to cast in line {} but dont know this cast yet".format(ctx.start.line))
-                    cast_node.type = node.type
-                    cast_node.child = node.init_expr
-                    cast_node.child.parent = cast_node
-                    node.init_expr = cast_node
+                        cast_node = ImplicitCastExprNode()
+                        cast_node.parent = node
+                        if node.type == "int" and node.init_expr.type == "float":
+                            cast_node.cast = "<FloatingToIntegral>"
+                        elif node.type == "float" and node.init_expr.type == "int":
+                            cast_node.cast = "<IntegralToFloating>"
+                        else:
+                            print("Need to cast in line {} but dont know this cast yet".format(ctx.start.line))
+                        cast_node.type = node.type
+                        cast_node.child = node.init_expr
+                        cast_node.child.parent = cast_node
+                        node.init_expr = cast_node
 
-        result = self.STT.insert(node.id)
-        if result is None:
-            raise Exception("Failed to insert {} in symboltable".format(node.id))
-        else:
-            self.STT.set_attribute(node.id, "ast_node", node)
-            self.STT.set_attribute(node.id, "object", "lvalue Var")
-            self.STT.set_attribute(node.id, "global", True)
-            self.STT.set_attribute(node.id, "serial", self.claimSerial())
+            result = self.STT.insert(node.id)
+            if result is None:
+                raise Exception("Failed to insert {} in symboltable".format(node.id))
+            else:
+                self.STT.set_attribute(node.id, "ast_node", node)
+                self.STT.set_attribute(node.id, "object", "lvalue Var")
+                self.STT.set_attribute(node.id, "global", True)
+                self.STT.set_attribute(node.id, "serial", self.claimSerial())
+            node_list.append(node)
 
-        
-        return node
+            
+        return node_list
 
 
     # Visit a parse tree produced by GrammarParser#funcheadsupDecl.
@@ -183,7 +190,7 @@ class BuildASTVisitor(GrammarVisitor):
             self.STT.set_attribute(node.id, "ast_node", node)
             self.STT.set_attribute(node.id, "object", "Function")
 
-        return node
+        return [node]
 
 
     # Visit a parse tree produced by GrammarParser#funcDecl.
@@ -258,15 +265,16 @@ class BuildASTVisitor(GrammarVisitor):
         scope_node.parent = node
         for Statement in ctx.stat():
             stat_node = self.visit(Statement)
-            stat_node.parent = scope_node
-            scope_node.children.append(stat_node)
+            for StatNode in stat_node:
+                StatNode.parent = scope_node
+                scope_node.children.append(StatNode)
         
         node.children.append(scope_node)
         
         # Go back to scope where Function was declared
         self.STT.prev_scope()
 
-        return node
+        return [node]
 
     # Visit a parse tree produced by GrammarParser#exprStat.
     def visitExprStat(self, ctx:GrammarParser.ExprStatContext):
@@ -274,95 +282,99 @@ class BuildASTVisitor(GrammarVisitor):
         expr_node = self.visit(ctx.expr())
         expr_node.parent = node
         node.child = expr_node
-        return node
+        return [node]
 
     # Visit a parse tree produced by GrammarParser#declStat.
     def visitDeclStat(self, ctx:GrammarParser.DeclStatContext):
-        node = DeclStmtNode()
-        var_decl = VarDeclNode()
-        var_decl.parent = node
-        var_decl.id = ctx.ID().getText()
+        node_list = []
+        for VarDecl in ctx.varhelp():
+            declnode = DeclStmtNode()
+            node = VarDeclNode()
+            node.id = VarDecl.ID().getText()
+            node.line = VarDecl.start.line
+            node.column = VarDecl.start.column
 
-        if ctx.KEY_CONST() is None:
-            var_decl.const = False
-        else:
-            var_decl.const = True
-
-        var_decl.line = ctx.start.line
-        var_decl.column = ctx.start.column
-        node.line = var_decl.line
-        node.column = var_decl.column
-        temp = ctx.prim().getText().split('*')
-        var_decl.type = temp[0]
-        if len(temp) >= 2:
-            var_decl.type += " "
-            var_decl.type += (len(temp)-1)*"*"
-
-        if ctx.INT() is None:
-            var_decl.array = False
-        else:
-            var_decl.array = True
-            var_decl.len = int(ctx.INT().getText())
-            var_decl.type += "[" + ctx.INT().getText() + "]"
-
-        if len(ctx.expr()) == 0:
-            var_decl.init = False
-        else:
-            if var_decl.array:
-                init_list_node = InitListExprNode()
-                init_list_node.parent = var_decl
-                # Check if supplied init array is same len as array
-                if var_decl.len != len(ctx.expr()):
-                    raise Exception("Array initialised with incorrect amount of elements")
-                for Expr in ctx.expr():
-                    expr_node = self.visit(Expr)
-                    expr_node.parent = init_list_node
-                    init_list_node.children.append(expr_node)
-                var_decl.init = True
-                var_decl.init_expr = init_list_node
+            if len(ctx.prim().KEY_CONST()) == 0:
+                node.const = False
             else:
-                var_decl.init_expr = self.visit(ctx.expr()[0])
-                if type(var_decl.init_expr) is DeclRefExprNode or type(var_decl.init_expr) is ArraySubscriptExprNode:
-                    cast_node = ImplicitCastExprNode()
-                    cast_node.cast = "<LValueToRValue>"
-                    cast_node.child = var_decl.init_expr
-                    cast_node.child.parent = cast_node
-                    cast_node.type = cast_node.child.type
-                    cast_node.line = cast_node.child.line
-                    cast_node.column = cast_node.child.column
-                    var_decl.init_expr = cast_node
-                var_decl.init_expr.parent = var_decl
-                var_decl.init = True
-                if var_decl.type == var_decl.init_expr.type:
-                    pass
+                node.const = True
+
+            
+            temp = ctx.prim().getText().split('*')
+            node.type = temp[0]
+            if len(temp) >= 2:
+                node.type += " "
+                node.type += (len(temp)-1)*"*"
+
+            if VarDecl.OPEN_BRACKET() is None:
+                node.array = False
+            else:
+                size = self.visit(VarDecl.expr()[0])
+                node.array = True
+                node.len = int(size.value)
+                node.type += "[" + str(node.len) + "]"
+
+            if len(VarDecl.expr()) == 0 or (len(VarDecl.expr()) == 1 and node.array):
+                node.init = False
+            else:
+                if node.array:
+                    init_list_node = InitListExprNode()
+                    init_list_node.type = node.type
+                    init_list_node.parent = node
+                    # Check if supplied init array is same len as array
+                    if node.len != len(VarDecl.expr()) - 1:
+                        raise Exception("Array initialised with incorrect amount of elements")
+                    for Expr in ctx.expr():
+                        expr_node = self.visit(Expr)
+                        expr_node.parent = init_list_node
+                        init_list_node.children.append(expr_node)
+                    node.init = True
+                    node.init_expr = init_list_node
                 else:
-                    cast_node = ImplicitCastExprNode()
-                    cast_node.parent = var_decl
-                    if var_decl.type == "int" and var_decl.init_expr.type == "float":
-                        cast_node.cast = "<FloatingToIntegral>"
-                    elif var_decl.type == "float" and var_decl.init_expr.type == "int":
-                        cast_node.cast = "<IntegralToFloating>"
+                    node.init_expr = self.visit(VarDecl.expr()[0])
+                    if type(node.init_expr) is DeclRefExprNode or type(node.init_expr) is ArraySubscriptExprNode:
+                        cast_node = ImplicitCastExprNode()
+                        cast_node.cast = "<LValueToRValue>"
+                        cast_node.child = node.init_expr
+                        cast_node.child.parent = cast_node
+                        cast_node.type = cast_node.child.type
+                        cast_node.line = cast_node.child.line
+                        cast_node.column = cast_node.child.column
+                        node.init_expr = cast_node
+                    node.init_expr.parent = node
+                    node.init = True
+                    if node.type == node.init_expr.type:
+                        pass
                     else:
-                        print("Need to cast ({}) in line {} but dont know this cast yet".format(var_decl.init_expr.type,ctx.start.line))
-                    cast_node.type = var_decl.type
-                    cast_node.child = var_decl.init_expr
-                    cast_node.line = cast_node.child.line
-                    cast_node.column = cast_node.child.column
-                    cast_node.child.parent = cast_node
-                    var_decl.init_expr = cast_node
+                        cast_node = ImplicitCastExprNode()
+                        cast_node.parent = node
+                        if node.type == "int" and node.init_expr.type == "float":
+                            cast_node.cast = "<FloatingToIntegral>"
+                        elif node.type == "float" and node.init_expr.type == "int":
+                            cast_node.cast = "<IntegralToFloating>"
+                        else:
+                            print("Need to cast in line {} but dont know this cast yet".format(ctx.start.line))
+                        cast_node.type = node.type
+                        cast_node.child = node.init_expr
+                        cast_node.child.parent = cast_node
+                        node.init_expr = cast_node
 
-        node.child = var_decl
+            result = self.STT.insert(node.id)
+            if result is None:
+                raise Exception("Failed to insert {} in symboltable".format(node.id))
+            else:
+                self.STT.set_attribute(node.id, "ast_node", node)
+                self.STT.set_attribute(node.id, "object", "lvalue Var")
+                self.STT.set_attribute(node.id, "global", False)
+                self.STT.set_attribute(node.id, "serial", self.claimSerial())
 
-        result = self.STT.insert(node.child.id)
-        if result is None:
-            raise Exception("Failed to insert Var '{}' in symboltable".format(node.child.id))
-        else:
-            self.STT.set_attribute(node.child.id, "ast_node", node.child)
-            self.STT.set_attribute(node.child.id, "object", "lvalue Var")
-            self.STT.set_attribute(node.child.id, "global", False)
-            self.STT.set_attribute(node.child.id, "serial", self.claimSerial())
+            declnode.child = node
+            declnode.line = ctx.start.line
+            declnode.column = ctx.start.column
+            node.parent = declnode
+            node_list.append(declnode)
         
-        return node
+        return node_list
 
 
     # Visit a parse tree produced by GrammarParser#whileStat.
@@ -381,14 +393,60 @@ class BuildASTVisitor(GrammarVisitor):
         while_scope.parent = node
         for stat in ctx.stat():
             stat_node = self.visit(stat)
-            stat_node.parent = while_scope
-            while_scope.children.append(stat_node)
+            for StatNode in stat_node:
+                StatNode.parent = while_scope
+                while_scope.children.append(StatNode)
         node.children.append(while_scope)
 
         # Return to SymbolTable where WhileBlock declared
         self.STT.prev_scope()
 
-        return node
+        return [node]
+
+    # Visit a parse tree produced by GrammarParser#forStat.
+    def visitForStat(self, ctx:GrammarParser.ForStatContext):
+        node = WhileStmtNode()
+        node.line = ctx.start.line
+        node.column = ctx.start.column
+
+        # Create SymbolTable for ForBlock
+        self.STT.new_scope()
+        loop_varinit = None
+        if ctx.stat() is None:
+            pass
+        else:
+            loop_varinit = self.visit(ctx.stat())
+
+        cond_node = self.visit(ctx.expr()[0])
+        cond_node.parent = node
+        node.children.append(cond_node)
+
+        while_scope = ScopeStmtNode()
+        while_scope.parent = node
+        for stat in ctx.alias().stat():
+            stat_node = self.visit(stat)
+            for StatNode in stat_node:
+                StatNode.parent = while_scope
+                while_scope.children.append(StatNode)
+        
+        if len(ctx.expr()) == 2:
+            increment_expr = self.visit(ctx.expr()[1])
+            temp = ExprStmtNode()
+            temp.parent = while_scope
+            temp.child = increment_expr
+            while_scope.children.append(temp)
+
+        node.children.append(while_scope)
+
+        if loop_varinit is None:
+            pass
+        else:
+            node.children.append(loop_varinit[0])
+
+        # Return to SymbolTable where WhileBlock declared
+        self.STT.prev_scope()
+
+        return [node]
 
     # Visit a parse tree produced by GrammarParser#ifStat.
     def visitIfStat(self, ctx:GrammarParser.IfStatContext):
@@ -406,8 +464,9 @@ class BuildASTVisitor(GrammarVisitor):
         if_scope.parent = node
         for Statement in ctx.stat():
             stat_node = self.visit(Statement)
-            stat_node.parent = if_scope
-            if_scope.children.append(stat_node)
+            for StatNode in stat_node:
+                StatNode.parent = if_scope
+                if_scope.children.append(StatNode)
         node.children.append(if_scope)
 
         # Return to symboltable where if statement declared
@@ -424,13 +483,14 @@ class BuildASTVisitor(GrammarVisitor):
             else_scope.parent = node
             for Statement in ctx.alias().stat():
                 stat_node = self.visit(Statement)
-                stat_node.parent = else_scope
-                else_scope.children.append(stat_node)
+                for StatNode in stat_node:
+                    StatNode.parent = else_scope
+                    else_scope.children.append(StatNode)
             node.children.append(else_scope)
             # Return to symboltable where else statement declared
             self.STT.prev_scope()
 
-        return node
+        return [node]
 
 
     # Visit a parse tree produced by GrammarParser#returnStat.
@@ -449,21 +509,21 @@ class BuildASTVisitor(GrammarVisitor):
                     return_expr = cast_node
             return_expr.parent = node
             node.child = return_expr
-        return node
+        return [node]
 
     # Visit a parse tree produced by GrammarParser#breakStat.
     def visitBreakStat(self, ctx:GrammarParser.BreakStatContext):
         node = BreakStmtNode()
         node.line = ctx.start.line
         node.column = ctx.start.column
-        return node
+        return [node]
 
     # Visit a parse tree produced by GrammarParser#continueStat.
     def visitContinueStat(self, ctx:GrammarParser.ContinueStatContext):
         node = ContinueStmtNode()
         node.line = ctx.start.line
         node.column = ctx.start.column
-        return node
+        return [node]
 
     # Visit a parse tree produced by GrammarParser#binExpr.
     def visitBinExpr(self, ctx:GrammarParser.BinExprContext):
