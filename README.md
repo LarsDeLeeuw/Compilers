@@ -82,6 +82,58 @@ it's type, it's identifier and the init_expr. But in reality the only child of t
 | (optional) Unreachable code and dead code: unused variables              | -   |
 | (optional) Unreachable code and dead code: always false conditionals     | -   |
 
+## Semantic Errors
+
+| Description                       | ?   | Notes                                                            |
+| --------------------------------- | --- | ---------------------------------------------------------------- |
+| arrayAccessTypeMismatch.c         | V   |                                                                  |
+| arrayAccessTypeMismatch2.c        | V   |                                                                  |
+| arrayCompareError.c               | V   |                                                                  |
+| arraySizeTypeMismatch.c           | V   |                                                                  |
+| declarationDeclarationMismatch1.c | V   |                                                                  |
+| declarationDeclarationMismatch2.c | V   |                                                                  |
+| declarationDeclarationMismatch3.c | V   |                                                                  |
+| declarationDefinitionMismatch1.c  | X   | Caught but definition is seen as original                        |
+| declarationDefinitionMismatch2.c  | X   | Caught but definition is seen as original                        |
+| declarationDefinitionMismatch3.c  | X   | Caught but definition is seen as original                        |
+| definitionInLocalScope.c          | X   |                                                                  |
+| dereferenceTypeMismatch1.c        | X   |                                                                  |
+| dereferenceTypeMismatch2.c        | X   |                                                                  |
+| functionCallargumentMismatch1.c   | X   |                                                                  |
+| functionCallargumentMismatch2.c   | X   |                                                                  |
+| functionCallargumentMismatch3.c   | X   |                                                                  |
+| functionCallargumentMismatch4.c   | X   |                                                                  |
+| functionRedefinition1.c           | X   |                                                                  |
+| functionRedefinition2.c           | X   |                                                                  |
+| functionRedefinition3.c           | X   |                                                                  |
+| incompatibleTypes1.c              | X   |                                                                  |
+| incompatibleTypes2.c              | X   |                                                                  |
+| incompatibleTypes3.c              | X   |                                                                  |
+| incompatibleTypes4.c              | X   |                                                                  |
+| incompatibleTypes5.c              | X   |                                                                  |
+| incompatibleTypes6.c              | X   |                                                                  |
+| incompatibleTypes7.c              | X   |                                                                  |
+| invalidIncludeError.c             | X   |                                                                  |
+| invalidLoopControlStatement.c     | X   |                                                                  |
+| invalidUnaryOperation.c           | X   |                                                                  |
+| mainNotFound.c                    | X   | Bad example of no main IMO, also does error but in parsing phase |
+| parameterRedefinition1.c          | X   |                                                                  |
+| parameterRedefinition2.c          | X   |                                                                  |
+| parameterRedefinition3.c          | X   |                                                                  |
+| pointerOperationError.c           | X   |                                                                  |
+| returnOutsideFunction.c           | X   |                                                                  |
+| returnTypeMismatch.c              | X   |                                                                  |
+| undeclaredVariable1.c             | X   |                                                                  |
+| undeclaredVariable2.c             | X   |                                                                  |
+| undeclaredVariable3.c             | X   |                                                                  |
+| variableRedefinition1.c           | V   |                                                                  |
+| variableRedefinition2.c           | V   |                                                                  |
+| variableRedefinition3.c           | V   |                                                                  |
+| variableRedefinition4.c           | V   |                                                                  |
+| variableRedefinition5.c           | -   | Gets caught but global error message not fully accurate.         |
+| variableRedefinition6.c           | -   | Gets caught but als catches legal init cause globalscope         |
+|                                   |     |                                                                  |
+
 
 ## Code generation
 

@@ -72,6 +72,7 @@ class VarDeclNode(DeclNode):
         self.id = None          # string
         self.type = None        # string
         self.array = False
+        self.array_size_expr = None
         self.len = None
         self.const = False
         self.init = False       

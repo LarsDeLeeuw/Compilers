@@ -98,6 +98,7 @@ class BuildASTVisitor(GrammarVisitor):
                 node.array = False
             else:
                 size = self.visit(VarDecl.expr()[0])
+                node.array_size_expr = size
                 node.array = True
                 node.len = int(size.value)
                 node.type += "[" + str(node.len) + "]"
@@ -149,7 +150,8 @@ class BuildASTVisitor(GrammarVisitor):
 
             result = self.STT.insert(node.id)
             if result is None:
-                raise Exception("Failed to insert {} in symboltable".format(node.id))
+                pass
+                # raise Exception("Failed to insert {} in symboltable".format(node.id))
             else:
                 self.STT.set_attribute(node.id, "ast_node", node)
                 self.STT.set_attribute(node.id, "object", "lvalue Var")
@@ -310,6 +312,7 @@ class BuildASTVisitor(GrammarVisitor):
                 node.array = False
             else:
                 size = self.visit(VarDecl.expr()[0])
+                node.array_size_expr = size
                 node.array = True
                 node.len = int(size.value)
                 node.type += "[" + str(node.len) + "]"
@@ -361,7 +364,8 @@ class BuildASTVisitor(GrammarVisitor):
 
             result = self.STT.insert(node.id)
             if result is None:
-                raise Exception("Failed to insert {} in symboltable".format(node.id))
+                pass
+                # raise Exception("Failed to insert {} in symboltable".format(node.id))
             else:
                 self.STT.set_attribute(node.id, "ast_node", node)
                 self.STT.set_attribute(node.id, "object", "lvalue Var")

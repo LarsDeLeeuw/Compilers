@@ -34,7 +34,7 @@ class VisualASTVisitor(ASTVisitor):
             nodelabel += node.type
 
         if node.array:
-            self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ nodelabel +"["+ str(node.len) +"]"+'"];\n'
+            self.labelbuffer += "n"+str(self.nodecount)+' [label="'+ nodelabel + '"];\n'
             self.edgebuffer += thisnode +" -> "+"n"+str((self.nodecount))+"\n"
             self.nodecount += 1
         else:
