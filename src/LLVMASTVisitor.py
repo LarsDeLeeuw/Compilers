@@ -248,16 +248,17 @@ class LLVMASTVisitor(ASTVisitor):
             store_br = self.absolute_br[-1]
 
         for StmtNode in node.children:
+            if StmtNode.reachable:
             # DeclStmts already done above with symboltable
-            if type(StmtNode) is DeclNode:
-                self.visit(StmtNode)
-            else:
-                if type(StmtNode) is ReturnStmtNode:
-                    returnFlag = True
+                if type(StmtNode) is DeclNode:
                     self.visit(StmtNode)
-                    self.buffer["functs"] += "\n"
-                    break
-                self.visit(StmtNode)
+                else:
+                    if type(StmtNode) is ReturnStmtNode:
+                        returnFlag = True
+                        self.visit(StmtNode)
+                        self.buffer["functs"] += "\n"
+                        break
+                    self.visit(StmtNode)
         
         if type(node.parent) is IfStmtNode:
             if not returnFlag:

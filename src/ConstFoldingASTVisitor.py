@@ -53,7 +53,7 @@ class ConstFoldingASTVisitor(ASTVisitor):
 
         if (issubclass(type(lhs_checked), LiteralNode) and issubclass(type(rhs_checked), LiteralNode)) and (type(lhs_checked) == type(rhs_checked)):
         # Only fold if lhs and rhs are same type
-            if node.type == "int":
+            if type(lhs_checked) is IntergerLiteralNode:
                 folded_node = IntergerLiteralNode()
                 if node.operation == "+":
                     folded_node.value = int(lhs_checked.value) + int(rhs_checked.value)
@@ -65,13 +65,25 @@ class ConstFoldingASTVisitor(ASTVisitor):
                     folded_node.value = int(int(lhs_checked.value) / int(rhs_checked.value))
                 elif node.operation == ">":
                     folded_node.value = int (1) if int(lhs_checked.value) > int(rhs_checked.value) else 0
+                elif node.operation == ">=":
+                    folded_node.value = int (1) if int(lhs_checked.value) >= int(rhs_checked.value) else 0
                 elif node.operation == "<":
                     folded_node.value = int (1) if int(lhs_checked.value) < int(rhs_checked.value) else 0
+                elif node.operation == "<=":
+                    folded_node.value = int (1) if int(lhs_checked.value) <= int(rhs_checked.value) else 0
                 elif node.operation == "==":
                     folded_node.value = int (1) if int(lhs_checked.value) == int(rhs_checked.value) else 0
+                elif node.operation == "!=":
+                    folded_node.value = int (0) if int(lhs_checked.value) == int(rhs_checked.value) else 1
+                elif node.operation == "||":
+                    folded_node.value = int (1) if int(lhs_checked.value) or int(rhs_checked.value) else 0
+                elif node.operation == "&&":
+                    folded_node.value = int (1) if int(lhs_checked.value) and int(rhs_checked.value) else 0
+                elif node.operation == "%":
+                    folded_node.value = int (1) if int(lhs_checked.value) % int(rhs_checked.value) else 0
                 else:
                     folded_node.value = "?"
-            elif node.type == "float":
+            elif type(lhs_checked) is FloatingLiteralNode:
                 folded_node = FloatingLiteralNode()
                 if node.operation == "+":
                     folded_node.value = float(lhs_checked.value) + float(rhs_checked.value)
@@ -82,11 +94,29 @@ class ConstFoldingASTVisitor(ASTVisitor):
                 elif node.operation == "/":
                     folded_node.value = float(int(lhs_checked.value) / float(rhs_checked.value))
                 elif node.operation == ">":
-                    folded_node.value = float (1) if int(lhs_checked.value) > float(rhs_checked.value) else 0
+                    folded_node = IntergerLiteralNode()
+                    folded_node.value = int (1) if float(lhs_checked.value) > float(rhs_checked.value) else 0
+                elif node.operation == ">=":
+                    folded_node = IntergerLiteralNode()
+                    folded_node.value = int (1) if float(lhs_checked.value) >= float(rhs_checked.value) else 0
                 elif node.operation == "<":
+                    folded_node = IntergerLiteralNode()
                     folded_node.value = int (1) if float(lhs_checked.value) < float(rhs_checked.value) else 0
+                elif node.operation == "<=":
+                    folded_node = IntergerLiteralNode()
+                    folded_node.value = int (1) if float(lhs_checked.value) <= float(rhs_checked.value) else 0
                 elif node.operation == "==":
+                    folded_node = IntergerLiteralNode()
                     folded_node.value = int (1) if float(lhs_checked.value) == float(rhs_checked.value) else 0
+                elif node.operation == "!=":
+                    folded_node = IntergerLiteralNode()
+                    folded_node.value = int (0) if float(lhs_checked.value) == float(rhs_checked.value) else 1
+                elif node.operation == "||":
+                    folded_node = IntergerLiteralNode()
+                    folded_node.value = int (1) if float(lhs_checked.value) or float(rhs_checked.value) else 0
+                elif node.operation == "&&":
+                    folded_node = IntergerLiteralNode()
+                    folded_node.value = int (1) if float(lhs_checked.value) and float(rhs_checked.value) else 0
                 else:
                     folded_node.value = "?"
             else:

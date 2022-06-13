@@ -4,6 +4,9 @@ class AbstractNode:
     def __init__(self):
         self.parent = None
         self.serial = None
+        self.reachable = True
+        self.normal_terminate = True
+        self.return_terminate = False
 
     def setParent(self, node):
         self.parent = node
@@ -16,6 +19,7 @@ class ProgNode(AbstractNode):
     It has DeclNode children.
     '''
     def __init__(self):
+        super().__init__()
         self.children = []
         self.includes = {}
 
@@ -24,6 +28,7 @@ class DeclNode(AbstractNode):
     """Superclass for DeclNodes"""
     
     def __init__(self):
+        super().__init__()
         self.line = None    # int
         self.column = None  # int
 
@@ -140,6 +145,7 @@ class StmtNode(AbstractNode):
     '''Superclass for StmtNodes'''
     
     def __init__(self):
+        super().__init__()
         self.line = None
         self.column = None
 
@@ -196,6 +202,7 @@ class ExprNode(AbstractNode):
     '''Superclass for ExprNodes'''
     
     def __init__(self):
+        super().__init__()
         self.line = None
         self.column = None
     
@@ -302,6 +309,7 @@ class LiteralNode(ExprNode):
     '''Superclass for LiteralNodes'''
     
     def __init__(self):
+        super().__init__()
         self.line = None
         self.column = None
         self.type = None

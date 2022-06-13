@@ -1,25 +1,29 @@
 # Compilers
 
+I use magick and dot so these may need to be installed for visualisation generation.
+
 My grammar is in src/Grammar.g4,
-    
-To run python main.py input.c
 
-TODO: Throw syntax error when break or continue statement not in loop/switch scope
-      Implement DeadCode/Unreachable Code, my break and continue depend on it, break/return/continueStmt node should be last stmtnode of a scope
-      forwardDeclaration.c works but is not fully implemented yet for example arguments arent checked yet when init an decl function
-      Need to implement for-loop
-      Need to add type implicitcasts for binaryop expr
-      
+To run execute: 
+python src/main.py -f "inputlocation.c"
 
-Grammar:
-      TODO: 
-            * Add const support.
-            * Add unnamed scope support, should not be allot of work. These are illegal in global scope. But could recognise them and throw sementic error after.
-            * Add For-loop support, should be straightforward if I can create a while-loop that does the same thing.
-            * (Optional) Maybe implement switch, can be converted to if-else so not allot of work.
+For help python main.py -h
+
+To run LLVM benchmark:
+Run from tests/CorrectCodeBenchmarkLLVM:
+
+python -m unittest -v
+
+To run MIPS benchmark:
+Run from tests/CorrectCodeBenchmarkMIPS:
+
+python -m unittest -v
 
 
-,
+
+
+
+
 # Features
 
 ## Grammar
@@ -34,7 +38,7 @@ Grammar:
 | (optional) Comparison operators >=, <=, and !=.                                                | V   |
 | (optional) Binary operator %.                                                                  | V   |
 | (mandatory) Types.                                                                             | V   |
-| (mandatory) Reserved word: "const"                                                             | -   |
+| (mandatory) Reserved word: "const"                                                             | V   |
 | (mandatory) Variables.                                                                         | V   |
 | (mandatory) Pointer Operations * and &.                                                        | V   |
 | (optional) Identifier Operations -- and ++                                                     | V   |
@@ -43,11 +47,11 @@ Grammar:
 | (mandatory) Reserved word: "if"                                                                | V   |
 | (mandatory) Reserved word: "else"                                                              | V   |
 | (mandatory) Reserved word: "while"                                                             | V   |
-| (mandatory) Reserved word: "for"                                                               | -   |
+| (mandatory) Reserved word: "for"                                                               | V   |
 | (mandatory) Reserved word: "break"                                                             | V   |
 | (mandatory) Reserved word: "continue"                                                          | V   |
 | (optional) Reserved words: "switch", "case" and "default"                                      | X   |
-| (mandatory) Scope: "unnamed scope"                                                             | -   |
+| (mandatory) Scope: "unnamed scope"                                                             | V   |
 | (mandatory) Scopes: "conditional", "loop" and "function"                                       | V   |
 | (mandatory) Local and global variables                                                         | V   |
 | (mandatory) Functions                                                                          | V   |
@@ -76,11 +80,13 @@ it's type, it's identifier and the init_expr. But in reality the only child of t
 | Description                                                              | ?   |
 | ------------------------------------------------------------------------ | --- |
 | (optional) Constant Folding                                              | -   |
-| (optional) Constant Propagation                                          | -   |
-| (mandatory) Unreachable code and dead code: after return in a function   | -   |
-| (mandatory) Unreachable code and dead code: break and continue in a loop | -   |
-| (optional) Unreachable code and dead code: unused variables              | -   |
-| (optional) Unreachable code and dead code: always false conditionals     | -   |
+| (optional) Constant Propagation                                          | X   |
+| (mandatory) Unreachable code and dead code: after return in a function   | V   |
+| (mandatory) Unreachable code and dead code: break and continue in a loop | V   |
+| (optional) Unreachable code and dead code: unused variables              | X   |
+| (optional) Unreachable code and dead code: always false conditionals     | X   |
+
+* Limited form of constant folding, explained in presentation.
 
 ## Semantic Errors
 
@@ -93,9 +99,9 @@ it's type, it's identifier and the init_expr. But in reality the only child of t
 | declarationDeclarationMismatch1.c | V   |                                                                  |
 | declarationDeclarationMismatch2.c | V   |                                                                  |
 | declarationDeclarationMismatch3.c | V   |                                                                  |
-| declarationDefinitionMismatch1.c  | X   | Caught but definition is seen as original                        |
-| declarationDefinitionMismatch2.c  | X   | Caught but definition is seen as original                        |
-| declarationDefinitionMismatch3.c  | X   | Caught but definition is seen as original                        |
+| declarationDefinitionMismatch1.c  | -   | Caught but definition is seen as original                        |
+| declarationDefinitionMismatch2.c  | -   | Caught but definition is seen as original                        |
+| declarationDefinitionMismatch3.c  | -   | Caught but definition is seen as original                        |
 | definitionInLocalScope.c          | X   |                                                                  |
 | dereferenceTypeMismatch1.c        | X   |                                                                  |
 | dereferenceTypeMismatch2.c        | X   |                                                                  |
@@ -137,64 +143,42 @@ it's type, it's identifier and the init_expr. But in reality the only child of t
 
 ## Code generation
 
-| Description | LLVM | MIPS |
-| ----------- | ---- | ---- |
-|             |      |      |
-This compiler is written in python and attempts to succesfully compile a subset of the C language to MIPS instructions using ANTLR.
+| Description                                                                                    | LLVM    | MIPS  |
+| ---------------------------------------------------------------------------------------------- | ------- | ----- |
+| (mandatory) Binary operations +, -, *, and /.                                                  | (old) V | V     |
+| (mandatory) Binary operations >, <, and ==.                                                    | (old) V | V     |
+| (mandatory) Unary operators + and -                                                            | V       | V     |
+| (mandatory) Brackets to overwrite the order of operations.                                     | V       | V     |
+| (mandatory) Logical operators c-style "and", "or", and !.                                      | (old) V | V     |
+| (optional) Comparison operators >=, <=, and !=.                                                | (old) V | V     |
+| (optional) Binary operator %.                                                                  | V       | V     |
+| (mandatory) Types.                                                                             | V       | V     |
+| (mandatory) Reserved word: "const"                                                             | V       | V     |
+| (mandatory) Variables.                                                                         | V       | V     |
+| (mandatory) Pointer Operations * and &.                                                        | V       | V     |
+| (optional) Identifier Operations -- and ++                                                     | V       | V     |
+| (optional) Conversions. Implicit casts with warnings where needed. No explicit cast supported. | V       | V     |
+| (mandatory) Comments. Comments are ignored.                                                    | V       | V     |
+| (mandatory) Reserved word: "if"                                                                | V       | V     |
+| (mandatory) Reserved word: "else"                                                              | V       | V     |
+| (mandatory) Reserved word: "while"                                                             | V       | V     |
+| (mandatory) Reserved word: "for"                                                               | V       | V     |
+| (mandatory) Reserved word: "break"                                                             | V       | V     |
+| (mandatory) Reserved word: "continue"                                                          | V       | V     |
+| (optional) Reserved words: "switch", "case" and "default"                                      | X       | X     |
+| (mandatory) Scope: "unnamed scope"                                                             | V       | V     |
+| (mandatory) Scopes: "conditional", "loop" and "function"                                       | V       | V     |
+| (mandatory) Local and global variables                                                         | V       | V     |
+| (mandatory) Functions                                                                          | V       | V     |
+| (mandatory) Arrays.                                                                            | V       | V     |
+| (optional) Assignments of complete arrays or rows in case of multidimensional arrays.          | X       | X     |
+| (optional) Dynamic arrays.                                                                     | X       | X     |
+| (mandatory) Import.                                                                            | V       | V     |
+| (mandatory) \<stdio.h\> printf()                                                               | V       | V     |
+| (mandatory) \<stdio.h\> scanf()                                                                | V       | -     |
+| ---------------------------------------------------------------------------------------------- | ------- | ----- |
+| BenchmarkCorrectCode                                                                           | 32/32   | 30/32 |
+| * unaryOperations.c and scanf2.c dont work for MIPS                                            |         |       |
 
-V: Werkend  
--: Deels werkend met gekende problemen (onderaan beschreven)  
-X: Niet werkend of niet geïmplementeerd  
-(blanco): TODO  
 
-
-|       | Functionaliteit           | Status |
-|-------|--------------------------------|---|
-| 1     | Grammar                        | - |
-| 1.1   | BinOp Mandatory                | - |
-|       | +,-,*,/,>,<,==,&&,\|\|         | V |
-|       | BinOp Optional                 | V |
-|       | >=, <=, !=, %,                 | V |
-| 1.2.1 | UnaryOp Mandatory              | V |
-|       | +,-,!                          | V |
-|       | &,*                            | V |
-| 1.2.2 | UnaryOp Optional               | X |
-|       | ++, --                         | X |
-| 1.3.1 | Reserved Words Mandatory       | - |
-|       | char, int, float               | V |
-|       | const                          | V |
-|       | if, else, while                | V |
-|       | for, break, continue           | - |
-|       | return, void                   | V |
-| 1.3.2 | Reserved Words Optional        | X |
-|       | switch, case, default          | X |
-| 1.4   | Variables                      | V |
-| 1.5   | Explicit Casting               | X |
-| 1.6   | Comments                       | V |
-|       | ignored                        | V |
-| 1.7   | Scopes                         | V |
-|       | conditional scopes             | V |
-|       | function scopes                | V |
-|       | local and global variabls      | V |
-| 1.8   | Functions                      | V |
-| 1.9   | Arrays                         | - | 
-| 1.10  | Import                         | V |
-| 2     | Abstract Syntax Tree           | - |
-|       | visualisation                  | - |
-|       | builder                        | - |
-|       | implicit type conversions      | - |
-| 3     | Symbol Table                   | - |
-|       | visualisation                  | - |
-|       | scoping                        | V |
-| 4     | Optimizations                  | - |
-|       | constant folding               | - |
-|       | constant propagation           | X |
-|       | unreachable/dead code analysis | X |
-| 5     | Syntax Errors                  | - |
-| 6     | Sementics Errors               | - |
-| 7     | LLVM                           | - |
-|       | comments (ignored)             | V |
-|       | printf                         | V |
-|       | scanf                          | X |
-| 8     | MIPS                           | X |
 

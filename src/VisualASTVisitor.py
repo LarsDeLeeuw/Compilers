@@ -69,7 +69,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += scopenode+' [label="'+ str("FuncScope") +'"];\n'
+        self.labelbuffer += scopenode+' [label="'+ str("FuncScope\nReachable? ") +'"];\n'
 
         for Child in node.children:
             self.refcount = storeref
@@ -97,7 +97,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("Body") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("Body\nReachable? ") + str(node.reachable) +'"];\n'
 
         for Child in node.children:
             self.refcount = storeref
@@ -110,13 +110,13 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("DeclStmt") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("DeclStmt") + "\n Is reachable? {}".format(node.reachable)+'"];\n'
 
         self.visit(node.child)
 
     def visitExprStmtNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ str("ExprStmt") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("ExprStmt") + "\n Is reachable? {}".format(node.reachable) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         storeref = self.refcount
@@ -130,7 +130,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("IfStmt") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("IfStmt") + "\n Is reachable? {}".format(node.reachable) +'"];\n'
 
         for Child in node.children:
             self.refcount = storeref
@@ -143,7 +143,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("WhileStmt") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("WhileStmt") + "\n Is reachable? {}".format(node.reachable) +'"];\n'
 
         for Child in node.children:
             self.refcount = storeref
@@ -156,7 +156,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("ReturnStmt") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("ReturnStmt") + "\n Is reachable? {}".format(node.reachable) +'"];\n'
 
         if not (node.child is None):
             self.visit(node.child)
@@ -165,18 +165,18 @@ class VisualASTVisitor(ASTVisitor):
         thisnode = "n"+str((self.nodecount))
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("BreakStmt") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("BreakStmt") + "\n Is reachable? {}".format(node.reachable) +'"];\n'
 
     def visitContinueStmtNode(self, node):
         thisnode = "n"+str((self.nodecount))
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("ContinueStmt") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("ContinueStmt") + "\n Is reachable? {}".format(node.reachable) +'"];\n'
 
 
     def visitBinExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="BinExpr\n'+ "'" + node.operation + "'" +'"];\n'
+        self.labelbuffer += thisnode+' [label="BinExpr\n'+ "'" + node.operation + "'" + "\n Is reachable? {}".format(node.reachable) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         storeref = self.refcount
@@ -200,7 +200,7 @@ class VisualASTVisitor(ASTVisitor):
         else:
             label += "postfix '"
         label += node.operation + "'"
-        self.labelbuffer += thisnode+' [label="'+ label +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ label + "\n Is reachable? {}".format(node.reachable) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         self.nodecount += 1
@@ -209,7 +209,7 @@ class VisualASTVisitor(ASTVisitor):
 
     def visitCallExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ str("CallExpr\n"+node.children[0].ref["ast_node"].type+" " + node.children[0].ref["ast_node"].id) +'()"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("CallExpr\n"+node.children[0].ref["ast_node"].type+" " + node.children[0].ref["ast_node"].id) +'()'+ "\n Is reachable? {}".format(node.reachable) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         storeref = self.refcount
@@ -222,12 +222,12 @@ class VisualASTVisitor(ASTVisitor):
 
     def visitDeclRefExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ "DeclRefExpr\n"+str(node.ref["object"] + " '"+ node.id)+"'" +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ "DeclRefExpr\n"+str(node.ref["object"] + " '"+ node.id)+"'"+ "\n Is reachable? {}".format(node.reachable) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitArraySubscriptExprNode(self, node):
         thisnode = "n"+str((self.nodecount))
-        self.labelbuffer += thisnode+' [label="'+ "ArraySubscriptExpr\n'"+node.type+ "' lvalue" +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ "ArraySubscriptExpr\n'"+node.type+ "' lvalue" + "\n Is reachable? {}".format(node.reachable) + '"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
         self.refcount = self.nodecount
         storeref = self.refcount
@@ -245,7 +245,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("ImplicitCastExpr\n" + node.cast) +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("ImplicitCastExpr\n" + node.cast) + "\n Is reachable? {}".format(node.reachable) + '"];\n'
         self.visit(node.child)
 
     def visitInitListExprNode(self, node):
@@ -254,7 +254,7 @@ class VisualASTVisitor(ASTVisitor):
         self.refcount = self.nodecount
         storeref = self.refcount
         self.nodecount += 1
-        self.labelbuffer += thisnode+' [label="'+ str("InitListExpr") +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ str("InitListExpr") + "\n Is reachable? {}".format(node.reachable)+'"];\n'
 
         for child in node.children:
             self.refcount = storeref
@@ -265,21 +265,21 @@ class VisualASTVisitor(ASTVisitor):
         thisnode = "n"+str((self.nodecount))
         label = "IntegerLiteral\nrvalue "
         label += "'" + str(node.value) + "'"
-        self.labelbuffer += thisnode+' [label="'+ label +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ label + "\n Is reachable? {}".format(node.reachable) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitFloatingLiteralNode(self, node):
         thisnode = "n"+str((self.nodecount))
         label = "FloatingLiteral\nrvalue "
         label += "'" + str(node.value) + "'"
-        self.labelbuffer += thisnode+' [label="'+ label +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ label + "\n Is reachable? {}".format(node.reachable) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitCharacterLiteralNode(self, node):
         thisnode = "n"+str((self.nodecount))
         label = "CharacterLiteral\nrvalue "
         label += "'" + chr(node.value) + "'"
-        self.labelbuffer += thisnode+' [label="'+ label +'"];\n'
+        self.labelbuffer += thisnode+' [label="'+ label + "\n Is reachable? {}".format(node.reachable) +'"];\n'
         self.edgebuffer +=  "n"+str(self.refcount) +" -> "+ thisnode +"\n"
 
     def visitStringLiteralNode(self, node):

@@ -1,118 +1,82 @@
 digraph {n0 [label="File"];
-n1 [label="VarDecl"];
-n2 [label="int[2]"];
-n3 [label="a"];
-n5 [label="FuncDecl"];
-n6 [label="int ()"];
-n7 [label="main"];
-n8 [label="FuncScope"];
-n10 [label="Body"];
-n12 [label="DeclStmt"];
-n13 [label="VarDecl"];
-n14 [label="int"];
-n15 [label="x"];
-n16 [label="IntegerLiteral
-rvalue '3'"];
-n17 [label="ExprStmt"];
-n18 [label="BinExpr
-'='"];
-n19 [label="ArraySubscriptExpr
-'int[2]' lvalue"];
-n20 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n21 [label="DeclRefExpr
-lvalue Var 'a'"];
-n22 [label="IntegerLiteral
-rvalue '0'"];
-n23 [label="IntegerLiteral
-rvalue '1'"];
-n24 [label="ExprStmt"];
-n25 [label="BinExpr
-'='"];
-n26 [label="ArraySubscriptExpr
-'int[2]' lvalue"];
-n27 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n28 [label="DeclRefExpr
-lvalue Var 'a'"];
-n29 [label="IntegerLiteral
-rvalue '1'"];
-n30 [label="IntegerLiteral
-rvalue '2'"];
-n31 [label="ExprStmt"];
-n32 [label="CallExpr
-void printf()"];
-n34 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n36 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n37 [label="ArraySubscriptExpr
-'int[2]' lvalue"];
-n38 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n39 [label="DeclRefExpr
-lvalue Var 'a'"];
-n40 [label="IntegerLiteral
-rvalue '0'"];
-n41 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n42 [label="ArraySubscriptExpr
-'int[2]' lvalue"];
-n43 [label="ImplicitCastExpr
-<ArrayToPointerDecay>"];
-n44 [label="DeclRefExpr
-lvalue Var 'a'"];
-n45 [label="IntegerLiteral
-rvalue '1'"];
-n46 [label="ImplicitCastExpr
-<LValueToRValue>"];
-n47 [label="DeclRefExpr
-lvalue Var 'x'"];
-n48 [label="ReturnStmt"];
-n49 [label="IntegerLiteral
-rvalue '1'"];
+n1 [label="FuncDecl"];
+n2 [label="void (int, int)"];
+n3 [label="f"];
+n4 [label="FuncScope
+Reachable? "];
+n6 [label="ParmVarDecl"];
+n7 [label="int"];
+n8 [label="a"];
+n10 [label="ParmVarDecl"];
+n11 [label="int"];
+n12 [label="b"];
+n14 [label="FuncDecl"];
+n15 [label="int (int, int)"];
+n16 [label="f"];
+n17 [label="FuncScope
+Reachable? "];
+n19 [label="ParmVarDecl"];
+n20 [label="int"];
+n21 [label="a"];
+n23 [label="ParmVarDecl"];
+n24 [label="int"];
+n25 [label="b"];
+n27 [label="Body
+Reachable? True"];
+n29 [label="ReturnStmt
+ Is reachable? True"];
+n30 [label="BinExpr
+'*'
+ Is reachable? True"];
+n31 [label="ImplicitCastExpr
+<LValueToRValue>
+ Is reachable? True"];
+n32 [label="DeclRefExpr
+lvalue ParmVar 'a'
+ Is reachable? True"];
+n33 [label="ImplicitCastExpr
+<LValueToRValue>
+ Is reachable? True"];
+n34 [label="DeclRefExpr
+lvalue ParmVar 'b'
+ Is reachable? True"];
+n35 [label="FuncDecl"];
+n36 [label="int ()"];
+n37 [label="main"];
+n38 [label="FuncScope
+Reachable? "];
+n40 [label="Body
+Reachable? True"];
 n0 -> n1
 n1 -> n2
 n1 -> n3
-n0 -> n5
-n5 -> n6
-n5 -> n7
-n5 -> n8
-n8 -> n10
+n1 -> n4
+n4 -> n6
+n6 -> n7
+n6 -> n8
+n4 -> n10
+n10 -> n11
 n10 -> n12
-n12 -> n13
-n13 -> n14
-n13 -> n15
-n13 -> n16
-n10 -> n17
-n17 -> n18
-n18 -> n19
+n0 -> n14
+n14 -> n15
+n14 -> n16
+n14 -> n17
+n17 -> n19
 n19 -> n20
-n20 -> n21
-n19 -> n22
-n18 -> n23
-n10 -> n24
-n24 -> n25
-n25 -> n26
-n26 -> n27
-n27 -> n28
-n26 -> n29
-n25 -> n30
-n10 -> n31
+n19 -> n21
+n17 -> n23
+n23 -> n24
+n23 -> n25
+n17 -> n27
+n27 -> n29
+n29 -> n30
+n30 -> n31
 n31 -> n32
-n32 -> n34
-n32 -> n36
-n36 -> n37
-n37 -> n38
-n38 -> n39
-n37 -> n40
-n32 -> n41
-n41 -> n42
-n42 -> n43
-n43 -> n44
-n42 -> n45
-n32 -> n46
-n46 -> n47
-n10 -> n48
-n48 -> n49
+n30 -> n33
+n33 -> n34
+n0 -> n35
+n35 -> n36
+n35 -> n37
+n35 -> n38
+n38 -> n40
 }

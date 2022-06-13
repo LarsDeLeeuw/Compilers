@@ -149,7 +149,7 @@ class SymbolTableNode:
             return 1
 
     def get_attribute(self, symbol_id, attr_name):
-         # Check if symbol_id in symboltable
+        # Check if symbol_id in symboltable
         if symbol_id in self.hashtable.keys():
             if attr_name in self.symboltable[self.hashtable[symbol_id]].keys():
                 return self.symboltable[self.hashtable[symbol_id]][attr_name]
@@ -160,6 +160,26 @@ class SymbolTableNode:
             sys.stderr.write("Tried get_attribute for symbol_id not present in symboltable\n")
             return None
 
+    def get_total_size(self, memory_offset=-44, unit="byte", char_unit=1, int_unit=4, float_unit=4, pointer_unit=4):
+        '''Call this method at own risk, only in funcdeclnode, never global.'''
 
+        total_size = memory_offset
+        for symbol_id in self.hashtable.keys():
+            # Allocate memory for every variable, store offset from frame pointer as attribute of symbol.
+            # Accumulate the total memory required, to move stack pointer.
+            result = self.lookup(symbol_id)
+            type_temp = result["ast_node"].parseType()
+            if type_temp[1]:
+                memory_size = result["ast_node"].getLen() * 4
+                self.set_attribute(symbol_id, "mem_offset", total_size)
+                total_size -= memory_size
+            else:
+                self.set_attribute(symbol_id, "mem_offset", total_size)
+                total_size -= 4
+        
+        for child in self.children:
+            total_size = child.get_total_size(memory_offset=total_size)
+        
+        return total_size
 
     

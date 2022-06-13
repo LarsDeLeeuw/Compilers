@@ -7,7 +7,7 @@ class MIPSGeneratorRegisters():
 
     def __init__(self):
         self.active_registers = deque([])   # Queue
-        self.standby_registers = deque(["$s7", "$s6", "$s5", "$s4", "$s3", "$s2", "$s1", "$s0", "$t9", "$t8", "$t7", "$t6", "$t5", "$t4", "$t3"])  # Stack
+        self.standby_registers = deque(["$s7", "$s6", "$s5", "$s4", "$s3", "$s2", "$t9", "$t8", "$t7", "$t6", "$t5", "$t4", "$t3"])  # Stack
         self.state = {}                     # symbol.serial -> register
         self.reverse_state = {}             # register -> symbol.serial
 
@@ -59,13 +59,14 @@ class MIPSGeneratorRegisters():
 class MIPSGenerator(ASTVisitor):
 
     def __init__(self):
+        self.readbufferpresent = False
         self.buffer = {}
         self.buffer["data"] = ".data\n"
         self.buffer["str"] = ""
         self.buffer["float"] = ""
         self.buffer["global"] = ""
-        self.buffer["text"] = ".text\nmain:\n"
-        self.buffer["exit"] = "\tli $v0, 10\n\tsyscall\n"
+        self.buffer["text"] = ".text\n\tjal main.entry\n\tli $v0, 10\n\tsyscall\n"
+        self.buffer["exit"] = ""
         self.register = -1
         self.str_constants = {}
         self.float_constants = {}
@@ -88,6 +89,7 @@ class MIPSGenerator(ASTVisitor):
         self.arrayidx_count = 0
         self.loop_stack = []
         self.absolute_br = []
+        self.current_function = None
 
     def loadSTT(self, STT):
         self.STT = copy.deepcopy(STT)
@@ -131,19 +133,24 @@ class MIPSGenerator(ASTVisitor):
             if static_depth == 0:
                 self.buffer["text"] += "\tsw {}, {}($fp)\n".format(register, result["mem_offset"])
             else:
-                self.buffer["text"] += "\tlw $t2, -4($fp)\n"
-                static_depth -= 1
-                while static_depth > 0:
-                    self.buffer["text"] += "\tlw $t2, -4($t2)\n"
-                self.buffer["text"] += "\tsw {}, {}($t2)\n".format(register, result["mem_offset"])
+                self.buffer["text"] += "\tsw {}, {}($fp)\n".format(register, result["mem_offset"])
+                # self.buffer["text"] += "\tlw $t2, -4($fp)\n"
+                # static_depth -= 1
+                # while static_depth > 0:
+                #     self.buffer["text"] += "\tlw $t2, -4($t2)\n"
+                #     static_depth -= 1
+                # self.buffer["text"] += "\tsw {}, {}($t2)\n".format(register, result["mem_offset"])
 
     def loadVar(self, result):
         # First check if present in registers
         (result, static_depth) = result
         register = self.registers.lookup(result["serial"])
         if register is None:
+            if type(result["ast_node"]) is ParmVarDeclNode:
+                register = self.registers.insert(-1)
             # If not present, choose register to load it into
-            register = self.registers.insert(result["serial"])
+            else:
+                register = self.registers.insert(-1)
             # Load into chosen register
             if result["global"]:
                 self.buffer["text"] += "\tlw {}, _{}\n".format(register, result["ast_node"].id)
@@ -151,11 +158,12 @@ class MIPSGenerator(ASTVisitor):
                 if static_depth == 0:
                     self.buffer["text"] += "\tlw {}, {}($fp)\n".format(register, result["mem_offset"])
                 else:
-                    self.buffer["text"] += "\tlw $t2, -4($fp)\n"
-                    static_depth -= 1
-                    while static_depth > 0:
-                        self.buffer["text"] += "\tlw $t2, -4($t2)\n"
-                    self.buffer["text"] += "\tlw {}, {}($t2)\n".format(register, result["mem_offset"])
+                    self.buffer["text"] += "\tlw {}, {}($fp)\n".format(register, result["mem_offset"])
+                    # self.buffer["text"] += "\tlw $t2, -4($fp)\n"
+                    # static_depth -= 1
+                    # while static_depth > 0:
+                    #     self.buffer["text"] += "\tlw $t2, -4($t2)\n"
+                    # self.buffer["text"] += "\tlw {}, {}($t2)\n".format(register, result["mem_offset"])
             return register
         else:
             # Found in register.
@@ -170,11 +178,12 @@ class MIPSGenerator(ASTVisitor):
             if static_depth == 0:
                 self.buffer["text"] += "\taddi {}, $fp, {}\n".format(register, result["mem_offset"])
             else:
-                self.buffer["text"] += "\tlw $t2, -4($fp)\n"
-                static_depth -= 1
-                while static_depth > 0:
-                    self.buffer["text"] += "\tlw $t2, -4($t2)\n"
-                self.buffer["text"] += "\taddi {}, $t2, {}\n".format(register, result["mem_offset"])
+                self.buffer["text"] += "\taddi {}, $fp, {}\n".format(register, result["mem_offset"])
+                # self.buffer["text"] += "\tlw $t2, -4($fp)\n"
+                # static_depth -= 1
+                # while static_depth > 0:
+                #     self.buffer["text"] += "\tlw $t2, -4($t2)\n"
+                # self.buffer["text"] += "\taddi {}, $t2, {}\n".format(register, result["mem_offset"])
         return register
         
     def visitProgNode(self, node):
@@ -217,61 +226,67 @@ class MIPSGenerator(ASTVisitor):
                 self.buffer["global"] += "_{}: .space 4\n".format(node.id)
 
     def visitFunctionDeclNode(self, node):
-        if node.init:    
+        if node.init:
+            self.current_function = node.id
+            self.buffer["text"] += "{}.entry:\n".format(node.id)
             self.STT.child_scope()
-            self.visit(node.children[-1])
+            memory_offset = self.STT.current_symboltablenode.get_total_size() 
+            
+            # Store previous frame pointer
+            self.buffer["text"] += "\tsw $fp, 0($sp)\t\t# Push old $fp ( control-link )\n"
+            self.buffer["text"] += "\tsw $fp, -4($sp)\t\t# Push activation link ( static-link )\n"
+            # Set framepointer for current frame
+            self.buffer["text"] += "\tmove $fp, $sp\t\t# Set $fp of new frame\n"
+            # Move stackpointer
+            self.buffer["text"] += "\taddi $sp, $sp, {}\t# Allocate {} bytes on the stack\n".format(memory_offset, memory_offset)
+            # Store $s0-s7 and $ra
+            self.buffer["text"] += "\tsw $ra, -8($fp)\t\t# Store value of return address\n"
+            # self.buffer["text"] += "\tsw $s0, -12($fp)\t# Save incase it gets used locally\n"
+            # self.buffer["text"] += "\tsw $s1, -16($fp)\t# Save incase it gets used locally\n"
+            # self.buffer["text"] += "\tsw $s2, -20($fp)\t# Save incase it gets used locally\n"
+            # self.buffer["text"] += "\tsw $s3, -24($fp)\t# Save incase it gets used locally\n"
+            # self.buffer["text"] += "\tsw $s4, -28($fp)\t# Save incase it gets used locally\n"
+            # self.buffer["text"] += "\tsw $s5, -32($fp)\t# Save incase it gets used locally\n"
+            # self.buffer["text"] += "\tsw $s6, -36($fp)\t# Save incase it gets used locally\n"
+            # self.buffer["text"] += "\tsw $s7, -40($fp)\t# Save incase it gets used locally\n"
+            param_count = 0
+            for Param in node.children[:-1]:
+                if param_count > 3:
+                    raise Exception("My compiler only supports functions with max 4 arguments")
+                result = self.STT.lookup(Param.id)
+                self.storeVar((result, 0), "$a{}".format(param_count))
+                param_count += 1
+            self.visit(node.children[-1])            
+            
+            self.buffer["text"] += "{}.exit:\n".format(node.id)
+            self.buffer["text"] += "\tlw $ra, -8($fp)\t\t# Restore saved return address\n"
+            # self.buffer["text"] += "\tlw $s0, -12($fp)\t# Restore saved register\n"
+            # self.buffer["text"] += "\tlw $s1, -16($fp)\t# Restore saved register\n"
+            # self.buffer["text"] += "\tlw $s2, -20($fp)\t# Restore saved register\n"
+            # self.buffer["text"] += "\tlw $s3, -24($fp)\t# Restore saved register\n"
+            # self.buffer["text"] += "\tlw $s4, -28($fp)\t# Restore saved register\n"
+            # self.buffer["text"] += "\tlw $s5, -32($fp)\t# Restore saved register\n"
+            # self.buffer["text"] += "\tlw $s6, -36($fp)\t# Restore saved register\n"
+            # self.buffer["text"] += "\tlw $s7, -40($fp)\t# Restore saved register\n"
+            self.buffer["text"] += "\tmove $sp, $fp\t\t# Deallocate {} bytes from the stack\n".format(memory_offset)
+            self.buffer["text"] += "\tlw $fp, 0($sp)\t\t# Restore old framepointer\n"
+            self.buffer["text"] += "\tjr $ra\n"
             self.STT.prev_scope()
 
     def visitScopeStmtNode(self, node):
-        memory_offset = -44 
-        for symbol_id in self.STT.current_symboltablenode.hashtable.keys():
-            # Allocate memory for every variable, store offset from frame pointer as attribute of symbol.
-            # Accumulate the total memory required, to move stack pointer.
-            result = self.STT.lookup(symbol_id)
-            type_temp = result["ast_node"].parseType()
-            if type_temp[1]:
-                memory_size = result["ast_node"].getLen() * 4
-                self.STT.set_attribute(symbol_id, "mem_offset", memory_offset)
-                memory_offset -= memory_size
-            else:
-                self.STT.set_attribute(symbol_id, "mem_offset", memory_offset)
-                memory_offset -= 4
-            print("{} {}($fp)".format(symbol_id, result["mem_offset"]))
         
-        # Store previous frame pointer
-        self.buffer["text"] += "\tsw $fp, 0($sp)\t\t# Push old $fp ( control-link )\n"
-        self.buffer["text"] += "\tsw $fp, -4($sp)\t\t# Push activation link ( static-link )\n"
-        # Set framepointer for current frame
-        self.buffer["text"] += "\tmove $fp, $sp\t\t# Set $fp of new frame\n"
-        # Move stackpointer
-        self.buffer["text"] += "\taddi $sp, $sp, {}\t# Allocate {} bytes on the stack\n".format(memory_offset, memory_offset)
-        # Store $s0-s7 and $ra
-        self.buffer["text"] += "\tsw $ra, -8($fp)\t\t# Store value of return address\n"
-        self.buffer["text"] += "\tsw $s0, -12($fp)\t# Save incase it gets used locally\n"
-        self.buffer["text"] += "\tsw $s1, -16($fp)\t# Save incase it gets used locally\n"
-        self.buffer["text"] += "\tsw $s2, -20($fp)\t# Save incase it gets used locally\n"
-        self.buffer["text"] += "\tsw $s3, -24($fp)\t# Save incase it gets used locally\n"
-        self.buffer["text"] += "\tsw $s4, -28($fp)\t# Save incase it gets used locally\n"
-        self.buffer["text"] += "\tsw $s5, -32($fp)\t# Save incase it gets used locally\n"
-        self.buffer["text"] += "\tsw $s6, -36($fp)\t# Save incase it gets used locally\n"
-        self.buffer["text"] += "\tsw $s7, -40($fp)\t# Save incase it gets used locally\n"
+        control = None
 
         for StmtNode in node.children:
+            # if type(StmtNode) is BreakStmtNode or type(StmtNode) is ContinueStmtNode:
+            #     control = StmtNode
+            #     break
             self.visit(StmtNode)
-
-        print("Active registers: ", self.registers.active_registers)
-
-        self.buffer["text"] += "\tlw $ra, -8($fp)\t\t# Restore saved return address\n"
-        self.buffer["text"] += "\tlw $s0, -12($fp)\t# Restore saved register\n"
-        self.buffer["text"] += "\tlw $s1, -16($fp)\t# Restore saved register\n"
-        self.buffer["text"] += "\tlw $s2, -20($fp)\t# Restore saved register\n"
-        self.buffer["text"] += "\tlw $s3, -24($fp)\t# Restore saved register\n"
-        self.buffer["text"] += "\tlw $s4, -28($fp)\t# Restore saved register\n"
-        self.buffer["text"] += "\tlw $s5, -32($fp)\t# Restore saved register\n"
-        self.buffer["text"] += "\tlw $s6, -36($fp)\t# Restore saved register\n"
-        self.buffer["text"] += "\tlw $s7, -40($fp)\t# Restore saved register\n"
-        self.buffer["text"] += "\tmove $sp, $fp\t\t# Deallocate {} bytes from the stack\n".format(memory_offset)
-        self.buffer["text"] += "\tlw $fp, 0($sp)\t\t# Restore old framepointer\n"
+        
+        # if control is None:
+        #     pass
+        # else:
+        #     self.visit(control)
     
     def visitDeclStmtNode(self, node):
         var = node.child
@@ -323,29 +338,65 @@ class MIPSGenerator(ASTVisitor):
         label_end = "while.{}.end".format(self.while_count)
         self.while_count += 1
         self.loop_stack.append((label_cond, label_end))
+        if len(node.children) == 2:
 
-        self.current_label = label_cond
-        self.buffer["text"] += label_cond + ":\n"
-        condition_node = node.children[0]
-        register = self.visit(condition_node)
+            self.current_label = label_cond
+            self.buffer["text"] += label_cond + ":\n"
+            condition_node = node.children[0]
+            register = self.visit(condition_node)
 
-        # If register > 0 its true
-        self.buffer["text"] += "\tsgt $t0, {}, $zero\n".format(register)
+            # If register > 0 its true
+            self.buffer["text"] += "\tsgt $t0, {}, $zero\n".format(register)
 
-        self.buffer["text"] += "\tbeq  $t0, $zero, " + label_end + "\n"
+            self.buffer["text"] += "\tbeq  $t0, $zero, " + label_end + "\n"
 
-        self.buffer["text"] += label_body + ":\n"
-        self.current_label = label_body
-        self.STT.child_scope()
-        self.visit(node.children[1])
-        self.STT.prev_scope()
-        self.buffer["text"] += "\tb " + label_cond + "\n"
-        if len(self.loop_stack) != 0:
-            if self.loop_stack[-1] == (label_cond, label_end):
-                self.loop_stack.pop()
-        
-        self.buffer["text"] += label_end + ":\n"
-        self.current_label = label_end
+            self.buffer["text"] += label_body + ":\n"
+            self.current_label = label_body
+            self.STT.child_scope()
+            self.visit(node.children[1])
+            self.STT.prev_scope()
+            self.buffer["text"] += "\tb " + label_cond + "\n"
+            if len(self.loop_stack) != 0:
+                if self.loop_stack[-1] == (label_cond, label_end):
+                    self.loop_stack.pop()
+                else:
+                    raise Exception("Weird loop behavior")
+            
+            self.buffer["text"] += label_end + ":\n"
+            self.current_label = label_end
+        else:
+            self.STT.child_scope()
+            self.visit(node.children[2])
+            self.current_label = label_cond
+            self.buffer["text"] += label_cond + ":\n"
+            condition_node = node.children[0]
+            register = self.visit(condition_node)
+
+            # If register > 0 its true
+            self.buffer["text"] += "\tsgt $t0, {}, $zero\n".format(register)
+
+            self.buffer["text"] += "\tbeq  $t0, $zero, " + label_end + "\n"
+
+            self.buffer["text"] += label_body + ":\n"
+            self.current_label = label_body
+            self.visit(node.children[1])
+            self.STT.prev_scope()
+            self.buffer["text"] += "\tb " + label_cond + "\n"
+            if len(self.loop_stack) != 0:
+                if self.loop_stack[-1] == (label_cond, label_end):
+                    self.loop_stack.pop()
+                else:
+                    raise Exception("Weird loop behavior")
+            
+            self.buffer["text"] += label_end + ":\n"
+            self.current_label = label_end
+
+    def visitBreakStmtNode(self, node):
+        self.buffer["text"] += "\tb " + self.loop_stack[-1][1] + "\n"
+
+    def visitContinueStmtNode(self, node):
+        self.buffer["text"] += "\tb " + self.loop_stack[-1][0] + "\n"
+
 
     def visitIfStmtNode(self, node):
 
@@ -359,7 +410,7 @@ class MIPSGenerator(ASTVisitor):
 
         label_true = "if.{}.then".format(self.if_count)
         label_end = "if.{}.end".format(self.if_count)
-        label_false = "if.{}.else.".format(self.if_count) if node.has_else else label_end
+        label_false = "if.{}.else".format(self.if_count) if node.has_else else label_end
         self.if_count += 1
 
         self.buffer["text"] += "\tbeq  $t0, $zero, " + label_false + "\n"
@@ -440,18 +491,117 @@ class MIPSGenerator(ASTVisitor):
             format_arg = 2
             for part in processed_string:
                 if type(part) is int:
-                    self.buffer["text"] += "\tli $v0, {}\n".format(part)
+                    
                     register = self.visit(node.children[format_arg])
                     format_arg += 1
                     if part == 2:
                         # load format_value to $f12
                         self.buffer["text"] += "\tmtc1 {}, $f0\n".format(register) 
-                        self.buffer["text"] += "\tmov.s $f12, $f0\n\tsyscall\n" 
+                        self.buffer["text"] += "\tmov.s $f12, $f0\n" 
                     else:
                         # load format_value to $a0
-                        self.buffer["text"] += "\tmove $a0, {}\n\tsyscall\n".format(register) 
+                        self.buffer["text"] += "\tmove $a0, {}\n".format(register)
+                    self.buffer["text"] += "\tli $v0, {}\n\tsyscall\n".format(part)
                 else:
                     self.buffer["text"] += "\tli $v0, 4\n\tla $a0, " + part + "\n\tsyscall\n"
+        elif node.children[0].id == "scanf":
+            # First edition of this codeblock, probably very inefficient.
+            format_flag = False
+            processed_string = []
+            actual_text = []
+            temp = ""
+            stringsize = []
+            stringsizeflag = False
+            for char in node.children[1].child.rawbuffer:
+                if char == '%':
+                    format_flag = True
+                    continue
+                if format_flag:
+                    if char == 'c':
+                        if not temp == "":
+                            actual_text.append(temp)
+                        actual_text.append(12)
+                        temp = ""
+                    elif char == 'd':
+                        if not temp == "":
+                            actual_text.append(temp)
+                        actual_text.append(5)
+                        temp = ""
+                    elif char == 'f':
+                        if not temp == "":
+                            actual_text.append(temp)
+                        actual_text.append(6)
+                        temp = ""
+                    elif char == 's':
+                        if not self.readbufferpresent:
+                            self.buffer["str"] += "buffer: .space 1024\n"
+                            self.readbufferpresent = True
+                        if stringsizeflag:
+                            pass
+                        else:
+                            stringsize.append(2)
+                        if not temp == "":
+                            actual_text.append(temp)
+                        actual_text.append(8)
+                        temp = ""
+                        stringsizeflag = False
+                    elif char in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+                        stringsize.append(int(char)+1)
+                        stringsizeflag = True
+                        continue
+                    else:
+                        raise Exception("Unknown formatting.")
+                    format_flag = False
+                else:
+                    temp += char
+            if not temp == "":
+                actual_text.append(temp)
+
+            for part in actual_text:
+                if type(part) is int:
+                    processed_string.append(part)
+                    continue
+            
+            string_format_counter = 0
+            format_arg = 2
+            for part in processed_string:
+                self.buffer["text"] += "\tli $v0, {}\n".format(part)
+                if part == 8:
+                    # load format_value to $f12
+                    self.buffer["text"] += "\tla $a0, buffer\n"
+                    self.buffer["text"] += "\tli $a1, {}\n\tsyscall\n".format(stringsize[string_format_counter])
+                    register = self.visit(node.children[format_arg])
+                    for i in range(stringsize[string_format_counter]-1):
+                        j = stringsize[string_format_counter]-2 - i
+                        self.buffer["text"] += "\tlb $v0, {}($a0)\n".format((i), register)
+                        self.buffer["text"] += "\tsb $v0, {}({})\n".format(-(j), register)
+                    self.registers.reset()
+
+                    string_format_counter += 1
+                else:
+                    # load format_value to $a0
+                    self.buffer["text"] += "\tsyscall\n"
+                    register = self.visit(node.children[format_arg])
+                    self.buffer["text"] += "\tsw $v0, 0({})\n".format(register)
+                    self.registers.reset()
+                    
+                format_arg += 1
+        else:
+            arg_count = 0
+            for arg in node.children[1:(len(node.children))]:
+                register = self.visit(arg)
+                self.buffer["text"] += "\tmove $a{}, {}\n".format(arg_count, register)
+            self.buffer["text"] += "\tjal {}.entry\n".format(node.children[0].id)
+            return "$v0"
+
+    def visitReturnStmtNode(self, node):
+        if node.child is None:
+            self.buffer["text"] += "\tj {}.exit\n".format(self.current_function)
+            # raise Exception("Empty return not supported for mips?")
+        else:
+            register = self.visit(node.child)
+            self.buffer["text"] += "\tmove $v0, {}\n".format(register)
+            self.buffer["text"] += "\tj {}.exit\n".format(self.current_function)
 
     def visitUnaryExprNode(self, node):
         # Save register $s0
@@ -526,6 +676,29 @@ class MIPSGenerator(ASTVisitor):
                     self.buffer["text"] += "\tmove $t2, {}\n".format(lvalue)
                     self.buffer["text"] += "\tlw $t1, 0({})\n".format(lvalue)
                     self.buffer["text"] += "\taddi {}, {}, 1\n".format(register, "$t1")
+                    self.buffer["text"] += "\tsw {}, 0({})\n".format(register, "$t2")                    
+                    if node.prefix:
+                        return register
+                    else:
+                        return "$t1"
+            elif node.operation == "--":
+                if type(node.child) is DeclRefExprNode:
+                    result = self.getResult(node.child)
+                    register = self.loadVar(result)
+                    self.buffer["text"] += "\tsubi $t0, {}, 1\n".format(register)
+                    self.storeVar(result, "$t0")
+                    if node.prefix:
+                        return "$t0"
+                    else:
+                        return register
+                else:
+                    # Unregulated address assignment clear all Register Associations
+                    self.registers.reset()
+                    register = "$t0"
+                    lvalue = self.visit(node.child)
+                    self.buffer["text"] += "\tmove $t2, {}\n".format(lvalue)
+                    self.buffer["text"] += "\tlw $t1, 0({})\n".format(lvalue)
+                    self.buffer["text"] += "\tsubi {}, {}, 1\n".format(register, "$t1")
                     self.buffer["text"] += "\tsw {}, 0({})\n".format(register, "$t2")                    
                     if node.prefix:
                         return register
@@ -700,9 +873,22 @@ class MIPSGenerator(ASTVisitor):
                         # fcmp.x.end block
                         self.buffer["text"] += "fcmp.{}.end:\n".format(self.fcmp_count)
                         self.fcmp_count += 1
+                    elif node.operation == "==":
+                        self.buffer["text"] += "\tc.eq.s $f0, $f1\n"
+                        self.buffer["text"] += "\tbc1t fcmp.{}.true\n".format(self.fcmp_count)
+                        # fcmp.x.false block
+                        self.buffer["text"] += "fcmp.{}.false:\n".format(self.fcmp_count)
+                        self.buffer["text"] += "\tli $t0, 0\n"
+                        self.buffer["text"] += "\tb fcmp.{}.end\n".format(self.fcmp_count)
+                        # fcmp.x.true block
+                        self.buffer["text"] += "fcmp.{}.true:\n".format(self.fcmp_count)
+                        self.buffer["text"] += "\tli $t0, 1\n"
+                        # fcmp.x.end block
+                        self.buffer["text"] += "fcmp.{}.end:\n".format(self.fcmp_count)
+                        self.fcmp_count += 1
             else:
                 # Need int instructions
-                if node.operation in ["+", "-", "*", "/"]:
+                if node.operation in ["+", "-", "*", "/", "%"]:
                     if node.operation == "+":
                         self.buffer["text"] += "\tadd $t0, $s0, $s1\n"
                     elif node.operation == "-":
@@ -711,6 +897,8 @@ class MIPSGenerator(ASTVisitor):
                         self.buffer["text"] += "\tmul $t0, $s0, $s1\n"
                     elif node.operation == "/":
                         self.buffer["text"] += "\tdiv $t0, $s0, $s1\n"
+                    else:
+                        self.buffer["text"] += "\trem $t0, $s0, $s1\n"
                 else:
                     if node.operation == "&&":
                         # Branch to land.x.false if == 0.
@@ -752,6 +940,8 @@ class MIPSGenerator(ASTVisitor):
                         self.buffer["text"] += "\tsle $t0, $s0, $s1\n"
                     elif node.operation == "!=":
                         self.buffer["text"] += "\tsne $t0, $s0, $s1\n"
+                    elif node.operation == "==":
+                        self.buffer["text"] += "\tseq $t0, $s0, $s1\n"
 
         # Restore registers $s0, $s1
         self.buffer["text"] += "\tlw $s0, 4($sp)\n"
@@ -788,7 +978,6 @@ class MIPSGenerator(ASTVisitor):
                     print("gotta fix this")
                 else:
                     return self.loadVar(result) # Should return the register where loaded ex "$t0"
-            print("Not fully defined behavior yet")
             register = self.visit(node.child)
             self.buffer["text"] += "\tlw $t0, 0({})\n".format(register)
             return "$t0"
@@ -797,6 +986,14 @@ class MIPSGenerator(ASTVisitor):
                 return self.visit(node.child)
             
             return self.visit(node.child)
+        elif node.cast == "<FloatingToIntegral>":
+            register = self.visit(node.child)
+            self.buffer["text"] += "\tmtc1 {}, $f2\n\tcvt.w.s $f2, $f2\n\tmfc1 $t0, $f2\n".format(register)
+            return "$t0"
+        elif node.cast == "<IntegralToFloating>":
+            register = self.visit(node.child)
+            self.buffer["text"] += "\tmtc1 {}, $f2\n\tcvt.s.w $f2, $f2\n\tmfc1 $t0, $f2\n".format(register)
+            return "$t0"
                 
 
     def visitCharacterLiteralNode(self, node):

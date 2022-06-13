@@ -60,6 +60,26 @@ class TestBenchmarkCorrectCodeMIPS(unittest.TestCase):
         GeneratedFile.close()
         RefFile.close()
 
+    def test_breakAndContinue(self):
+        name = "breakAndContinue"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+
     def test_comparisons1(self):
         name = "comparisons1"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
@@ -102,6 +122,166 @@ class TestBenchmarkCorrectCodeMIPS(unittest.TestCase):
 
     def test_dereferenceAssignment(self):
         name = "dereferenceAssignment"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+
+    def test_fibonacciRecursiveStatic(self):
+        name = "fibonacciRecursiveStatic"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+
+    def test_floatToIntConversion(self):
+        name = "floatToIntConversion"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+
+    def test_for(self):
+        name = "for"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+    
+    def test_forwardDeclaration(self):
+        name = "forwardDeclaration"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+
+    def test_intToFloatConversion(self):
+        name = "intToFloatConversion"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+    
+    def test_modulo(self):
+        name = "modulo"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+    
+    def test_pointerArgument(self):
+        name = "pointerArgument"
+        inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
+        name = "oracle/{}".format(name)
+        if not exists(name):
+            self.skipTest("Could not find Reference Output.")
+        
+        call(['python', '../../src/main.py', "-f"+inputfile, "-c 1"])
+        MIPSOutput = open("MIPSOutput", "w")
+        Copyrightcleanup = re.split(r"^MARS 4.5  Copyright 2003-2014 Pete Sanderson and Kenneth Vollmar\n\n", (run(['java','-jar', 'Mars4_5.jar', "main.asm"], capture_output=True).stdout).decode("utf-8"))
+        Copyrightcleanup = Copyrightcleanup[1][0:-1]
+        MIPSOutput.write(Copyrightcleanup)
+        MIPSOutput.close()
+
+        GeneratedFile = open("MIPSOutput", "r")
+        RefFile = open(name, "r")
+        self.assertListEqual(list(GeneratedFile), list(RefFile))
+        GeneratedFile.close()
+        RefFile.close()
+
+    def test_primeStatic(self):
+        name = "primeStatic"
         inputfile = "../CompilersBenchmark/CorrectCode/"+name+".c"
         name = "oracle/{}".format(name)
         if not exists(name):
